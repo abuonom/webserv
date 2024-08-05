@@ -2,7 +2,7 @@ NAME = web_server
 
 MAKEFLAGS += --silent
 
-SRC =	srcs/main.cpp \
+SRC =	src/main.cpp \
 
 OBJ = ${SRC:.cpp=.o}
 
