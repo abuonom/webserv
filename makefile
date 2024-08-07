@@ -1,4 +1,4 @@
-NAME = web_server
+NAME = webserv
 
 MAKEFLAGS += --silent
 
@@ -10,7 +10,7 @@ CC = c++
 
 RM = rm -f
 
-CFLAGS = -g -W -W -W -std=c++98
+CFLAGS = -g -Wall -Wextra -Werror -std=c++98
 
 .o:.cpp
 	${CC} ${CFLAGS} -c $< -o ${<:.cpp=.o}
