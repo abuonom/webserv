@@ -22,36 +22,60 @@
 */
 
 int main() {
-	int server_fd = socket(AF_INET, SOCK_STREAM, 0);
-	if (server_fd == -1) {
+	int sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (sock < 0) {
 		std::cerr << "Failed to create socket" << std::endl;
 		return -1;
 	}
 
-	struct sockaddr_in address;
-	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons(8080);
+// BINDING
+	struct sockaddr_in server;
+	server.sin_family = AF_INET;
+	server.sin_addr.s_addr = INADDR_ANY;
+	server.sin_port = htons(8080);
 
-	if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
+	if (bind(sock, (struct sockaddr *)&server, sizeof(server)) < 0) {
 		std::cerr << "Bind failed" << std::endl;
 		return -1;
 	}
 
-	if (listen(server_fd, 3) < 0) {
+// GETSOCKNAME
+	if (getsockname(sock, (struct sockaddr *)&server, (socklen_t*)&server) < 0) {
+		std::cerr << "Name failed" << std::endl;
+		return -1;
+	}
+
+// LISTEN
+	if (listen(sock, 3) < 0) {
 		std::cerr << "Listen failed" << std::endl;
 		return -1;
 	}
 
-	int new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&address);
-	if (new_socket < 0) {
-		std::cerr << "Accept failed" << std::endl;
-		return -1;
-	}
+	struct sockaddr_in client;
+	int length;
+	while(1) {
+		int new_socket = accept(sock, (struct sockaddr *)&client, (socklen_t*)&length);
+		if (new_socket < 0) {
+			std::cerr << "Accept failed" << std::endl;
+			return -1;
+		}
 
-	const char *hello = "Hello, World!";
-	send(new_socket, hello, strlen(hello), 0);
-	close(new_socket);
-	close(server_fd);
-	return 0;
+		int pid = fork();
+
+		if (pid < 0) {
+			std::cerr << "Fork failed" << std::endl;
+			return -1;
+		}
+
+		if (pid == 0) {
+			//gestione richieste
+			close(new_socket);
+			exit(0);
+		}
+
+		else if (pid > 0) {
+			//processo padre
+			close(new_socket);
+		}
+	}
 }
