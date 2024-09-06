@@ -1,81 +1,138 @@
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <iostream>
+#include "server.hpp"
 
-/*
-	Un socket è un punto finale per la comunicazione tra due macchine su una rete.
-	In informatica, i socket sono utilizzati per stabilire connessioni di rete tra un client e un server.
-	Esistono due principali tipi di socket:
-	a.	Socket di tipo stream (TCP): Forniscono una connessione affidabile e orientata alla connessione.
-		È come una comunicazione telefonica, dove entrambi i lati devono essere connessi.
-	b.	Socket di tipo datagramma (UDP): Permettono l’invio di messaggi individuali senza connessione.
-		È come inviare una lettera, dove ogni messaggio è indipendente.
+#define BUFFER_SIZE 1024
 
-	1.	Creazione del socket: socket(AF_INET, SOCK_STREAM, 0) crea un socket di tipo stream per il protocollo IPv4.
-	2.	Binding: bind() associa il socket a un indirizzo e una porta.
-	3.	Ascolto: listen() mette il socket in modalità di ascolto.
-	4.	Accettazione: accept() accetta una connessione in entrata.
-	5.	Invio dati: send() invia una risposta al client.
-	6.	Chiusura: close() chiude il socket.
-*/
-
-int main() {
-	int sock = socket(AF_INET, SOCK_STREAM, 0);
-	if (sock < 0) {
-		std::cerr << "Failed to create socket" << std::endl;
-		return -1;
+Server::Server(int port) {
+	_server_fd = socket(AF_INET, SOCK_STREAM, 0);
+	if (_server_fd == -1) {
+		std::cerr << "socket failed: " << strerror(errno) << std::endl;
+		_exit(1);
 	}
 
-// BINDING
-	struct sockaddr_in server;
-	server.sin_family = AF_INET;
-	server.sin_addr.s_addr = INADDR_ANY;
-	server.sin_port = htons(8080);
+	_address.sin_family = AF_INET;
+	_address.sin_addr.s_addr = INADDR_ANY;
+	_address.sin_port = htons(port);
 
-	if (bind(sock, (struct sockaddr *)&server, sizeof(server)) < 0) {
-		std::cerr << "Bind failed" << std::endl;
-		return -1;
+	if (bind(_server_fd, (struct sockaddr *)&_address, sizeof(_address)) < 0) {
+		std::cerr << "bind failed: " << strerror(errno) << std::endl;
+		close(_server_fd);
+		_exit(1);
 	}
 
-// GETSOCKNAME
-	if (getsockname(sock, (struct sockaddr *)&server, (socklen_t*)&server) < 0) {
-		std::cerr << "Name failed" << std::endl;
-		return -1;
+	if (listen(_server_fd, 3) < 0) {
+		std::cerr << "listen failed: " << strerror(errno) << std::endl;
+		close(_server_fd);
+		_exit(1);
 	}
 
-// LISTEN
-	if (listen(sock, 3) < 0) {
-		std::cerr << "Listen failed" << std::endl;
-		return -1;
-	}
+	setNonBlocking(_server_fd);
+	pollfd server_poll_fd = {_server_fd, POLLIN, 0};
+	_poll_fds.push_back(server_poll_fd);
+}
 
-	struct sockaddr_in client;
-	int length;
-	while(1) {
-		int new_socket = accept(sock, (struct sockaddr *)&client, (socklen_t*)&length);
-		if (new_socket < 0) {
-			std::cerr << "Accept failed" << std::endl;
-			return -1;
+Server::~Server() {
+	close(_server_fd);
+}
+
+void Server::setNonBlocking(int fd) {
+	int flags = fcntl(fd, F_GETFL, 0);
+	if (flags < 0) {
+		std::cerr << "fcntl F_GETFL failed: " << strerror(errno) << std::endl;
+		_exit(1);
+	}
+	if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0) {
+		std::cerr << "fcntl F_SETFL failed: " << strerror(errno) << std::endl;
+		_exit(1);
+	}
+}
+
+void Server::run() {
+	while (true) {
+		int poll_count = poll(_poll_fds.data(), _poll_fds.size(), -1);
+		if (poll_count < 0) {
+			perror("poll error");
+			_exit(1);
 		}
 
-		int pid = fork();
-
-		if (pid < 0) {
-			std::cerr << "Fork failed" << std::endl;
-			return -1;
-		}
-
-		if (pid == 0) {
-			//gestione richieste
-			close(new_socket);
-			exit(0);
-		}
-
-		else if (pid > 0) {
-			//processo padre
-			close(new_socket);
+		for (size_t i = 0; i < _poll_fds.size(); i++) {
+			if (_poll_fds[i].revents & POLLIN) {
+				if (_poll_fds[i].fd == _server_fd) {
+					int client_fd = accept(_server_fd, NULL, NULL);
+					if (client_fd < 0) {
+						perror("accept error");
+					} else {
+						setNonBlocking(client_fd);
+						pollfd client_poll_fd = {client_fd, POLLIN, 0};
+						_poll_fds.push_back(client_poll_fd);
+					}
+				} else {
+					handleClient(_poll_fds[i].fd);
+				}
+			}
 		}
 	}
+}
+
+void Server::handleClient(int client_fd) {
+	char buffer[BUFFER_SIZE];
+	memset(buffer, 0, BUFFER_SIZE);
+	int bytes_read = read(client_fd, buffer, BUFFER_SIZE - 1);
+	if (bytes_read <= 0) {
+		close(client_fd);
+
+		// Rimuovere il file descriptor dal vector di pollfd
+		for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) {
+			if (it->fd == client_fd) {
+				_poll_fds.erase(it);
+				break;
+			}
+		}
+		return;
+	}
+
+	std::string request(buffer);
+	std::string method = request.substr(0, request.find(" "));
+	std::string path = request.substr(request.find(" ") + 1, request.find("HTTP/1.1") - request.find(" ") - 1);
+	std::string body = request.substr(request.find("\r\n\r\n") + 4);
+
+	std::cout << request << std::endl << "---------------------------------------------------" << std::endl;
+	if (method == "GET") {
+		handleGet(client_fd);
+	} else if (method == "POST") {
+		handlePost(client_fd, body);
+	} else if (method == "DELETE") {
+		handleDelete(client_fd);
+	}
+}
+
+void Server::handleGet(int client_fd) {
+	std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nHello, GET method!\n";
+	send(client_fd, response.c_str(), response.length(), 0);
+	close(client_fd);
+}
+
+void Server::handlePost(int client_fd, const std::string &body) {
+	std::ofstream file("uploaded_file.png");
+	if (file.is_open()) {
+		file << body;
+		file.close();
+		std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nFile uploaded successfully!\n";
+		send(client_fd, response.c_str(), response.length(), 0);
+	} else {
+		std::string response = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nFailed to open file!\n";
+		send(client_fd, response.c_str(), response.length(), 0);
+	}
+	close(client_fd);
+}
+
+void Server::handleDelete(int client_fd) {
+	if (remove("uploaded_file.png") == 0) {
+		std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nFile deleted successfully!\n";
+		send(client_fd, response.c_str(), response.length(), 0);
+	} else {
+		std::cout << "Failed to delete file: " << strerror(errno) << std::endl;
+		std::string response = "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nFile not found!\n";
+		send(client_fd, response.c_str(), response.length(), 0);
+	}
+	close(client_fd);
 }
