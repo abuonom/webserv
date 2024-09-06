@@ -1,8 +1,6 @@
 #include "../include/server.hpp"
 
-Request::Request()
-{
-	std::cout << "costruttore" << std::endl;
+Request::Request() {
 }
 
 void Request::divide_url(std::string url)
@@ -14,9 +12,7 @@ void Request::divide_url(std::string url)
 		_query = url.substr(i + 1, url.length());
 	}
 	else
-	{
 		_path = url.substr(1, url.length());
-	}
 }
 
 void Request::getData(std::string request)
