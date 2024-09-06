@@ -1,6 +1,7 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
+#include "request.hpp"
 #include <fcntl.h>
 #include <cstring>
 #include <iostream>
@@ -19,8 +20,8 @@
 #include <string>
 #include <sstream>
 
-class Server
-{
+
+class Server {
 public:
 	Server(int port);
 	~Server();

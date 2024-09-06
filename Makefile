@@ -1,6 +1,6 @@
 NAME = webserv
 
-SRC = src/webserv.cpp src/server.cpp
+SRC = src/webserv.cpp src/server.cpp src/request.cpp
 OBJ = $(SRC:.cpp=.o)
 
 CXX = c++
