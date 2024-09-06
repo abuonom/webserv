@@ -19,7 +19,8 @@
 #include <string>
 #include <sstream>
 
-class Server {
+class Server
+{
 public:
 	Server(int port);
 	~Server();
