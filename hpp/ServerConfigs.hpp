@@ -10,9 +10,10 @@
 #include <iostream>
 #include <cstdlib>
 
-typedef struct s_location{
+typedef struct s_location
+{
 	bool autoindex;
-	std::string root;
+	std::string fastcgi;
 } t_location;
 
 typedef struct s_config
@@ -30,16 +31,17 @@ typedef struct s_config
 class ServerConfigs
 {
 public:
+	ServerConfigs();
+	~ServerConfigs();
+	const t_config *getConfigForPort(int port) const;
+	void printConfigs() const;
+	bool loadConfig(const std::string &filename);
+
 	int max_clients;
 	std::map<int, std::string> error_pages; // Mappa delle error pages
 	std::map<int, t_config> configs;		// Mappa delle configurazioni per ciascun server
-	ServerConfigs(const std::string &filename);
-	const t_config *getConfigForPort(int port) const;
-	void printConfigs() const;
 
 private:
-	// Funzione privata per caricare il file di configurazione
-	bool loadConfig(const std::string &filename);
 };
 
 #endif

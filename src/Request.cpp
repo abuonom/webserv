@@ -1,4 +1,4 @@
-#include "../include/server.hpp"
+#include "../hpp/Server.hpp"
 
 Request::Request() {
 }

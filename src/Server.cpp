@@ -1,4 +1,4 @@
-#include "../include/server.hpp"
+#include "../hpp/Server.hpp"
 #define BUFFER_SIZE 1024
 
 Server::Server(int port) {

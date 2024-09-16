@@ -1,9 +1,11 @@
-#include "../include/server.hpp"
-
-int stringToInt(const std::string& str) {
+#include "../hpp/Server.hpp"
+#include "../hpp/ServerConfigs.hpp"
+int stringToInt(const std::string &str)
+{
 	std::stringstream ss(str);
 	int result;
-	if (!(ss >> result)) {
+	if (!(ss >> result))
+	{
 		// Se la conversione fallisce, restituisci un valore di default (puoi gestirlo diversamente)
 		std::cerr << "Conversione non riuscita. Usa un numero valido.\n";
 		return -1;
@@ -11,18 +13,30 @@ int stringToInt(const std::string& str) {
 	return result;
 }
 
-int main(int argc, char **argv) {
-	int port = 8080;
-	if (argc == 2) {
-		port = stringToInt(argv[1]);
-		if (port == -1) {
-			std::cerr << "Porta non valida, uso di default: 8080\n";
-			port = 8080;
-		}
+void VerifyExtension(const std::string &filename, const std::string &extension)
+{
+	if (filename.size() <= extension.size() || filename.compare(filename.size() - extension.size(), extension.size(), extension) != 0)
+	{
+		std::cerr << "ERROR: Config file must terminate with " << extension << std::endl;
+		exit(1);
 	}
+}
 
-	Server server(port);
-	server.run();
-
+int main(int argc, char **argv)
+{
+	ServerConfigs configs = ServerConfigs();
+	if (argc < 2)
+	{
+		VerifyExtension("default.config", ".config");
+		std::cout << "WebServer started with default config file" << std::endl;
+		configs.loadConfig("config/default.config");
+		configs.printConfigs();
+	}
+	else
+	{
+		VerifyExtension(argv[1], ".config");
+		configs.loadConfig(argv[1]);
+		configs.printConfigs();
+	}
 	return 0;
 }

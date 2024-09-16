@@ -1,7 +1,7 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include "request.hpp"
+#include "Request.hpp"
 #include <fcntl.h>
 #include <cstring>
 #include <iostream>
