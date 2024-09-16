@@ -14,6 +14,8 @@ typedef struct s_location
 {
 	bool autoindex;
 	std::string fastcgi;
+	std::string upload_dir;
+	int return_code;
 } t_location;
 
 typedef struct s_config
@@ -25,7 +27,7 @@ typedef struct s_config
 	std::vector<std::string> accepted_methods;
 	std::string index;
 	std::string root;
-	t_location location;
+	std::map<std::string,t_location> location;
 } t_config;
 
 class ServerConfigs
@@ -42,6 +44,7 @@ public:
 	std::map<int, t_config> configs;		// Mappa delle configurazioni per ciascun server
 
 private:
+	bool isValidKey(const std::string &key ,const std::string &type) const;
 };
 
 #endif

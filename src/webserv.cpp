@@ -40,3 +40,6 @@ int main(int argc, char **argv)
 	}
 	return 0;
 }
+
+
+//You server must have default error pages if none are provided
