@@ -20,14 +20,15 @@ typedef struct s_location
 
 typedef struct s_config
 {
-	int port;
-	std::string host;
-	std::string server_names;
-	int max_body_size;
-	std::vector<std::string> accepted_methods;
-	std::string index;
-	std::string root;
-	std::map<std::string,t_location> location;
+	int port; //listen
+	std::string host; //host
+	std::string server_names; //server_name
+	int max_body_size; //max_body_size
+	std::vector<std::string> accepted_methods; //methods
+	std::string index; //index
+	std::string root; //root
+	std::map<std::string,t_location> location; //location[]
+	
 } t_config;
 
 class ServerConfigs

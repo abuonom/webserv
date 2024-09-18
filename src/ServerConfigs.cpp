@@ -39,11 +39,12 @@ bool ServerConfigs::isValidKey(const std::string &key, const std::string &type) 
 		"server_name",
 		"root",
 		"client_max_body_size",
-		"index"};
+		"index",
+		"methods"};
 	static const std::vector<std::string> serverKeys(serverKeysArray, serverKeysArray + sizeof(serverKeysArray) / sizeof(serverKeysArray[0]));
 
 	static const std::string locationKeysArray[] = {
-		"limit_except",
+		"methods",
 		"deny",
 		"autoindex",
 		"fastcgi_pass",
@@ -103,7 +104,7 @@ void ServerConfigs::printConfigs() const
 }
 
 // Funzione per rimuovere spazi iniziali e finali da una stringa
-static std::string trim(const std::string& str)
+static std::string trim(const std::string &str)
 {
 	size_t first = str.find_first_not_of(" \t\n\r\f\v");
 	if (first != std::string::npos)
@@ -120,7 +121,7 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 	if (!file.is_open())
 	{
 		std::cerr << "Error: Unable to open config file: " << filename << std::endl;
-		return false;
+		exit(1);
 	}
 
 	std::string line;
@@ -142,22 +143,21 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 		{
 			inServerBlock = true;
 			currentConfig = t_config(); // Reset for new server block
-			std::cout << "Starting new server block" << std::endl;
 		}
-		else if (line.find("location ") != std::string::npos)
+		else if (line.find("location ") != std::string::npos && line.find("[") != std::string::npos)
 		{
 			inLocationBlock = true;
 			currentLocation = t_location(); // Reset for new location block
 
 			// Cerca l'inizio e la fine delle parentesi quadre
-			size_t start = line.find("[");
-			size_t end = line.find("]");
+			size_t start = line.find("location ") + 9; // Perché "location " è lunga 9 caratteri
+			size_t end = line.find("[");
 
-			// Controlla se entrambe le parentesi sono presenti
+			// Verifica che il percorso sia valido
 			if (start != std::string::npos && end != std::string::npos && end > start)
 			{
-				currentLocationPath = line.substr(start + 1, end - start - 1);
-				std::cout << "Starting new location block: " << currentLocationPath << std::endl;
+				currentLocationPath = line.substr(start, end - start); // Estrai il percorso della location
+				currentLocationPath = trim(currentLocationPath);	   // Rimuovi eventuali spazi
 			}
 			else
 			{
@@ -165,96 +165,79 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 				return false; // Interrompe il parsing per formato non valido
 			}
 		}
-		else if (inServerBlock && line.find("}") != std::string::npos)
+		else if (inServerBlock && !inLocationBlock && line.find("}") != std::string::npos)
 		{
-			if (inLocationBlock)
+			configs[currentConfig.port] = currentConfig;
+			inServerBlock = false;
+		}
+		else if (inLocationBlock && line.find("]") != std::string::npos)
+		{
+			currentConfig.location[currentLocationPath] = currentLocation; // Salva la location nella mappa
+			inLocationBlock = false;
+		}
+		else if (inLocationBlock)
+		{
+			std::cout << "Parsing location block: " << line << std::endl;
+			// Parsing dei valori all'interno del blocco location
+			size_t spacePos = line.find("\t");
+			std::string key = line.substr(0, spacePos);
+			std::string value = trim(line.substr(spacePos + 1));
+
+			if (isValidKey(key, "LOCATION"))
 			{
-				currentConfig.location[currentLocationPath] = currentLocation;
-				inLocationBlock = false;
-				std::cout << "Added location block: " << currentLocationPath << std::endl;
-			}
-			else
-			{
-				configs[currentConfig.port] = currentConfig;
-				inServerBlock = false;
-				std::cout << "Added server block on port: " << currentConfig.port << std::endl;
+				if (key == "autoindex")
+					currentLocation.autoindex = (value == "on");
+				else if (key == "fastcgi")
+				{
+					currentLocation.fastcgi = value;
+				}
+				else if (key == "upload_dir")
+					currentLocation.upload_dir = value;
+				else if (key == "return")
+					currentLocation.return_code = std::atoi(value.c_str());
 			}
 		}
 		else
 		{
+			// Parsing dei valori a livello globale o del server
 			size_t spacePos = line.find("\t");
 			std::string key = line.substr(0, spacePos);
 			std::string value = trim(line.substr(spacePos + 1));
+
 			if (isValidKey(key, "GLOBAL"))
 			{
 				if (key == "max_clients")
-				{
 					max_clients = std::atoi(value.c_str());
-					std::cout << "Set max_clients: " << max_clients << std::endl;
-				}
 				else if (key == "error_page")
 				{
 					size_t spacePos = value.find(" ");
 					int errorCode = std::atoi(value.substr(0, spacePos).c_str());
 					std::string errorPagePath = value.substr(spacePos + 1);
 					error_pages[errorCode] = trim(errorPagePath);
-					std::cout << "Set error_page for code " << errorCode << ": " << errorPagePath << std::endl;
 				}
 			}
 			else if (isValidKey(key, "SERVER"))
 			{
 				if (key == "listen")
-				{
 					currentConfig.port = std::atoi(value.c_str());
-					std::cout << "Set listen port: " << currentConfig.port << std::endl;
-				}
 				else if (key == "host")
-				{
 					currentConfig.host = value;
-					std::cout << "Set host: " << currentConfig.host << std::endl;
-				}
 				else if (key == "server_name")
-				{
 					currentConfig.server_names = value;
-					std::cout << "Set server_name: " << currentConfig.server_names << std::endl;
-				}
 				else if (key == "root")
-				{
 					currentConfig.root = value;
-					std::cout << "Set root: " << currentConfig.root << std::endl;
-				}
 				else if (key == "client_max_body_size")
-				{
 					currentConfig.max_body_size = std::atoi(value.c_str());
-					std::cout << "Set client_max_body_size: " << currentConfig.max_body_size << std::endl;
-				}
 				else if (key == "index")
-				{
 					currentConfig.index = value;
-					std::cout << "Set index: " << currentConfig.index << std::endl;
-				}
-			}
-			else if (isValidKey(key, "LOCATION"))
-			{
-				if (key == "autoindex")
+				else if (key == "methods")
 				{
-					currentLocation.autoindex = (value == "on");
-					std::cout << "Set autoindex: " << value << std::endl;
-				}
-				else if (key == "fastcgi_pass")
-				{
-					currentLocation.fastcgi = value;
-					std::cout << "Set fastcgi_pass: " << currentLocation.fastcgi << std::endl;
-				}
-				else if (key == "upload_store")
-				{
-					currentLocation.upload_dir = value;
-					std::cout << "Set upload_store: " << currentLocation.upload_dir << std::endl;
-				}
-				else if (key == "return")
-				{
-					currentLocation.return_code = std::atoi(value.c_str());
-					std::cout << "Set return code: " << currentLocation.return_code << std::endl;
+					std::istringstream iss(value);
+					std::string method;
+					while (std::getline(iss, method, ','))
+					{
+						currentConfig.accepted_methods.push_back(trim(method));
+					}
 				}
 			}
 		}
