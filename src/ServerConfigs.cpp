@@ -40,15 +40,16 @@ bool ServerConfigs::isValidKey(const std::string &key, const std::string &type) 
 		"root",
 		"client_max_body_size",
 		"index",
-		"methods"};
+		"methods",
+		"error_page"};
 	static const std::vector<std::string> serverKeys(serverKeysArray, serverKeysArray + sizeof(serverKeysArray) / sizeof(serverKeysArray[0]));
 
 	static const std::string locationKeysArray[] = {
 		"methods",
-		"deny",
+		"root",
 		"autoindex",
-		"fastcgi_pass",
-		"upload_store",
+		"fastcgi",
+		"upload_dir",
 		"return"};
 	static const std::vector<std::string> locationKeys(locationKeysArray, locationKeysArray + sizeof(locationKeysArray) / sizeof(locationKeysArray[0]));
 
@@ -81,6 +82,11 @@ void ServerConfigs::printConfigs() const
 		std::cout << "  Max Body Size: " << config.max_body_size << std::endl;
 		std::cout << "  Index: " << config.index << std::endl;
 		std::cout << "  Root: " << config.root << std::endl;
+		std::cout << "  Error Pages:" << std::endl;
+		for (std::map<int, std::string>::const_iterator it = config.error_pages.begin(); it != config.error_pages.end(); ++it)
+		{
+			std::cout << "    " << it->first << ": " << it->second << std::endl;
+		}
 		std::cout << "  Accepted Methods: ";
 		for (size_t i = 0; i < config.accepted_methods.size(); ++i)
 		{
@@ -99,6 +105,16 @@ void ServerConfigs::printConfigs() const
 			std::cout << "      FastCGI: " << location.fastcgi << std::endl;
 			std::cout << "      Upload Directory: " << location.upload_dir << std::endl;
 			std::cout << "      Return Code: " << location.return_code << std::endl;
+			std::cout << "      Root: " << location.root << std::endl;
+			std::cout << "      Index: " << location.index << std::endl;
+			std::cout << "      Accepted Methods: ";
+			for (size_t i = 0; i < location.accepted_methods.size(); ++i)
+			{
+				std::cout << location.accepted_methods[i];
+				if (i < location.accepted_methods.size() - 1)
+					std::cout << ", ";
+			}
+			std::cout << std::endl;
 		}
 	}
 }
@@ -129,22 +145,51 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 	t_location currentLocation;
 	bool inServerBlock = false;
 	bool inLocationBlock = false;
+	bool inGlobalBlock = true; // Variabile per controllare se siamo nel blocco globale
 	std::string currentLocationPath;
 
 	while (std::getline(file, line))
 	{
+		std::cout << "line: " << line << std::endl;
 		line = trim(line);
 		if (line.empty() || line[0] == '#')
 		{
 			continue; // Skip empty lines and comments
 		}
 
-		if (line.find("server {") != std::string::npos)
+		if (inGlobalBlock && line.find("server {") != std::string::npos)
 		{
+			std::cout<<"SERVER BLOCK"<<std::endl;
 			inServerBlock = true;
+			inGlobalBlock = false;		// Stop reading global params
 			currentConfig = t_config(); // Reset for new server block
+			continue;
 		}
-		else if (line.find("location ") != std::string::npos && line.find("[") != std::string::npos)
+
+		// Parsing dei parametri globali
+		if (inGlobalBlock)
+		{
+			size_t spacePos = line.find("\t");
+			std::string key = line.substr(0, spacePos);
+			std::string value = trim(line.substr(spacePos + 1));
+
+			if (isValidKey(key, "GLOBAL"))
+			{
+				if (key == "max_clients")
+					max_clients = std::atoi(value.c_str());
+				else if (key == "error_page")
+				{
+					size_t spacePos = value.find(" ");
+					int errorCode = std::atoi(value.substr(0, spacePos).c_str());
+					std::string errorPagePath = value.substr(spacePos + 1);
+					error_pages[errorCode] = trim(errorPagePath);
+				}
+			}
+			continue;
+		}
+
+		// Parsing dei blocchi server e location
+		if (inServerBlock && line.find("location ") != std::string::npos && line.find("[") != std::string::npos)
 		{
 			inLocationBlock = true;
 			currentLocation = t_location(); // Reset for new location block
@@ -177,46 +222,43 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 		}
 		else if (inLocationBlock)
 		{
-			std::cout << "Parsing location block: " << line << std::endl;
-			// Parsing dei valori all'interno del blocco location
 			size_t spacePos = line.find("\t");
 			std::string key = line.substr(0, spacePos);
 			std::string value = trim(line.substr(spacePos + 1));
 
 			if (isValidKey(key, "LOCATION"))
 			{
-				if (key == "autoindex")
+				if (key == "root")
+					currentLocation.root = value;
+				else if (key == "index")
+					currentLocation.index = value;
+				else if (key == "methods")
+				{
+					std::istringstream iss(value);
+					std::string method;
+					while (std::getline(iss, method, ','))
+					{
+						currentLocation.accepted_methods.push_back(trim(method));
+					}
+				}
+				else if (key == "autoindex")
 					currentLocation.autoindex = (value == "on");
 				else if (key == "fastcgi")
-				{
 					currentLocation.fastcgi = value;
-				}
 				else if (key == "upload_dir")
 					currentLocation.upload_dir = value;
 				else if (key == "return")
-					currentLocation.return_code = std::atoi(value.c_str());
+					currentLocation.return_code = value;
 			}
 		}
 		else
 		{
-			// Parsing dei valori a livello globale o del server
+			// Parsing dei valori del server
 			size_t spacePos = line.find("\t");
 			std::string key = line.substr(0, spacePos);
 			std::string value = trim(line.substr(spacePos + 1));
 
-			if (isValidKey(key, "GLOBAL"))
-			{
-				if (key == "max_clients")
-					max_clients = std::atoi(value.c_str());
-				else if (key == "error_page")
-				{
-					size_t spacePos = value.find(" ");
-					int errorCode = std::atoi(value.substr(0, spacePos).c_str());
-					std::string errorPagePath = value.substr(spacePos + 1);
-					error_pages[errorCode] = trim(errorPagePath);
-				}
-			}
-			else if (isValidKey(key, "SERVER"))
+			if (isValidKey(key, "SERVER"))
 			{
 				if (key == "listen")
 					currentConfig.port = std::atoi(value.c_str());
@@ -230,6 +272,13 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 					currentConfig.max_body_size = std::atoi(value.c_str());
 				else if (key == "index")
 					currentConfig.index = value;
+				else if (key == "error_page")
+				{
+					size_t spacePos = value.find(" ");
+					int errorCode = std::atoi(value.substr(0, spacePos).c_str());
+					std::string errorPagePath = value.substr(spacePos + 1);
+					currentConfig.error_pages[errorCode] = trim(errorPagePath);
+				}
 				else if (key == "methods")
 				{
 					std::istringstream iss(value);

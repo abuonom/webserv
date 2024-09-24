@@ -15,7 +15,10 @@ typedef struct s_location
 	bool autoindex;
 	std::string fastcgi;
 	std::string upload_dir;
-	int return_code;
+	std::string return_code;
+	std::string root;
+	std::vector<std::string> accepted_methods;
+	std::string index;
 } t_location;
 
 typedef struct s_config
@@ -28,7 +31,7 @@ typedef struct s_config
 	std::string index; //index
 	std::string root; //root
 	std::map<std::string,t_location> location; //location[]
-	
+	std::map<int, std::string> error_pages;
 } t_config;
 
 class ServerConfigs
