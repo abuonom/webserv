@@ -157,9 +157,10 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 			continue; // Skip empty lines and comments
 		}
 
+		// Inizia un nuovo blocco server
 		if (inGlobalBlock && line.find("server {") != std::string::npos)
 		{
-			std::cout<<"SERVER BLOCK"<<std::endl;
+			std::cout << "SERVER BLOCK" << std::endl;
 			inServerBlock = true;
 			inGlobalBlock = false;		// Stop reading global params
 			currentConfig = t_config(); // Reset for new server block
@@ -212,8 +213,10 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 		}
 		else if (inServerBlock && !inLocationBlock && line.find("}") != std::string::npos)
 		{
+			// Fine di un blocco server, salva la configurazione
 			configs[currentConfig.port] = currentConfig;
 			inServerBlock = false;
+			inGlobalBlock = true; // Riprendi il parsing globale per eventuali blocchi server successivi
 		}
 		else if (inLocationBlock && line.find("]") != std::string::npos)
 		{
