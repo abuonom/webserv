@@ -130,7 +130,6 @@ static std::string trim(const std::string &str)
 	}
 	return "";
 }
-
 bool ServerConfigs::loadConfig(const std::string &filename)
 {
 	std::ifstream file(filename.c_str());
@@ -148,21 +147,44 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 	bool inGlobalBlock = true; // Variabile per controllare se siamo nel blocco globale
 	std::string currentLocationPath;
 
+	bool serverBlockFound = false; // Controlla se almeno un blocco server è presente
+
+	// Controlla se il file è vuoto
+	if (file.peek() == std::ifstream::traits_type::eof())
+	{
+		std::cerr << "Error: Config file is empty" << std::endl;
+		exit(1);
+	}
+
 	while (std::getline(file, line))
 	{
-		std::cout << "line: " << line << std::endl;
 		line = trim(line);
+
 		if (line.empty() || line[0] == '#')
 		{
 			continue; // Skip empty lines and comments
 		}
 
+		// Verifica che la riga termini con ";"
+		if (line[line.size() - 1] != ';' && line.find("server {") == std::string::npos && line.find("[") == std::string::npos && line.find("}") == std::string::npos && line.find("]") == std::string::npos)
+		{
+			std::cerr << "Error: Missing semicolon at the end of the line: " << line << std::endl;
+			exit(1);
+		}
+
+		// Rimuove il punto e virgola se è presente
+		if (line[line.size() - 1] == ';')
+		{
+			line = line.substr(0, line.size() - 1); // Rimuove l'ultimo carattere
+			line = trim(line);						// Rimuove eventuali spazi in eccesso
+		}
+
 		// Inizia un nuovo blocco server
 		if (inGlobalBlock && line.find("server {") != std::string::npos)
 		{
-			std::cout << "SERVER BLOCK" << std::endl;
 			inServerBlock = true;
 			inGlobalBlock = false;		// Stop reading global params
+			serverBlockFound = true;	// Indica che è stato trovato un blocco server
 			currentConfig = t_config(); // Reset for new server block
 			continue;
 		}
@@ -293,6 +315,13 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 				}
 			}
 		}
+	}
+
+	// Controlla se è stato trovato almeno un blocco server
+	if (!serverBlockFound)
+	{
+		std::cerr << "Error: No server block found in the config file" << std::endl;
+		exit(1);
 	}
 
 	file.close();
