@@ -2,6 +2,7 @@
 #define SERVER_HPP
 
 #include "Request.hpp"
+#include "ServerConfigs.hpp"
 #include <fcntl.h>
 #include <cstring>
 #include <iostream>
@@ -25,14 +26,11 @@ class Server {
 public:
 	Server(int port);
 	~Server();
-	void run();
+	void run(ServerConfigs server);
 
 private:
 	void setNonBlocking(int fd);
-	void handleClient(int client_fd);
-	void handleGet(int client_fd);
-	void handlePost(int client_fd, const std::string &body);
-	void handleDelete(int client_fd);
+	void handleClient(int client_fd, ServerConfigs server);
 
 	int _server_fd;
 	struct sockaddr_in _address;

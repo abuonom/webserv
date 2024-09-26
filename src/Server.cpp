@@ -1,4 +1,6 @@
 #include "../hpp/Server.hpp"
+#include "../hpp/GetMethod.hpp"
+#include "../hpp/Response.hpp"
 #define BUFFER_SIZE 1024
 
 Server::Server(int port) {
@@ -45,7 +47,7 @@ void Server::setNonBlocking(int fd) {
 	}
 }
 
-void Server::run() {
+void Server::run(ServerConfigs server) {
 	while (true) {
 		int poll_count = poll(_poll_fds.data(), _poll_fds.size(), -1);
 		if (poll_count < 0) {
@@ -65,14 +67,14 @@ void Server::run() {
 						_poll_fds.push_back(client_poll_fd);
 					}
 				} else {
-					handleClient(_poll_fds[i].fd);
+					handleClient(_poll_fds[i].fd, server);
 				}
 			}
 		}
 	}
 }
 
-void Server::handleClient(int client_fd) {
+void Server::handleClient(int client_fd, ServerConfigs server) {
 	char buffer[BUFFER_SIZE];
 	memset(buffer, 0, BUFFER_SIZE);
 	int bytes_read = read(client_fd, buffer, BUFFER_SIZE - 1);
@@ -88,49 +90,19 @@ void Server::handleClient(int client_fd) {
 		}
 		return;
 	}
-
-	Request req;
-	std::string request(buffer);
-	req.getData(request);
-	req.getBody(request);
-	std::cout << request << std::endl << "---------------------------------------------------" << std::endl;
-	if (req._method == "GET") {
-		handleGet(client_fd);
-	} else if (req._method == "POST") {
-		handlePost(client_fd, req._body);
-	} else if (req._method == "DELETE") {
-		handleDelete(client_fd);
+	Request request(buffer);
+	if (request._method == "GET")
+	{
+		GetMethod response;
+		std::string result = response.generateResponse(request, server);
+		send(client_fd, result.c_str(), result.length(), 0);
+		close(client_fd);
 	}
+	// else if (request._method == "POST")
+	// {
+	// 	PostMethod response;
+	// 	response.generateResponse(request, server);
+	// }
+
 }
 
-void Server::handleGet(int client_fd) {
-	std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nHello, GET method!\n";
-	send(client_fd, response.c_str(), response.length(), 0);
-	close(client_fd);
-}
-
-void Server::handlePost(int client_fd, const std::string &body) {
-	std::ofstream file("uploaded_file.png");
-	if (file.is_open()) {
-		file << body;
-		file.close();
-		std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nFile uploaded successfully!\n";
-		send(client_fd, response.c_str(), response.length(), 0);
-	} else {
-		std::string response = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nFailed to open file!\n";
-		send(client_fd, response.c_str(), response.length(), 0);
-	}
-	close(client_fd);
-}
-
-void Server::handleDelete(int client_fd) {
-	if (remove("uploaded_file.png") == 0) {
-		std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nFile deleted successfully!\n";
-		send(client_fd, response.c_str(), response.length(), 0);
-	} else {
-		std::cout << "Failed to delete file: " << strerror(errno) << std::endl;
-		std::string response = "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nFile not found!\n";
-		send(client_fd, response.c_str(), response.length(), 0);
-	}
-	close(client_fd);
-}

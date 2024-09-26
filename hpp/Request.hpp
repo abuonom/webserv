@@ -14,9 +14,11 @@ class Request
 		std::string _query;
 		std::string _version;
 		std::string _body;
-		std::string _user_agent;
 		std::string _connection;
-		Request();
+		std::string _accept;
+		std::string _host;
+		int			host;
+		Request(std::string request);
 		void getData(std::string request);
 		void getBody(std::string request);
 		void divide_url(std::string url);

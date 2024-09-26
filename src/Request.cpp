@@ -1,26 +1,40 @@
 #include "../hpp/Server.hpp"
+#include "../hpp/Response.hpp"
 
-Request::Request() {
+Request::Request(std::string request) {
+	getData(request);
+	getBody(request);
+	std::stringstream ss(_host);
+    ss >> host;
+	std::cout << _path << std::endl;
 }
 
 void Request::divide_url(std::string url)
 {
+	if (url == "/")
+	{
+		_path = "";
+		_query = "";
+		return ;
+	}
 	size_t i = url.find('?');
 	if (i != std::string::npos)
 	{
-		_path = url.substr(1, i-1);
+		_path = url.substr(1, i - 1);
 		_query = url.substr(i + 1, url.length());
 	}
 	else
-		_path = url.substr(1, url.length());
+	{
+		_path = url.substr(0, url.length());
+		_path += "/";
+		_query = "";
+	}
 }
 
 void Request::getData(std::string request)
 {
 	char tmp[1024];
 	strcpy(tmp, request.c_str());
-
-
 	char* line = strtok(tmp, "\r\n");
 	_method = strtok(line, " ");
 	_url = strtok(NULL, " ");
@@ -49,6 +63,22 @@ void Request::getBody(std::string request)
 	std::vector<std::string>::iterator it;
 	for (it = tokens.begin(); it < tokens.end(); it++)
 	{
+		std::string tmp = *it;
+		if (tmp.find("Connection:") != std::string::npos)
+		{
+			int fine = tmp.find("/r");
+			_connection = tmp.substr(tmp.find("Connection:") + 12, fine);
+		}
+		if (tmp.find("Accept:") != std::string::npos)
+		{
+			int fine = tmp.find("/r");
+			_accept = tmp.substr(tmp.find("Accept:") + 8, fine);
+		}
+		if (tmp.find("Host:") != std::string::npos)
+		{
+			int fine = tmp.find("/r");
+			_host = tmp.substr(tmp.find("Host: localhost:") + 16, fine);
+		}
 		if (*it == "")
 			break ;
 	}
