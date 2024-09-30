@@ -30,14 +30,14 @@ int main(int argc, char **argv)
 		VerifyExtension("default.config", ".config");
 		std::cout << "WebServer started with default config file" << std::endl;
 		configs.loadConfig("config/default.config");
-		//configs.printConfigs();
 	}
 	else
 	{
 		VerifyExtension(argv[1], ".config");
 		configs.loadConfig(argv[1]);
+
 	}
-	Server server(9090);
+	Server server = Server(8080);
 	server.run(configs);
 	return 0;
 }
