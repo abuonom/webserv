@@ -225,7 +225,8 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 			if (start != std::string::npos && end != std::string::npos && end > start)
 			{
 				currentLocationPath = line.substr(start, end - start); // Estrai il percorso della location
-				currentLocationPath = trim(currentLocationPath);	   // Rimuovi eventuali spazi
+				currentLocationPath = trim(currentLocationPath);   // Rimuovi eventuali spazi
+				currentLocationPath = currentLocationPath.substr(1, currentLocationPath.size() - 2); // Rimuovi eventuali virgolette
 			}
 			else
 			{

@@ -6,7 +6,6 @@ Request::Request(std::string request) {
 	getBody(request);
 	std::stringstream ss(_host);
     ss >> host;
-	std::cout << _path << std::endl;
 }
 
 void Request::divide_url(std::string url)
@@ -25,8 +24,7 @@ void Request::divide_url(std::string url)
 	}
 	else
 	{
-		_path = url.substr(0, url.length());
-		_path += "/";
+		_path = url.substr(1, url.length());
 		_query = "";
 	}
 }
