@@ -1,5 +1,5 @@
 #include "../hpp/Server.hpp"
-#include "../hpp/ServerConfigs.hpp"
+
 int stringToInt(const std::string &str)
 {
 	std::stringstream ss(str);
@@ -21,6 +21,7 @@ void VerifyExtension(const std::string &filename, const std::string &extension)
 		exit(1);
 	}
 }
+
 
 int main(int argc, char **argv)
 {

@@ -11,7 +11,6 @@ std::string GetMethod::err404(std::string version)
 	response += " 404 Not Found\r\n";
 	response += "Content-Type: text/html\r\n\r\n";
 	response += getFile("error_pages/404.html");
-	std::cout << response << std::endl;
 	return response;
 }
 
@@ -45,20 +44,21 @@ std::string GetMethod::err500(std::string version)
 	return response;
 }
 
-std::string GetMethod::autoindexResponse(std::string absolute_path)
+std::string GetMethod::autoindexResponse(std::string s, std::string path)
 {
 	std::string response;
+	std::string absolute_path = s + "/" + path;
 	DIR *dir = opendir(absolute_path.c_str());
-	if (dir)
+	if (absolute_path[absolute_path.size() - 1] != '/')
+		absolute_path += "/";
+	if (dir != 0)
 	{
 		dirent *dir_info = readdir(dir);
 		while(dir_info != 0)
 		{
-			std::cout << dir_info->d_name << std::endl;
 			if (dir_info->d_name[0] != '.')
 			{
-				response += dir_info->d_name;
-				response += "\n";
+				response += "<a href=\"" + path + "/" + dir_info->d_name + "\">" + dir_info->d_name + "</a><br>";
 			}
 			dir_info = readdir(dir);
 		}
@@ -86,7 +86,11 @@ std::string GetMethod::getExtension(std::string path, std::string accepted)
 {
 	int pos = path.find_last_of(".");
 	std::string extension = path.substr(pos + 1);
-	if (accepted.find(extension) == std::string::npos)
+	if (accepted == "*/*")
+	{
+		return "Content-Type: text/" + extension + "\r\n";
+	}
+	else if (accepted.find(extension) == std::string::npos)
 	{
 		return "";
 	}
@@ -127,9 +131,20 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 						{
 							return "";
 						}
-						response += "200 OK\r\n";
-						response += "Content-Type: text/html\r\n\r\n";
-						response += "<html><body>Richiesta elaborata correttamente</body></html>";
+						if (loc.autoindex == true)
+						{
+							response += "200 OK\r\n";
+							response += "Content-Type: text/html\r\n\r\n";
+							char buffer[4096];
+							getcwd(buffer, sizeof(buffer));
+							std::string s(buffer);
+							response += autoindexResponse(s , req._path);
+							return response;
+						}
+						else
+						{
+
+						}
 					}
 				}
 				if (flag == 0)
@@ -144,8 +159,7 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 						return err415(req._version);
 					response += getExtension(req._path, req._accept);
 					response += "Content-Length: " + getContentLength(req._path) + "\r\n\r\n";
-					response += getFile(req._path);
-					std::cout << response << std::endl;
+					response += getFile("./" + req._path);
 					return response;
 				}
 				return err404(req._version);

@@ -1,6 +1,4 @@
 #include "../hpp/Server.hpp"
-#include "../hpp/GetMethod.hpp"
-#include "../hpp/Response.hpp"
 #define BUFFER_SIZE 1024
 
 Server::Server(int port) {
@@ -47,6 +45,9 @@ void Server::setNonBlocking(int fd) {
 	}
 }
 
+
+
+
 void Server::run(ServerConfigs server) {
 	while (true) {
 		int poll_count = poll(_poll_fds.data(), _poll_fds.size(), -1);
@@ -54,7 +55,6 @@ void Server::run(ServerConfigs server) {
 			perror("poll error");
 			_exit(1);
 		}
-
 		for (size_t i = 0; i < _poll_fds.size(); i++) {
 			if (_poll_fds[i].revents & POLLIN) {
 				if (_poll_fds[i].fd == _server_fd) {
