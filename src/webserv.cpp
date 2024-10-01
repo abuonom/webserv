@@ -1,5 +1,7 @@
 #include "../hpp/Server.hpp"
 
+extern int	fd;
+
 int stringToInt(const std::string &str)
 {
 	std::stringstream ss(str);
@@ -22,7 +24,6 @@ void VerifyExtension(const std::string &filename, const std::string &extension)
 	}
 }
 
-
 int main(int argc, char **argv)
 {
 	ServerConfigs configs = ServerConfigs();
@@ -36,7 +37,6 @@ int main(int argc, char **argv)
 	{
 		VerifyExtension(argv[1], ".config");
 		configs.loadConfig(argv[1]);
-
 	}
 	Server server = Server(8080);
 	server.run(configs);

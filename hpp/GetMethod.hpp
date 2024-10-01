@@ -23,6 +23,7 @@ class GetMethod : public Response
 		std::string err405(std::string version);
 		std::string err500(std::string version);
 		std::string err415(std::string version);
+		void cgiRequest(std::string name);
 		virtual ~GetMethod(){};
 
 };

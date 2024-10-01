@@ -106,6 +106,32 @@ std::string GetMethod::getContentLength(std::string path)
 	return ss.str();
 }
 
+void GetMethod::cgiRequest(std::string name)
+{
+	char buffer[4096];
+	getcwd(buffer, sizeof(buffer));
+	std::string s(buffer);
+	std::string final = s + "/" + name;
+	std::cout << final <<std::endl;
+	pid_t pid = fork();
+	if (pid < 0)
+	{
+		std::cerr << "Fork failed" << std::endl;
+		return;
+	}
+	if (pid == 0)
+	{
+		char* args[] = {(char *)"Users/gianmarcopecci/Desktop/webserv/cgi-bin/post.py", 0};
+		char *env[] = {0};
+		execve("/Users/gianmarcopecci/Desktop/webserv/cgi-bin/post.py", args, env);
+		printf("%s\n", strerror(errno));
+		std::cerr << "CGI script failed to execute" << std::endl;
+		exit(1);
+	}
+	else
+		waitpid(pid, 0, 0);
+}
+
 std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 {
 	std::string response;
@@ -127,9 +153,10 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 					if (loc.accepted_methods[i] == "GET")
 					{
 						flag = 1;
-						if (req._path == "/cgi-bin/")
+						if (req._path == "cgi-bin")
 						{
-							return "";
+							cgiRequest(req._path + "/" + loc.fastcgi);
+							return "200 OK";
 						}
 						if (loc.autoindex == true)
 						{
@@ -143,7 +170,13 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 						}
 						else
 						{
-
+							if (loc.index == "")
+								return err404(req._version);
+							std::string temp =	"." + loc.root + "/" + loc.index;
+							response += "200 OK \r\n";
+							response += "Content-Type: text/html\r\n";
+							response += "Content-Length: " + getContentLength(temp) + "\r\n\r\n";
+							response += getFile(temp);
 						}
 					}
 				}
@@ -173,12 +206,10 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 		t_config temp;
 		temp = serv.configs[req.host];
 		std::string path = "." + temp.root + "/" + temp.index;
-		std::cout << path << std::endl;
 		response += "200 OK\r\n";
 		response += "Content-Type: text/html\r\n";
 		response += "Content-Length: " + getContentLength(path) + "\r\n\r\n";
 		response += getFile(path);
-		std::cout << response << std::endl;
 	}
 	return response;
 }
