@@ -16,14 +16,11 @@ class GetMethod : public Response
 		GetMethod();
 		std::string generateResponse(Request req, ServerConfigs serv);
 		std::string autoindexResponse(std::string string ,std::string path);
-		std::string getFile(std::string path);
 		std::string getExtension(std::string path, std::string accepted);
-		std::string getContentLength(std::string path);
 		std::string err404(std::string version);
 		std::string err405(std::string version);
 		std::string err500(std::string version);
 		std::string err415(std::string version);
-		void cgiRequest(std::string name);
 		virtual ~GetMethod(){};
 
 };

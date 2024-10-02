@@ -6,6 +6,7 @@ Request::Request(std::string request) {
 	getBody(request);
 	std::stringstream ss(_host);
     ss >> host;
+	std::cout << "request = " << request << std::endl;
 }
 
 void Request::divide_url(std::string url)
@@ -76,6 +77,11 @@ void Request::getBody(std::string request)
 		{
 			int fine = tmp.find("/r");
 			_host = tmp.substr(tmp.find("Host: localhost:") + 16, fine);
+		}
+		if (tmp.find("Content-Type:") != std::string::npos)
+		{
+			int fine = tmp.find(";");
+			_type = tmp.substr(tmp.find("Content-Type:") + 14, fine);
 		}
 		if (*it == "")
 			break ;

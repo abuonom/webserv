@@ -17,6 +17,7 @@ class Request
 		std::string _connection;
 		std::string _accept;
 		std::string _host;
+		std::string _type;
 		int			host;
 		Request(std::string request);
 		void getData(std::string request);

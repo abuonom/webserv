@@ -16,3 +16,32 @@ Response::Response()
 	httpStatus[503] = "Service Unavailable";
 }
 
+std::string Response::getFile(std::string path)
+{
+	std::ifstream file(path.c_str());
+	if (!file)
+		return "";
+	std::string line;
+	char buffer[4096];
+	while (file.read(buffer, sizeof(buffer)))
+	{
+		line.append(buffer, file.gcount());
+	}
+	line.append(buffer, file.gcount());
+	return (line);
+}
+
+std::string Response::getContentLength(std::string path)
+{
+	std::string contentFile = getFile(path);
+	int number = contentFile.size();
+	std::stringstream ss;
+	ss << number;
+	return ss.str();
+}
+
+std::string Response::findEXT(std::string filename)
+{
+	std::string ext = filename.substr(filename.find_last_of("."), filename.length());
+	return ext;
+}
