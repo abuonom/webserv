@@ -67,21 +67,6 @@ std::string GetMethod::autoindexResponse(std::string s, std::string path)
 	return (response);
 }
 
-std::string GetMethod::getFile(std::string path)
-{
-	std::ifstream file(path.c_str());
-	if (!file)
-		return "";
-	std::string line;
-	char buffer[4096];
-	while (file.read(buffer, sizeof(buffer)))
-	{
-		line.append(buffer, file.gcount());
-	}
-	line.append(buffer, file.gcount());
-	return (line);
-}
-
 std::string GetMethod::getExtension(std::string path, std::string accepted)
 {
 	int pos = path.find_last_of(".");
@@ -97,46 +82,12 @@ std::string GetMethod::getExtension(std::string path, std::string accepted)
 	return "Content-Type: text/" + extension + "\r\n";
 }
 
-std::string GetMethod::getContentLength(std::string path)
-{
-	std::string contentFile = getFile(path);
-	int number = contentFile.size();
-	std::stringstream ss;
-	ss << number;
-	return ss.str();
-}
-
-void GetMethod::cgiRequest(std::string name)
-{
-	char buffer[4096];
-	getcwd(buffer, sizeof(buffer));
-	std::string s(buffer);
-	std::string final = s + "/" + name;
-	std::cout << final <<std::endl;
-	pid_t pid = fork();
-	if (pid < 0)
-	{
-		std::cerr << "Fork failed" << std::endl;
-		return;
-	}
-	if (pid == 0)
-	{
-		char* args[] = {(char *)"Users/gianmarcopecci/Desktop/webserv/cgi-bin/post.py", 0};
-		char *env[] = {0};
-		execve("/Users/gianmarcopecci/Desktop/webserv/cgi-bin/post.py", args, env);
-		printf("%s\n", strerror(errno));
-		std::cerr << "CGI script failed to execute" << std::endl;
-		exit(1);
-	}
-	else
-		waitpid(pid, 0, 0);
-}
-
 std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 {
 	std::string response;
 	response += req._version;
 	response += " ";
+	std::cout << "path = " << req._path <<std::endl;
 	if (!req._path.empty())
 	{
 		if(serv.configs.find(req.host) != serv.configs.end()) //se trova config
@@ -153,10 +104,13 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 					if (loc.accepted_methods[i] == "GET")
 					{
 						flag = 1;
-						if (req._path == "cgi-bin")
+						if (req._path == "cgi-bin/post.py")
 						{
-							cgiRequest(req._path + "/" + loc.fastcgi);
-							return "200 OK";
+							std::cout << "AOOOOOOOOOOOOOOOOOO" <<std::endl;
+							response += "200 OK \r\n\r\n";
+							response += cgiRequest(req._path + "/" + loc.fastcgi);
+							std::cout << "response = " << response << std::endl;
+							return response;
 						}
 						if (loc.autoindex == true)
 						{
@@ -185,6 +139,13 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 			}
 			else //se non trovo location
 			{
+				if (findEXT(req._path) == ".py")
+				{
+					response += "200 OK \r\n\r\n";
+					response += cgiRequest(req);
+					std::cout << "response = " << response << std::endl;
+					return response;
+				}
 				if (getFile(req._path) != "")
 				{
 					response += "200 OK\r\n";
