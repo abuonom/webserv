@@ -1,4 +1,5 @@
 #include "../hpp/GetMethod.hpp"
+#include <sys/wait.h>
 
 void Response::env_cgi(Request req)
 {
@@ -7,23 +8,18 @@ void Response::env_cgi(Request req)
 	char buffer[4096];
 	getcwd(buffer, sizeof(buffer));
 	std::string s(buffer);
+	std::cout << "s = " << s << std::endl;
 
 	tmp_env["CONTENT_LENGTH"] = getContentLength(req._path);
 	tmp_env["CONTENT_TYPE"] = req._type;
 	tmp_env["REQUEST_METHOD"] = req._method;
-	tmp_env["SCRIPT_FILENAME"] = s + "/" + req._url + "/";
+	tmp_env["SCRIPT_FILENAME"] = s + req._url;
 	tmp_env["SERVER_PROTOCOL"] = req._version;
 	tmp_env["UPLOAD_PATH"] = s + "/uploads/";
 
+	// RIEMPIRE ENV
 	env = new char*[tmp_env.size() + 1];
 	int i = 0;
-	for (std::map<std::string, std::string>::iterator it = tmp_env.begin(); it != tmp_env.end(); ++it) {
-		std::string to_convert = it->first + '=' + it->second;
-		env[i] = new char[to_convert.size() + 1];
-		std::strcpy(env[i], to_convert.c_str());
-		to_convert.clear();
-		++i;
-	}
 	env[i] = NULL;
 	tmp_env.clear();
 	to_convert.clear();
@@ -69,6 +65,7 @@ static char **args_create(std::string path)
 
 std::string Response::cgiRequest(Request req)
 {
+	env_cgi(req);
 	std::string newBody;
 	int savestdIn = dup(STDIN_FILENO);
 	int savestdOut = dup(STDOUT_FILENO);
@@ -89,11 +86,10 @@ std::string Response::cgiRequest(Request req)
 	}
 	if (pid == 0)
 	{
-		dup2(fdIn, STDIN_FILENO);
-		dup2(fdOut, STDOUT_FILENO);
 		const char *s1 = commandSelect(findEXT(req._path));
 		static char **s2 = args_create(req._path);
-		printf("%s, %s, %s\n", s1, s2[0], s2[1]);
+		dup2(fdIn, STDIN_FILENO);
+		dup2(fdOut, STDOUT_FILENO);
 		if (execve(s1, s2, env) != 0)
 		{
 			perror("execve");

@@ -7,8 +7,8 @@
 
 class Response {
 	private:
-		char **env;
 	public:
+		char **env;
 		Response();
 		std::string findEXT(std::string filename);
 		virtual std::string generateResponse(Request req, ServerConfigs serv) = 0;

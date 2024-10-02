@@ -87,7 +87,6 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 	std::string response;
 	response += req._version;
 	response += " ";
-	std::cout << "path = " << req._path <<std::endl;
 	if (!req._path.empty())
 	{
 		if(serv.configs.find(req.host) != serv.configs.end()) //se trova config
