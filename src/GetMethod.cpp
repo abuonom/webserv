@@ -103,12 +103,10 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 					if (loc.accepted_methods[i] == "GET")
 					{
 						flag = 1;
-						if (req._path == "cgi-bin/post.py")
+						if (req._path == "cgi-bin")
 						{
-							std::cout << "AOOOOOOOOOOOOOOOOOO" <<std::endl;
 							response += "200 OK \r\n\r\n";
-							response += cgiRequest(req._path + "/" + loc.fastcgi);
-							std::cout << "response = " << response << std::endl;
+							response += cgiRequest(loc.fastcgi);
 							return response;
 						}
 						if (loc.autoindex == true)
@@ -142,7 +140,6 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 				{
 					response += "200 OK \r\n\r\n";
 					response += cgiRequest(req);
-					std::cout << "response = " << response << std::endl;
 					return response;
 				}
 				if (getFile(req._path) != "")

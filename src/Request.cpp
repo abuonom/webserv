@@ -6,7 +6,7 @@ Request::Request(std::string request) {
 	getBody(request);
 	std::stringstream ss(_host);
     ss >> host;
-	std::cout << "request = " << request << std::endl;
+	std::cout << "request = " << _url << std::endl;
 }
 
 void Request::divide_url(std::string url)
