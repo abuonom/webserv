@@ -4,25 +4,28 @@
 void Response::env_cgi(Request req)
 {
 	std::map<std::string, std::string> tmp_env;
-	std::string to_convert;
 	char buffer[4096];
 	getcwd(buffer, sizeof(buffer));
 	std::string s(buffer);
-	std::cout << "s = " << s << std::endl;
 
 	tmp_env["CONTENT_LENGTH"] = getContentLength(req._path);
 	tmp_env["CONTENT_TYPE"] = req._type;
 	tmp_env["REQUEST_METHOD"] = req._method;
-	tmp_env["SCRIPT_FILENAME"] = s + req._url;
+	tmp_env["SCRIPT_FILENAME"] = s + req._path;
 	tmp_env["SERVER_PROTOCOL"] = req._version;
 	tmp_env["UPLOAD_PATH"] = s + "/uploads/";
+	tmp_env["QUERY_STRING"] = req._query;
 
-	// RIEMPIRE ENV
-	env = new char*[tmp_env.size() + 1];
-	int i = 0;
-	env[i] = NULL;
+	env = new char*[tmp_env.size() + 1];  // +1 per l'elemento nullo finale
+    int i = 0;
+    for (std::map<std::string, std::string>::const_iterator it = tmp_env.begin(); it != tmp_env.end(); ++it) {
+        std::string concatenated = it->first + "=" + it->second;
+        env[i] = new char[concatenated.size() + 1];
+        std::strcpy(env[i], concatenated.c_str());
+        i++;
+    }
+    env[i] = 0;  // Usare 0 come nullptr in C++98
 	tmp_env.clear();
-	to_convert.clear();
 }
 
 const char *commandSelect(std::string ext)
