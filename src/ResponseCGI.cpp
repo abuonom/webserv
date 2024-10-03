@@ -17,14 +17,14 @@ void Response::env_cgi(Request req)
 	tmp_env["QUERY_STRING"] = req._query;
 
 	env = new char*[tmp_env.size() + 1];  // +1 per l'elemento nullo finale
-    int i = 0;
-    for (std::map<std::string, std::string>::const_iterator it = tmp_env.begin(); it != tmp_env.end(); ++it) {
-        std::string concatenated = it->first + "=" + it->second;
-        env[i] = new char[concatenated.size() + 1];
-        std::strcpy(env[i], concatenated.c_str());
-        i++;
-    }
-    env[i] = 0;  // Usare 0 come nullptr in C++98
+	int i = 0;
+	for (std::map<std::string, std::string>::const_iterator it = tmp_env.begin(); it != tmp_env.end(); ++it) {
+		std::string concatenated = it->first + "=" + it->second;
+		env[i] = new char[concatenated.size() + 1];
+		std::strcpy(env[i], concatenated.c_str());
+		i++;
+	}
+	env[i] = NULL;
 	tmp_env.clear();
 }
 
@@ -38,9 +38,9 @@ const char *commandSelect(std::string ext)
 	return ret;
 }
 
-static char **args_create(std::string path)
+char **args_create(std::string path)
 {
-	char buffer[4096];
+	char buffer[8192];
 	getcwd(buffer, sizeof(buffer));
 	std::string s(buffer);
 	std::string ext = path.substr(path.find_last_of("."), path.length());
@@ -52,11 +52,11 @@ static char **args_create(std::string path)
 
 	ret[0] = new char[cmd.size() + 1];
 	std::strcpy(ret[0], cmd.c_str());
-	ret[0][cmd.size()] = 0;
+	ret[0][cmd.size()] = '\0';
 
 	ret[1] = new char[full_path.size() + 1];
 	std::strcpy(ret[1], full_path.c_str());
-	ret[1][full_path.size() + 1] = 0;
+	ret[1][full_path.size()] = '\0';
 
 	ret[2] = NULL;
 
@@ -77,6 +77,8 @@ std::string Response::cgiRequest(Request req)
 	int fdIn = fileno(fileIn);
 	int fdOut = fileno(fileOut);
 	int ret = 1;
+	const char *s1 = commandSelect(findEXT(req._path));
+	char **s2 = args_create(req._path);
 
 	write(fdIn, req._body.c_str(), req._body.size());
 	lseek(fdIn, 0, SEEK_SET);
@@ -89,8 +91,6 @@ std::string Response::cgiRequest(Request req)
 	}
 	if (pid == 0)
 	{
-		const char *s1 = commandSelect(findEXT(req._path));
-		static char **s2 = args_create(req._path);
 		dup2(fdIn, STDIN_FILENO);
 		dup2(fdOut, STDOUT_FILENO);
 		if (execve(s1, s2, env) != 0)
@@ -120,5 +120,17 @@ std::string Response::cgiRequest(Request req)
 	close(fdOut);
 	close(savestdIn);
 	close(savestdOut);
+	int i = 0;
+	for (i = 0;i < 7; i++)
+	{
+		delete[] env[i];
+	}
+	delete[] env;
+	fprintf(stdout, "puntatore = %p\n", s2[2]);
+	for (i = 0 ;i < 2; i++)
+	{
+		delete[] s2[i];
+	}
+	delete[] s2;
 	return (newBody);
 }

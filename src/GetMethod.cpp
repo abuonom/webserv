@@ -27,21 +27,6 @@ std::string GetMethod::autoindexResponse(std::string s, std::string path)
 	return (response);
 }
 
-std::string GetMethod::getExtension(std::string path, std::string accepted)
-{
-	int pos = path.find_last_of(".");
-	std::string extension = path.substr(pos + 1);
-	if (accepted == "*/*")
-	{
-		return "Content-Type: text/" + extension + "\r\n";
-	}
-	else if (accepted.find(extension) == std::string::npos)
-	{
-		return "";
-	}
-	return "Content-Type: text/" + extension + "\r\n";
-}
-
 std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 {
 	std::string response;

@@ -16,6 +16,7 @@ class Response {
 		void env_cgi(Request req);
 		std::string getFile(std::string path);
 		std::string getContentLength(std::string path);
+		std::string getExtension(std::string path, std::string accepted);
 		std::string cgiRequest(Request req);
 		virtual ~Response(){};
 		std::string err400(std::string version);
