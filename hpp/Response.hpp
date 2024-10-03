@@ -18,6 +18,12 @@ class Response {
 		std::string getContentLength(std::string path);
 		std::string cgiRequest(Request req);
 		virtual ~Response(){};
-};
+		std::string err400(std::string version);
+		std::string err404(std::string version);
+		std::string err405(std::string version);
+		std::string err415(std::string version);
+		std::string err500(std::string version);
+		std::string err501(std::string version);
+	};
 
 #endif
