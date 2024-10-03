@@ -2,18 +2,21 @@
 
 Response::Response()
 {
-	httpStatus[200] = "OK";
-	httpStatus[301] = "Moved Permanently";
-	httpStatus[400] = "Bad Request";
-	httpStatus[401] = "Unauthorized";
-	httpStatus[403] = "Forbidden";
-	httpStatus[404] = "Not Found";
-	httpStatus[405] = "Method Not Allowed";
-	httpStatus[413] = "Request Entity Too Large";
-	httpStatus[415] = "Unsupported Media Type";
-	httpStatus[500] = "Internal Server Error";
-	httpStatus[501] = "Not Implemented";
-	httpStatus[503] = "Service Unavailable";
+}
+
+std::string Response::getExtension(std::string path, std::string accepted)
+{
+	int pos = path.find_last_of(".");
+	std::string extension = path.substr(pos + 1);
+	if (accepted == "*/*")
+	{
+		return "Content-Type: text/" + extension + "\r\n";
+	}
+	else if (accepted.find(extension) == std::string::npos)
+	{
+		return "";
+	}
+	return "Content-Type: text/" + extension + "\r\n";
 }
 
 std::string Response::getFile(std::string path)
@@ -48,43 +51,3 @@ std::string Response::findEXT(std::string filename)
 	return ext;
 }
 
-std::string Response::err404(std::string version)
-{
-	std::string response;
-	response += version;
-	response += " 404 Not Found\r\n";
-	response += "Content-Type: text/html\r\n\r\n";
-	response += getFile("error_pages/404.html");
-	return response;
-}
-
-
-std::string Response::err405(std::string version)
-{
-	std::string response;
-	response += version;
-	response += " 405 Method Not Allowed\r\n";
-	response += "Content-Type: text/html\r\n\r\n";
-	response += getFile("error_pages/405.html");
-	return response;
-}
-
-std::string Response::err415(std::string version)
-{
-	std::string response;
-	response += version;
-	response += " 415 Unsupported Media Type\r\n";
-	response += "Content-Type: text/html\r\n\r\n";
-	response += getFile("error_pages/415.html");
-	return response;
-}
-
-std::string Response::err500(std::string version)
-{
-	std::string response;
-	response += version;
-	response += " 500 Internal Server Error\r\n";
-	response += "Content-Type: text/html\r\n\r\n";
-	response += getFile("error_pages/500.html");
-	return response;
-}
