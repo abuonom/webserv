@@ -13,7 +13,7 @@
 typedef struct s_location
 {
 	bool autoindex; // Se true, abilita il listing delle directory. Se false, disabilita il listing delle directory.
-	std::string fastcgi; // Specifica il percorso al programma CGI da eseguire per file con determinate estensioni (ad esempio, per .php).
+	std::string cgi; // Specifica il percorso al programma CGI da eseguire per file con determinate estensioni (ad esempio, per .php).
 	std::string upload_dir; // Directory dove i file caricati tramite richieste POST verranno salvati.
 	std::string return_code; // Codice di redirezione HTTP e, opzionalmente, l'URL di destinazione (es. "301 /newpath").
 	std::string root; // Directory root per questa route. I file saranno cercati all'interno di questa directory (ad esempio, /tmp/www per /route).

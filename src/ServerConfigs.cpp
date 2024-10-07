@@ -48,7 +48,7 @@ bool ServerConfigs::isValidKey(const std::string &key, const std::string &type) 
 		"methods",
 		"root",
 		"autoindex",
-		"fastcgi",
+		"cgi",
 		"upload_dir",
 		"return"};
 	static const std::vector<std::string> locationKeys(locationKeysArray, locationKeysArray + sizeof(locationKeysArray) / sizeof(locationKeysArray[0]));
@@ -102,7 +102,7 @@ void ServerConfigs::printConfigs() const
 			const t_location &location = locIt->second;
 			std::cout << "    Location " << locIt->first << ":" << std::endl;
 			std::cout << "      Autoindex: " << (location.autoindex ? "on" : "off") << std::endl;
-			std::cout << "      FastCGI: " << location.fastcgi << std::endl;
+			std::cout << "      cgi: " << location.cgi << std::endl;
 			std::cout << "      Upload Directory: " << location.upload_dir << std::endl;
 			std::cout << "      Return Code: " << location.return_code << std::endl;
 			std::cout << "      Root: " << location.root << std::endl;
@@ -275,8 +275,8 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 				}
 				else if (key == "autoindex")
 					currentLocation.autoindex = (value == "on");
-				else if (key == "fastcgi")
-					currentLocation.fastcgi = value;
+				else if (key == "cgi")
+					currentLocation.cgi = value;
 				else if (key == "upload_dir")
 					currentLocation.upload_dir = value;
 				else if (key == "return")
