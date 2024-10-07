@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
-import cgi
+import cgi, warnings
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 # Crea un modulo HTML per ricevere il nome
 html_form = """

@@ -95,9 +95,8 @@ std::string Response::cgiRequest(Request req)
 		dup2(fdOut, STDOUT_FILENO);
 		if (execve(s1, s2, env) != 0)
 		{
-			perror("execve");
 			std::cerr << "CGI script failed to execute" << std::endl;
-			return 0;
+			return err500(req._version);
 		}
 	}
 	else
@@ -126,7 +125,6 @@ std::string Response::cgiRequest(Request req)
 		delete[] env[i];
 	}
 	delete[] env;
-	fprintf(stdout, "puntatore = %p\n", s2[2]);
 	for (i = 0 ;i < 2; i++)
 	{
 		delete[] s2[i];

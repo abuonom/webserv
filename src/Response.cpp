@@ -8,15 +8,16 @@ std::string Response::getExtension(std::string path, std::string accepted)
 {
 	int pos = path.find_last_of(".");
 	std::string extension = path.substr(pos + 1);
-	if (accepted == "*/*")
-	{
-		return "Content-Type: text/" + extension + "\r\n";
-	}
-	else if (accepted.find(extension) == std::string::npos)
-	{
-		return "";
-	}
-	return "Content-Type: text/" + extension + "\r\n";
+	std::string type;
+	std::cout << accepted << std::endl;
+	if (extension == "html" || extension == "css" || extension == "js" || extension == "txt")
+		type = "text/" + extension;
+	if (extension == "avif" || extension == "jpg" || extension == "jpeg" || extension == "gif" || extension == "png" || extension == "webp")
+		type = "image/" + extension;
+	std::cout << type<< std::endl;
+	if (accepted.find("*/*") != std::string::npos || accepted.find(type) != std::string::npos)
+		return "Content-Type: " + type + "\r\n";
+	return "";
 }
 
 std::string Response::getFile(std::string path)

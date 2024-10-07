@@ -5,8 +5,7 @@ Request::Request(std::string request) {
 	getData(request);
 	getBody(request);
 	std::stringstream ss(_host);
-    ss >> host;
-	std::cout << "request = " << _url << std::endl;
+	ss >> host;
 }
 
 void Request::divide_url(std::string url)
