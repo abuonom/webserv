@@ -45,9 +45,6 @@ void Server::setNonBlocking(int fd) {
 	}
 }
 
-
-
-
 void Server::run(ServerConfigs server) {
 	while (true) {
 		int poll_count = poll(_poll_fds.data(), _poll_fds.size(), -1);

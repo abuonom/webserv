@@ -3,6 +3,7 @@
 
 #include "Request.hpp"
 #include "ServerConfigs.hpp"
+#include <unistd.h>
 #include <map>
 
 class Response {

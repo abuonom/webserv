@@ -1,4 +1,6 @@
-import cgi, os, sys
+import cgi, os, sys, warnings
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 erorr_405 = ("""<blockquote>
 <h1 style="text-align: center;">SCRIPT CHE FUNZIONA SU METHOD POST</h1>
