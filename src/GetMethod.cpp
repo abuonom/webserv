@@ -50,8 +50,11 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 						flag = 1;
 						if (req._path == "cgi-bin")
 						{
+							std::string path = "." + loc.root + "/" + loc.cgi;
+							if (access(path.c_str(), F_OK) == -1)
+								return err404(req._version);
 							response += "200 OK \r\n\r\n";
-							response += cgiRequest(loc.fastcgi);
+							response += cgiRequest(loc.cgi);
 							return response;
 						}
 						if (loc.autoindex == true)
