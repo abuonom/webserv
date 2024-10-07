@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 		VerifyExtension(argv[1], ".config");
 		configs.loadConfig(argv[1]);
 	}
-	Server server = Server(8080);
+	Server server = Server(configs);
 	server.run(configs);
 	return 0;
 }
