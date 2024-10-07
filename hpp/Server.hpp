@@ -23,20 +23,20 @@
 #include <sstream>
 #include <signal.h>
 
-
-class Server {
+class Server
+{
 public:
-	Server(int port);
+	Server(const ServerConfigs &server_configs);
 	~Server();
-	void run(ServerConfigs server);
+	void run(const ServerConfigs &server_configs);
 
 private:
 	void setNonBlocking(int fd);
-	void handleClient(int client_fd, ServerConfigs server);
+	void handleClient(int client_fd, const ServerConfigs &serverConfigs);
 
-	int _server_fd;
-	struct sockaddr_in _address;
-	std::vector<struct pollfd> _poll_fds;
+	std::vector<int> _server_fds;  // Vettore che contiene i file descriptor dei socket server
+	std::vector<pollfd> _poll_fds; // Vettore per la gestione dei file descriptor da monitorare
+	std::vector<int> _ports;	   // Vettore per tracciare le porte dei server
 };
 
 #endif
