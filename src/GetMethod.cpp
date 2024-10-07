@@ -58,9 +58,8 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 					if (loc.accepted_methods[i] == "GET")
 					{
 						flag = 1;
-						if (req._path == "antonio")
+						if (req._path == "redirect")
 						{
-							std::cout << "redirect" << std::endl;
 							response += "301 Moved Permanently\r\n";
 							std::string code = loc.return_code.substr(4, loc.return_code.length());
 							response += "Location: " + code + "\r\n";
