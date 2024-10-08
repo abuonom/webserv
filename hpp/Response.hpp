@@ -4,12 +4,11 @@
 #include "Request.hpp"
 #include "ServerConfigs.hpp"
 #include <unistd.h>
-#include <map>
 
 class Response {
-	private:
 	public:
 		char **env;
+		std::map<std::string, std::string> data_map;
 		Response();
 		std::string findEXT(std::string filename);
 		virtual std::string generateResponse(Request req, ServerConfigs serv) = 0;
@@ -26,6 +25,8 @@ class Response {
 		std::string err415(std::string version);
 		std::string err500(std::string version);
 		std::string err501(std::string version);
+		std::string trim(std::string s, char c);
+		std::string mygetcwd();
 	};
 
 #endif

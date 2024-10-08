@@ -27,15 +27,6 @@ std::string GetMethod::autoindexResponse(std::string s, std::string path)
 	return (response);
 }
 
-std::string trim(std::string s, char c)
-{
-	size_t first = s.find_first_not_of(c);
-	if (first == std::string::npos)
-		return "";
-	size_t last = s.find_last_not_of(c);
-	return s.substr(first, last - first + 1);
-}
-
 std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 {
 	std::string response;

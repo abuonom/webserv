@@ -25,3 +25,53 @@ Postman-Token: 5a910fe5-c0dc-40b6-a0cd-1ee2d5501306
 Host: localhost:9092
 Accept-Encoding: gzip, deflate, br
 Connection: keep-alive
+
+
+# POST x-www-form-urlencoded
+WebServer started with default config file
+POST / HTTP/1.1
+User-Agent: PostmanRuntime/7.39.1
+Accept: */*
+Cache-Control: no-cache
+Postman-Token: 78447f66-d193-4193-921b-9a19129ab6c9
+Host: localhost:8080
+Accept-Encoding: gzip, deflate, br
+Connection: keep-alive
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 25
+
+name=Gianmarco&name2=Luca
+
+# POST raw text
+POST / HTTP/1.1
+Content-Type: text/plain
+User-Agent: PostmanRuntime/7.39.1
+Accept: */*
+Cache-Control: no-cache
+Postman-Token: b7bd2384-8e18-447b-8570-fd0c57605a4b
+Host: localhost:8080
+Accept-Encoding: gzip, deflate, br
+Connection: keep-alive
+Content-Length: 42
+
+{
+  "key1": "value1",
+  "key2": "value2"
+}
+
+# POST raw JSON
+POST / HTTP/1.1
+Content-Type: application/json
+User-Agent: PostmanRuntime/7.39.1
+Accept: */*
+Cache-Control: no-cache
+Postman-Token: bd60c7cf-d68f-4170-a985-0f07d9ae87c7
+Host: localhost:8080
+Accept-Encoding: gzip, deflate, br
+Connection: keep-alive
+Content-Length: 42
+
+{
+  "key1": "value1",
+  "key2": "value2"
+}

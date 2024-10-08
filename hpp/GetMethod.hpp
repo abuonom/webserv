@@ -1,5 +1,5 @@
-#ifndef GETRESPONSE_HPP
-#define GETRESPONSE_HPP
+#ifndef GETMETHOD_HPP
+#define GETMETHOD_HPP
 
 #include "Response.hpp"
 #include <sys/types.h>

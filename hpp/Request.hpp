@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstring>
 #include <vector>
+#include <map>
 
 class Request
 {
@@ -21,7 +22,7 @@ class Request
 		int			host;
 		Request(std::string request);
 		void getData(std::string request);
-		void getBody(std::string request);
+		void getInfo(std::string request);
 		void divide_url(std::string url);
 };
 
