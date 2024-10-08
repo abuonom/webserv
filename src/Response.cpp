@@ -52,3 +52,18 @@ std::string Response::findEXT(std::string filename)
 	return ext;
 }
 
+std::string Response::trim(std::string s, char c)
+{
+	size_t first = s.find_first_not_of(c);
+	if (first == std::string::npos)
+		return "";
+	size_t last = s.find_last_not_of(c);
+	return s.substr(first, last - first + 1);
+}
+std::string Response::mygetcwd()
+{
+	char buffer[8192];
+	getcwd(buffer, sizeof(buffer));
+	std::string s(buffer);
+	return s;
+}

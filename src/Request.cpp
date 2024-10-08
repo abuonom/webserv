@@ -3,9 +3,10 @@
 
 Request::Request(std::string request) {
 	getData(request);
-	getBody(request);
+	getInfo(request);
 	std::stringstream ss(_host);
 	ss >> host;
+	//std::cout << request << std::endl;
 }
 
 void Request::divide_url(std::string url)
@@ -55,7 +56,7 @@ std::vector<std::string> split(std::string &s, const std::string &delimiter)
 	return tokens;
 }
 
-void Request::getBody(std::string request)
+void Request::getInfo(std::string request)
 {
 	std::vector<std::string> tokens = split(request, "\r\n");
 	std::vector<std::string>::iterator it;
@@ -93,4 +94,3 @@ void Request::getBody(std::string request)
 	else
 		_body = "";
 }
-

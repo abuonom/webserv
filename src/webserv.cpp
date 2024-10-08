@@ -1,7 +1,5 @@
 #include "../hpp/Server.hpp"
 
-extern int	fd;
-
 int stringToInt(const std::string &str)
 {
 	std::stringstream ss(str);
