@@ -6,7 +6,8 @@ Request::Request(std::string request) {
 	getInfo(request);
 	std::stringstream ss(_host);
 	ss >> host;
-	//std::cout << request << std::endl;
+	std::cout << request << std::endl;
+	std::cout << "\n\n\n\n start body:" <<_boundary << "end body: " << std::endl;
 }
 
 void Request::divide_url(std::string url)
@@ -86,11 +87,12 @@ void Request::getInfo(std::string request)
 		if (*it == "")
 			break ;
 	}
-	if (it < tokens.end())
+	_body = "";
+	it++;
+	_boundary = *it;
+	while (it < tokens.end())
 	{
+		_body += *it;
 		it++;
-		_body=*it;
 	}
-	else
-		_body = "";
 }

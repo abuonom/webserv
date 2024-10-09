@@ -75,3 +75,20 @@ Content-Length: 42
   "key1": "value1",
   "key2": "value2"
 }
+
+
+WebServer started with default config file
+POST / HTTP/1.1
+User-Agent: PostmanRuntime/7.39.1
+Accept: */*
+Cache-Control: no-cache
+Postman-Token: 6afa409a-84e0-41a1-a8c6-e7492c94294e
+Host: localhost:8080
+Accept-Encoding: gzip, deflate, br
+Connection: keep-alive
+Content-Type: multipart/form-data; boundary=--------------------------487690016196520036897138
+Content-Length: 102725554
+
+----------------------------487690016196520036897138
+Content-Disposition: form-data; name=""; filename="code_1.93.1-1726079302_amd64.deb"
+Content-Type: application/x-debian-package

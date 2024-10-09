@@ -50,6 +50,7 @@ bool ServerConfigs::isValidKey(const std::string &key, const std::string &type) 
 		"autoindex",
 		"cgi",
 		"upload_dir",
+		"index",
 		"return"};
 	static const std::vector<std::string> locationKeys(locationKeysArray, locationKeysArray + sizeof(locationKeysArray) / sizeof(locationKeysArray[0]));
 
@@ -138,7 +139,6 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 		std::cerr << "Error: Unable to open config file: " << filename << std::endl;
 		exit(1);
 	}
-
 	std::string line;
 	t_config currentConfig;
 	t_location currentLocation;
@@ -263,7 +263,9 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 				if (key == "root")
 					currentLocation.root = value;
 				else if (key == "index")
+				{
 					currentLocation.index = value;
+				}
 				else if (key == "methods")
 				{
 					std::istringstream iss(value);
@@ -276,7 +278,10 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 				else if (key == "autoindex")
 					currentLocation.autoindex = (value == "on");
 				else if (key == "cgi")
+				{
+					currentConfig.cgi_path = value;
 					currentLocation.cgi = value;
+				}
 				else if (key == "upload_dir")
 					currentLocation.upload_dir = value;
 				else if (key == "return")

@@ -39,3 +39,13 @@ std::string Response::err500(std::string version)
 	response += getFile("error_pages/500.html");
 	return response;
 }
+
+std::string Response::err403(std::string version)
+{
+	std::string response;
+	response += version;
+	response += " 403 Forbidden\r\n";
+	response += "Content-Type: text/html\r\n\r\n";
+	response += getFile("error_pages/403.html");
+	return response;
+}

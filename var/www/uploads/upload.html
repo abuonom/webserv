@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload Form</title>
+</head>
+<body>
+
+<form action="/upload.php" method="post" enctype="multipart/form-data">
+    <!-- File Input -->
+    <label for="fileInput">Choose a file:</label>
+    <input type="file" id="fileInput" name="file" accept=".jpg, .jpeg, .png">
+
+    <!-- Hidden Input for upload_id -->
+    <input type="hidden" name="upload_id" value="your_generated_uuid_here">
+
+    <br><br>
+
+    <!-- Submit Button -->
+    <button type="submit">Upload File</button>
+</form>
+
+</body>
+</html>

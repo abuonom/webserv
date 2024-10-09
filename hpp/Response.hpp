@@ -19,7 +19,7 @@ class Response {
 		std::string getExtension(std::string path, std::string accepted);
 		std::string cgiRequest(Request req);
 		virtual ~Response(){};
-		std::string err400(std::string version);
+		std::string err403(std::string version);
 		std::string err404(std::string version);
 		std::string err405(std::string version);
 		std::string err415(std::string version);
