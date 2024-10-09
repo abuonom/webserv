@@ -40,12 +40,9 @@ const char *commandSelect(std::string ext)
 
 char **args_create(std::string path)
 {
-	char buffer[8192];
-	getcwd(buffer, sizeof(buffer));
-	std::string s(buffer);
 	std::string ext = path.substr(path.find_last_of("."), path.length());
 	std::string cmd = commandSelect(ext);
-	std::string full_path = s + "/" + path;
+	std::string full_path = path;
 
 	char **ret;
 	ret = new char *[3];

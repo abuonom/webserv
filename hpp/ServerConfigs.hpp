@@ -32,6 +32,7 @@ typedef struct s_config
 	std::string root;							// root
 	std::map<std::string, t_location> location; // location[]
 	std::map<int, std::string> error_pages;
+	std::string cgi_path;
 } t_config;
 
 class ServerConfigs

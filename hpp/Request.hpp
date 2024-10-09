@@ -19,6 +19,7 @@ class Request
 		std::string _accept;
 		std::string _host;
 		std::string _type;
+		std::string _boundary;
 		int			host;
 		Request(std::string request);
 		void getData(std::string request);

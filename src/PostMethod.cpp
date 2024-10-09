@@ -41,10 +41,10 @@ void PostMethod::fillMap(Request req)
 		}
 		file.close();
 	}
-	// if (req._type == "multipart/form-data")
-	// {
+	if (req._type == "multipart/form-data")
+	{
 
-	// }
+	}
 }
 
 std::string PostMethod::getNameFile(std::string url)
@@ -68,7 +68,6 @@ std::string PostMethod::generateResponse(Request req, ServerConfigs serv)
 
 	if (!file.empty())
 		req._url = req._url.substr(0, req._url.find_last_of("/") + 1);
-
 	if(req._type != "")
 		fillMap(req);
 	response += "200 OK";
