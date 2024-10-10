@@ -1,0 +1,72 @@
+WebServer started with default config file
+COntent-Length: 862
+4
+
+
+
+
+start body-
+----------------------------333839904335538246596357Content-Disposition: form-data; name=""; filename="output.html"Content-Type: text/html<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+<meta name="description" content="">
+<style type="text/css">/* Caratteristiche generali del corpo della pagina */
+body {
+ margin: 0;
+ padding: 0;
+ background-color: #FFF;
+ font-family: arial, verdana, sans-serif;
+ color: #000;
+}
+/* caratteristiche del contenitore del codice HTML */
+.container {
+ width: 80%;
+ margin: 0 auto;
+}</style>
+</head>
+<body>
+<div class="container">
+<p><br /><br /><img src="https://hips.hearstapps.com/hmg-prod/images/spongebob-rainbow-meme-video-16x9-0-1543415942.jpg?resize=640:*" alt="" width="640" height="427" /></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+</div>
+</body>
+</html>----------------------------333839904335538246596357--
+-end body
+
+
+
+
+boundary = ----------------------------333839904335538246596357
+Intestazioni: ntent-Disposition: form-data; name=""; filename="output.html"Content-Type: text/html<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+<meta name="description" content="">
+<style type="text/css">/* Caratteristiche generali del corpo della pagina */
+body {
+ margin: 0;
+ padding: 0;
+ background-color: #FFF;
+ font-family: arial, verdana, sans-serif;
+ color: #000;
+}
+/* caratteristiche del contenitore del codice HTML */
+.container {
+ width: 80%;
+ margin: 0 auto;
+}</style>
+</head>
+<body>
+<div class="container">
+<p><br /><br /><img src="https://hips.hearstapps.com/hmg-prod/images/spongebob-rainbow-meme-video-16x9-0-1543415942.jpg?resize=640:*" alt="" width="640" height="427" /></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+</div>
+</body>
+</html>----------------------------333839904335538246596357--
+Nome del file: output.html
+File salvato con successo come: output.html

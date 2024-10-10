@@ -68,7 +68,7 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 						else
 						{
 							std::string temp =	mygetcwd() + loc.root + "/" + req._path + "/" + loc.index;
-							std::cout << temp << std::endl;
+							//std::cout << temp << std::endl;
 							if (loc.index == "" || (access(temp.c_str(), F_OK) != 0))
 								return err404(req._version);
 							response += "200 OK \r\n";
@@ -88,7 +88,7 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 				if (findEXT(req._path) == ".py" && req._path.substr(0, req._path.find_last_of("/")) == temp.cgi_path)
 				{
 					req._path = mygetcwd() + temp.location[temp.cgi_path].root + "/" + req._path;
-					std::cout << req._path << std::endl;
+					//std::cout << req._path << std::endl;
 					if (access(req._path.c_str(), F_OK) != 0)
 						return err404(req._version);
 					response += "200 OK \r\n\r\n";

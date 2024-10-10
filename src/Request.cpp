@@ -6,8 +6,6 @@ Request::Request(std::string request) {
 	getInfo(request);
 	std::stringstream ss(_host);
 	ss >> host;
-	std::cout << request << std::endl;
-	std::cout << "\n\n\n\n start body:" <<_boundary << "end body: " << std::endl;
 }
 
 void Request::divide_url(std::string url)
@@ -33,7 +31,7 @@ void Request::divide_url(std::string url)
 
 void Request::getData(std::string request)
 {
-	char tmp[1024];
+	char tmp[4096];
 	strcpy(tmp, request.c_str());
 	char* line = strtok(tmp, "\r\n");
 	_method = strtok(line, " ");
@@ -57,6 +55,18 @@ std::vector<std::string> split(std::string &s, const std::string &delimiter)
 	return tokens;
 }
 
+int myfind(std::string s, char c)
+{
+	size_t i = 0;
+	const char *t = s.c_str();
+	while (t[i] != c)
+	{
+		// << "char=" << t[i] << "end" <<std::endl;
+		i++;
+	}
+	return i;
+}
+
 void Request::getInfo(std::string request)
 {
 	std::vector<std::string> tokens = split(request, "\r\n");
@@ -66,29 +76,41 @@ void Request::getInfo(std::string request)
 		std::string tmp = *it;
 		if (tmp.find("Connection:") != std::string::npos)
 		{
-			int fine = tmp.find("/r");
+			int fine = tmp.find("/r") - 12;
 			_connection = tmp.substr(tmp.find("Connection:") + 12, fine);
 		}
 		if (tmp.find("Accept:") != std::string::npos)
 		{
-			int fine = tmp.find("/r");
+			int fine = tmp.find("/r") - 8;
 			_accept = tmp.substr(tmp.find("Accept:") + 8, fine);
+
 		}
 		if (tmp.find("Host:") != std::string::npos)
 		{
-			int fine = tmp.find("/r");
+			int fine = tmp.find("/r") - 16;
 			_host = tmp.substr(tmp.find("Host: localhost:") + 16, fine);
+
 		}
 		if (tmp.find("Content-Type:") != std::string::npos)
 		{
-			int fine = tmp.find(";");
-			_type = tmp.substr(tmp.find("Content-Type:") + 14, fine);
+			size_t fine = tmp.find(";") - 14;
+			size_t inizio = tmp.find("Content-Type:") + 14;
+			_type = tmp.substr(inizio, fine);
+
+		}
+		if (tmp.find("Content-Length:") != std::string::npos)
+		{
+			size_t fine = tmp.find(";") - 16;
+			size_t inizio = tmp.find("Content-Length:") + 16;
+			_length = tmp.substr(inizio, fine);
+			//std::cout << "COntent-Length: " << _length << std::endl;
 		}
 		if (*it == "")
 			break ;
 	}
 	_body = "";
-	it++;
+	if(it < tokens.end())
+		it++;
 	_boundary = *it;
 	while (it < tokens.end())
 	{
