@@ -24,7 +24,7 @@ std::string Response::getFile(std::string path)
 	if (!file)
 		return "";
 	std::string line;
-	char buffer[4096];
+	char buffer[65536];
 	while (file.read(buffer, sizeof(buffer)))
 	{
 		line.append(buffer, file.gcount());

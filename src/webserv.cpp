@@ -38,6 +38,7 @@ int main(int argc, char **argv)
 	}
 	Server server = Server(configs);
 	server.run(configs);
+	
 	return 0;
 }
 

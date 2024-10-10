@@ -4,7 +4,7 @@
 void Response::env_cgi(Request req)
 {
 	std::map<std::string, std::string> tmp_env;
-	char buffer[4096];
+	char buffer[65536];
 	getcwd(buffer, sizeof(buffer));
 	std::string s(buffer);
 
