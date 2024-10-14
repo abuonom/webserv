@@ -16,6 +16,7 @@ class PostMethod : public Response
 		PostMethod();
 		std::string generateResponse(Request req, ServerConfigs serv);
 		std::string autoindexResponse(std::string string ,std::string path);
+		void save_file_from_request(Request request, std::string root);
 		virtual ~PostMethod(){};
 		void fillMap(Request req);
 		std::string getNameFile(std::string url);
