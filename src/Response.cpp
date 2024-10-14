@@ -58,6 +58,7 @@ std::string Response::trim(std::string s, char c)
 	size_t last = s.find_last_not_of(c);
 	return s.substr(first, last - first + 1);
 }
+
 std::string Response::mygetcwd()
 {
 	char buffer[8192];

@@ -1,0 +1,14 @@
+POST / HTTP/1.1
+User-Agent: PostmanRuntime/7.42.0
+Accept: */*
+Postman-Token: 342571d3-2012-4565-bb1a-43d6ccd39aac
+Host: localhost:6060
+Accept-Encoding: gzip, deflate, br
+Connection: keep-alive
+Content-Type: multipart/form-data; boundary=--------------------------547462717081432642947730
+Content-Length: 8841
+
+----------------------------547462717081432642947730
+Content-Disposition: form-data; name=""; filename="images.jpeg"
+Content-Type: image/jpeg
+

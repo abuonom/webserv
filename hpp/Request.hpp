@@ -9,6 +9,7 @@
 class Request
 {
 	public:
+		std::string _full;
 		std::string _method;
 		std::string _url;
 		std::string _path;

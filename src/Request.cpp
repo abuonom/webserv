@@ -2,6 +2,7 @@
 #include "../hpp/Response.hpp"
 
 Request::Request(std::string request) {
+	_full = request;
 	getData(request);
 	getInfo(request);
 	std::stringstream ss(_host);
@@ -115,6 +116,7 @@ void Request::getInfo(std::string request)
 	while (it < tokens.end())
 	{
 		_body += *it;
+		_body += "\r\n";
 		it++;
 	}
 }

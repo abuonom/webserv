@@ -1,5 +1,5 @@
 #include "../hpp/Server.hpp"
-#define BUFFER_SIZE 65536
+#define BUFFER_SIZE 1011111
 
 
 Server::Server(const ServerConfigs &serverConfigs)
@@ -120,34 +120,37 @@ void Server::run(const ServerConfigs &serverConfigs)
 	}
 }
 
+
 // Funzione per gestire le richieste dei client
 void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 {
+	std::string rec ;
 	char buffer[BUFFER_SIZE];
-	memset(buffer, 0, BUFFER_SIZE);
+    memset(buffer, 0, BUFFER_SIZE);
 
-	// Leggiamo i dati dal client
-	int bytes_read = read(client_fd, buffer, BUFFER_SIZE - 1);
-	if (bytes_read <= 0)
-	{
-		close(client_fd);
+    // Leggiamo i dati dal client
+    int bytes_read = read(client_fd, buffer, BUFFER_SIZE - 1);
 
-		// Rimuoviamo il client dal vector dei pollfd
-		for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
-		{
-			if (it->fd == client_fd)
-			{
-				_poll_fds.erase(it);
-				break;
-			}
-		}
-		return;
-	}
+    if (bytes_read <= 0)
+    {
+        close(client_fd);
 
-	// Processiamo la richiesta
-	Request request(buffer);
-
-	// Gestiamo il metodo GET
+        // Rimuoviamo il client dal vector dei pollfd
+        for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
+        {
+            if (it->fd == client_fd)
+            {
+                _poll_fds.erase(it);
+                break;
+            }
+        }
+        return;
+    }
+	buffer[bytes_read] = '\0';
+	// printf("Received: %s\n", buffer);
+	for(int i = 0; i < bytes_read; i++)
+		rec += buffer[i];
+	Request request(rec);
 	if (request._method == "GET")
 	{
 		GetMethod response;
