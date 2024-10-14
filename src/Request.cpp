@@ -1,7 +1,8 @@
 #include "../hpp/Server.hpp"
 #include "../hpp/Response.hpp"
 
-Request::Request(std::string request) {
+Request::Request(std::string request)
+{
 	_full = request;
 	getData(request);
 	getInfo(request);
@@ -15,7 +16,7 @@ void Request::divide_url(std::string url)
 	{
 		_path = "";
 		_query = "";
-		return ;
+		return;
 	}
 	size_t i = url.find('?');
 	if (i != std::string::npos)
@@ -32,9 +33,9 @@ void Request::divide_url(std::string url)
 
 void Request::getData(std::string request)
 {
-	char tmp[4096];
+	char tmp[300000];
 	strcpy(tmp, request.c_str());
-	char* line = strtok(tmp, "\r\n");
+	char *line = strtok(tmp, "\r\n");
 	_method = strtok(line, " ");
 	_url = strtok(NULL, " ");
 	divide_url(_url);
@@ -84,35 +85,34 @@ void Request::getInfo(std::string request)
 		{
 			int fine = tmp.find("/r") - 8;
 			_accept = tmp.substr(tmp.find("Accept:") + 8, fine);
-
 		}
 		if (tmp.find("Host:") != std::string::npos)
 		{
 			int fine = tmp.find("/r") - 16;
 			_host = tmp.substr(tmp.find("Host: localhost:") + 16, fine);
-
 		}
 		if (tmp.find("Content-Type:") != std::string::npos)
 		{
 			size_t fine = tmp.find(";") - 14;
 			size_t inizio = tmp.find("Content-Type:") + 14;
 			_type = tmp.substr(inizio, fine);
-
 		}
 		if (tmp.find("Content-Length:") != std::string::npos)
 		{
 			size_t fine = tmp.find(";") - 16;
 			size_t inizio = tmp.find("Content-Length:") + 16;
 			_length = tmp.substr(inizio, fine);
-			//std::cout << "COntent-Length: " << _length << std::endl;
+			// std::cout << "COntent-Length: " << _length << std::endl;
 		}
 		if (*it == "")
-			break ;
+			break;
 	}
 	_body = "";
-	if(it < tokens.end())
+	if (it < tokens.end())
+	{
 		it++;
-	_boundary = *it;
+		_boundary = *it;
+	}
 	while (it < tokens.end())
 	{
 		_body += *it;
