@@ -1,5 +1,21 @@
 #include "../hpp/Server.hpp"
 
+
+Server *g_server = NULL;
+
+void handle_sigint(int sig)
+{
+	(void)sig; // Ignora il warning "unused parameter 'sig'"
+	if (g_server != NULL)
+	{
+		std::cout << "\nIntercettato CTRL + C. Chiudo il server e libero le risorse..." << std::endl;
+		delete g_server; // Questo chiamerà il distruttore del server e chiuderà tutti i socket
+		g_server = NULL;
+	}
+	exit(0); // Uscita sicura
+}
+
+
 int stringToInt(const std::string &str)
 {
 	std::stringstream ss(str);
@@ -22,8 +38,13 @@ void VerifyExtension(const std::string &filename, const std::string &extension)
 	}
 }
 
+
 int main(int argc, char **argv)
 {
+	// Cattura il segnale SIGINT (CTRL + C) e assegna il gestore del segnale
+	signal(SIGINT, handle_sigint);
+
+	//Comportamento uguale al precedente
 	ServerConfigs configs = ServerConfigs();
 	if (argc < 2)
 	{
@@ -36,10 +57,13 @@ int main(int argc, char **argv)
 		VerifyExtension(argv[1], ".config");
 		configs.loadConfig(argv[1]);
 	}
-	Server server = Server(configs);
-	server.run(configs);
-	
+
+	g_server = new Server(configs); // Assegna il server al puntatore globale
+	g_server->run(configs);
+
+	// Termina il server
+	delete g_server;
+	g_server = NULL;
+
 	return 0;
 }
-
-//You server must have default error pages if none are provided

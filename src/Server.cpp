@@ -51,12 +51,16 @@ Server::Server(const ServerConfigs &serverConfigs)
 	}
 }
 
-// Distruttore per chiudere tutti i socket
 Server::~Server()
 {
+	// Chiude tutti i socket aperti
 	for (size_t i = 0; i < _server_fds.size(); i++)
 	{
-		close(_server_fds[i]);
+		if (_server_fds[i] >= 0)
+		{
+			close(_server_fds[i]);											   // Chiudi il file descriptor del socket
+			std::cout << "Socket chiuso su porta: " << _ports[i] << std::endl; // Log della porta chiusa
+		}
 	}
 }
 
@@ -133,22 +137,8 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 		int bytes_read = 0;
 		bytes_read = read(client_fd, buffer, BUFFER_SIZE - 1);
 		total_read += bytes_read;
-		if (bytes_read <= 0)
+		if (bytes_read < 0)
 			break;
-		// if (bytes_read < 0)
-		// {
-		// 	close(client_fd);
-		// 	// Rimuoviamo il client dal vector dei pollfd
-		// 	for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
-		// 	{
-		// 		if (it->fd == client_fd)
-		// 		{
-		// 			_poll_fds.erase(it);
-		// 			break;
-		// 		}
-		// 	}
-		// 	return;
-		// }
 		for (int i = 0; i < bytes_read; i++)
 			rec += buffer[i];
 	}
