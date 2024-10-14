@@ -1,7 +1,6 @@
 #include "../hpp/Server.hpp"
 #define BUFFER_SIZE 1011111
 
-
 Server::Server(const ServerConfigs &serverConfigs)
 {
 	// Iteriamo attraverso ciascuna configurazione del server
@@ -120,36 +119,39 @@ void Server::run(const ServerConfigs &serverConfigs)
 	}
 }
 
-
 // Funzione per gestire le richieste dei client
 void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 {
-	std::string rec ;
+	std::string rec;
 	char buffer[BUFFER_SIZE];
-    memset(buffer, 0, BUFFER_SIZE);
+	memset(buffer, 0, BUFFER_SIZE);
+	int total_read = 0;
 
-    // Leggiamo i dati dal client
-    int bytes_read = read(client_fd, buffer, BUFFER_SIZE - 1);
-
-    if (bytes_read <= 0)
-    {
-        close(client_fd);
-
-        // Rimuoviamo il client dal vector dei pollfd
-        for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
-        {
-            if (it->fd == client_fd)
-            {
-                _poll_fds.erase(it);
-                break;
-            }
-        }
-        return;
-    }
-	buffer[bytes_read] = '\0';
-	// printf("Received: %s\n", buffer);
-	for(int i = 0; i < bytes_read; i++)
-		rec += buffer[i];
+	// Leggiamo i dati dal client
+	while (true)
+	{
+		int bytes_read = 0;
+		bytes_read = read(client_fd, buffer, BUFFER_SIZE - 1);
+		if (bytes_read <= 0)
+		{
+			close(client_fd);
+			// Rimuoviamo il client dal vector dei pollfd
+			for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
+			{
+				if (it->fd == client_fd)
+				{
+					_poll_fds.erase(it);
+					break;
+				}
+			}
+			return;
+		}
+		total_read += bytes_read;
+		for (int i = 0; i < bytes_read; i++)
+			rec += buffer[i];
+	}
+		buffer[total_read] = '\0';
+		rec += '\0';
 	Request request(rec);
 	if (request._method == "GET")
 	{
