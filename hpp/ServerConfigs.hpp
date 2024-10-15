@@ -23,7 +23,9 @@ typedef struct s_location
 
 typedef struct s_config
 {
+	std::string	cgi;
 	int port;									// listen
+	std::string	upload_dir;
 	std::string host;							// host
 	std::string server_names;					// server_name
 	int max_body_size;							// max_body_size

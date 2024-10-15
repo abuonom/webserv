@@ -66,3 +66,13 @@ std::string Response::mygetcwd()
 	std::string s(buffer);
 	return s;
 }
+
+std::string Response::getNameFile(std::string url)
+{
+	std::string ret;
+	if(findEXT(url).empty())
+		ret = "";
+	else
+		ret = url.substr(url.find_last_of("/") + 1, url.size());
+	return ret;
+}
