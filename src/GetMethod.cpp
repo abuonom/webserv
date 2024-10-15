@@ -4,10 +4,10 @@ GetMethod::GetMethod() : Response()
 {
 }
 
-std::string GetMethod::autoindexResponse(std::string s, std::string root ,std::string path)
+std::string GetMethod::autoindexResponse(std::string s, std::string root)
 {
 	std::string response;
-	std::string absolute_path = s +  root + "/" +  path + "/";
+	std::string absolute_path = s + root;
 	DIR *dir = opendir(absolute_path.c_str());
 	if (dir != 0)
 	{
@@ -16,7 +16,7 @@ std::string GetMethod::autoindexResponse(std::string s, std::string root ,std::s
 		{
 			if (dir_info->d_name[0] != '.')
 			{
-				std::string temp = "/" + path + "/";
+				std::string temp = "/" + root + "/";
 				temp += dir_info->d_name;
 				response += "<a href=\"" + temp + "\">" + dir_info->d_name + "</a><br>";
 			}
@@ -33,16 +33,21 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 	response += req._version;
 	response += " ";
 	req._path = trim(req._path, '/');
-	if (!req._path.empty())
+	std::string name = getNameFile(req._path);
+	std::string location = req._path;
+	if(!name.empty())
+		location = req._path.substr(0, req._path.find_last_of("/"));
+	if(serv.configs.find(req.host) != serv.configs.end()) //se trova config
 	{
-		if(serv.configs.find(req.host) != serv.configs.end()) //se trova config
+		t_config temp;
+		temp = serv.configs[req.host];
+		temp.cgi = "on";
+		if (!location.empty()) //se url contiene location
 		{
-			t_config temp;
-			temp = serv.configs[req.host];
-			if (temp.location.find(req._path) != temp.location.end()) // se trovo location
+			if (temp.location.find(location) != temp.location.end()) // se trovo location
 			{
 				t_location loc;
-				loc = temp.location[req._path];
+				loc = temp.location[location];
 				int flag = 0;
 				for (size_t i = 0; i < loc.accepted_methods.size(); ++i)
 				{
@@ -57,25 +62,48 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 							response += "Content-Length: 0\r\n\r\n";
 							return response;
 						}
-						if (loc.autoindex == true)
+						if (loc.autoindex == true && name.empty())
 						{
 							response += "200 OK\r\n";
 							response += "Content-Type: text/html\r\n\r\n";
 							std::string s = mygetcwd();
-							response += autoindexResponse(s , loc.root, req._path);
+							response += autoindexResponse(s , loc.root);
+							return response;
+						}
+						if (findEXT(name) == ".py" && loc.cgi == "on")
+						{
+							req._path = "/" + trim(mygetcwd(), '/') + "/" + trim(loc.root, '/') + "/" + name;
+							if (access(req._path.c_str(), F_OK) != 0)
+								return err404(req._version);
+							response += "200 OK \r\n\r\n";
+							response += cgiRequest(req);
 							return response;
 						}
 						else
 						{
-							std::string temp =	mygetcwd() + loc.root + "/" + req._path + "/" + loc.index;
-							//std::cout << temp << std::endl;
-							if (loc.index == "" || (access(temp.c_str(), F_OK) != 0))
+							if (name.empty())
+							{
+								std::string temp =	"/" + trim(mygetcwd(), '/') + "/" + trim(loc.root, '/') + "/" + trim(loc.index, '/');
+								if (loc.index == "" || (access(temp.c_str(), F_OK) != 0))
+									return err404(req._version);
+								response += "200 OK \r\n";
+								response += "Content-Type: text/html\r\n";
+								response += "Content-Length: " + getContentLength(temp) + "\r\n\r\n";
+								response += getFile(temp);
+								return response;
+							}
+							else
+							{
+								std::string s = "/" + trim(mygetcwd(), '/') + "/" + trim(temp.root, '/') + "/" + name;
+								if (access(s.c_str(), F_OK) == 0)
+								{
+									response += "200 OK\r\n";
+									response += "Content-Length: " + getContentLength(s) + "\r\n\r\n";
+									response += getFile(s);
+									return response;
+								}
 								return err404(req._version);
-							response += "200 OK \r\n";
-							response += "Content-Type: text/html\r\n";
-							response += "Content-Length: " + getContentLength(temp) + "\r\n\r\n";
-							response += getFile(temp);
-							return response;
+							}
 						}
 					}
 				}
@@ -83,27 +111,27 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 					return err405(req._version);
 			}
 			else //se non trovo location
+				return err404(req._version);
+		}
+		else //se url non ha location quindi solo /
+		{
+			if (name.empty())
 			{
-				temp.cgi_path = trim(temp.cgi_path, '/');
-				if (findEXT(req._path) == ".py" && req._path.substr(0, req._path.find_last_of("/")) == temp.cgi_path)
-				{
-					req._path = mygetcwd() + temp.location[temp.cgi_path].root + "/" + req._path;
-					//std::cout << req._path << std::endl;
-					if (access(req._path.c_str(), F_OK) != 0)
-						return err404(req._version);
-					response += "200 OK \r\n\r\n";
-					response += cgiRequest(req);
-					return response;
-				}
-				if (findEXT(req._path) == ".py" && req._path.substr(0, req._path.find_last_of("/")) != temp.cgi_path)
-					return err403(req._version);
-				std::string s = mygetcwd() + temp.root + "/" + req._path;
+				std::string s =	"/" + trim(mygetcwd(), '/') + "/" + trim(temp.root, '/') + "/" + temp.index;
+				if (temp.index == "" || (access(s.c_str(), F_OK) != 0))
+					return err404(req._version);
+				response += "200 OK \r\n";
+				response += "Content-Type: text/html\r\n";
+				response += "Content-Length: " + getContentLength(s) + "\r\n\r\n";
+				response += getFile(s);
+				return response;
+			}
+			else
+			{
+				std::string s = "/" + trim(mygetcwd(), '/') + "/" + trim(temp.root, '/') + "/" + name;
 				if (access(s.c_str(), F_OK) == 0)
 				{
 					response += "200 OK\r\n";
-					if (getExtension(req._path, req._accept) == "")
-						return err415(req._version);
-					response += getExtension(req._path, req._accept);
 					response += "Content-Length: " + getContentLength(s) + "\r\n\r\n";
 					response += getFile(s);
 					return response;
@@ -111,18 +139,6 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 				return err404(req._version);
 			}
 		}
-		else //se non trova config
-			return err500(req._version);
 	}
-	else
-	{
-		t_config temp;
-		temp = serv.configs[req.host];
-		std::string path = "." + temp.root + "/" + temp.index;
-		response += "200 OK\r\n";
-		response += "Content-Type: text/html\r\n";
-		response += "Content-Length: " + getContentLength(path) + "\r\n\r\n";
-		response += getFile(path);
-	}
-	return response;
+	return err500(req._version);
 }

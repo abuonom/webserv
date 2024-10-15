@@ -19,7 +19,6 @@ class PostMethod : public Response
 		int save_file_from_request(Request request, std::string root);
 		virtual ~PostMethod(){};
 		int fillMap(Request req, ServerConfigs serv);
-		std::string getNameFile(std::string url);
 		std::string err(int code, std::string version);
 };
 

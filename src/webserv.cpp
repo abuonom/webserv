@@ -8,7 +8,7 @@ void handle_sigint(int sig)
 	(void)sig; // Ignora il warning "unused parameter 'sig'"
 	if (g_server != NULL)
 	{
-		std::cout << "\nCaught CTRL + C\n Closing the server and freeing resources..." << std::endl;
+		std::cout << "\nCaught CTRL + C\nClosing the server and freeing resources..." << std::endl;
 		delete g_server; // Questo chiamerà il distruttore del server e chiuderà tutti i socket
 		g_server = NULL;
 	}
@@ -51,6 +51,7 @@ int main(int argc, char **argv)
 		VerifyExtension("default.config", ".config");
 		std::cout << "WebServer started with default config file" << std::endl;
 		configs.loadConfig("config/default.config");
+		// configs.printConfigs();
 	}
 	else
 	{

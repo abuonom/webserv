@@ -15,7 +15,7 @@ class GetMethod : public Response
 	public:
 		GetMethod();
 		std::string generateResponse(Request req, ServerConfigs serv);
-		std::string autoindexResponse(std::string string, std::string root ,std::string path);
+		std::string autoindexResponse(std::string string, std::string root);
 		virtual ~GetMethod(){};
 
 };

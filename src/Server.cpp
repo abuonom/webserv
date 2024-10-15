@@ -59,7 +59,7 @@ Server::~Server()
 		if (_server_fds[i] >= 0)
 		{
 			close(_server_fds[i]);											   // Chiudi il file descriptor del socket
-			std::cout << "Socket chiuso su porta: " << _ports[i] << std::endl; // Log della porta chiusa
+			std::cout << "Socket close on port: " << _ports[i] << std::endl; // Log della porta chiusa
 		}
 	}
 }
