@@ -8,7 +8,7 @@ void handle_sigint(int sig)
 	(void)sig; // Ignora il warning "unused parameter 'sig'"
 	if (g_server != NULL)
 	{
-		std::cout << "\nIntercettato CTRL + C. Chiudo il server e libero le risorse..." << std::endl;
+		std::cout << "\nCaught CTRL + C\n Closing the server and freeing resources..." << std::endl;
 		delete g_server; // Questo chiamerà il distruttore del server e chiuderà tutti i socket
 		g_server = NULL;
 	}

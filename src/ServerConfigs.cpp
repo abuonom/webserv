@@ -38,7 +38,7 @@ bool ServerConfigs::isValidKey(const std::string &key, const std::string &type) 
 		"host",
 		"server_name",
 		"root",
-		"client_max_body_size",
+		"max_body_size",
 		"index",
 		"methods",
 		"error_page"};
@@ -305,8 +305,8 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 					currentConfig.server_names = value;
 				else if (key == "root")
 					currentConfig.root = value;
-				else if (key == "client_max_body_size")
-					currentConfig.max_body_size = std::atoi(value.c_str());
+				else if (key == "max_body_size")
+					currentConfig.max_body_size = atoi(value.c_str());
 				else if (key == "index")
 					currentConfig.index = value;
 				else if (key == "error_page")

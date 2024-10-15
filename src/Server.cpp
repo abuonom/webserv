@@ -147,15 +147,15 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	Request request(rec);
 	if (request._method == "GET")
 	{
-		GetMethod response;
-		std::string result = response.generateResponse(request, serverConfigs);
+		GetMethod get;
+		std::string result = get.generateResponse(request, serverConfigs);
 		send(client_fd, result.c_str(), result.length(), 0);
 		close(client_fd);
 	}
 	else if (request._method == "POST")
 	{
-		PostMethod response;
-		std::string result = response.generateResponse(request, serverConfigs);
+		PostMethod post;
+		std::string result = post.generateResponse(request, serverConfigs);
 		send(client_fd, result.c_str(), result.length(), 0);
 		close(client_fd);
 	}

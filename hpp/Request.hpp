@@ -23,6 +23,7 @@ class Request
 		std::string _boundary;
 		std::string _length;
 		int			host;
+		int			lung;
 		Request(std::string request);
 		void getData(std::string request);
 		void getInfo(std::string request);
