@@ -22,6 +22,7 @@ class Response {
 		std::string err403(std::string version);
 		std::string err404(std::string version);
 		std::string err405(std::string version);
+		std::string err413(std::string version);
 		std::string err415(std::string version);
 		std::string err500(std::string version);
 		std::string err501(std::string version);

@@ -8,6 +8,7 @@ Request::Request(std::string request)
 	getInfo(request);
 	std::stringstream ss(_host);
 	ss >> host;
+	//std::cout << request << std::endl;
 }
 
 void Request::divide_url(std::string url)
@@ -102,6 +103,7 @@ void Request::getInfo(std::string request)
 			size_t fine = tmp.find(";") - 16;
 			size_t inizio = tmp.find("Content-Length:") + 16;
 			_length = tmp.substr(inizio, fine);
+			lung = atoi(_length.c_str());
 			// std::cout << "COntent-Length: " << _length << std::endl;
 		}
 		if (*it == "")
