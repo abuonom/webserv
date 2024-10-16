@@ -41,7 +41,9 @@ bool ServerConfigs::isValidKey(const std::string &key, const std::string &type) 
 		"max_body_size",
 		"index",
 		"methods",
-		"error_page"};
+		"error_page",
+		"cgi",
+		"upload_dir"};
 	static const std::vector<std::string> serverKeys(serverKeysArray, serverKeysArray + sizeof(serverKeysArray) / sizeof(serverKeysArray[0]));
 
 	static const std::string locationKeysArray[] = {
@@ -83,6 +85,8 @@ void ServerConfigs::printConfigs() const
 		std::cout << "  Max Body Size: " << config.max_body_size << std::endl;
 		std::cout << "  Index: " << config.index << std::endl;
 		std::cout << "  Root: " << config.root << std::endl;
+		std::cout << "  CGI: " << config.cgi << std::endl;
+		std::cout << "  Upload Directory: " << config.upload_dir << std::endl;
 		std::cout << "  Error Pages:" << std::endl;
 		for (std::map<int, std::string>::const_iterator it = config.error_pages.begin(); it != config.error_pages.end(); ++it)
 		{
@@ -131,6 +135,45 @@ static std::string trim(const std::string &str)
 	}
 	return "";
 }
+
+void ServerConfigs::validateAndFillDefaults()
+{
+
+	for (std::map<int, t_config>::iterator it = configs.begin(); it != configs.end(); ++it)
+	{
+		t_config &config = it->second;
+
+		if(config.port == 0)
+			config.port = 8080;
+		if (config.upload_dir.empty())
+			config.upload_dir = "upload_dir"; // Valore di default per upload_dir
+		if (config.host.empty())
+			config.host = "localhost"; // Valore di default per host
+		if (config.server_names.empty())
+			config.server_names = "localhost"; // Valore di default per server_names
+		if (config.max_body_size == 0)
+			config.max_body_size = 1000000; // Valore di default per max_body_size
+		if (config.index.empty())
+			config.index = "index.html"; // Valore di default per index
+		if (config.root.empty())
+			config.root = "/tmp/www"; // Valore di default per root
+		if (config.accepted_methods.empty())
+		{
+			config.accepted_methods.push_back("GET");
+			config.accepted_methods.push_back("POST");
+			config.accepted_methods.push_back("DELETE");
+		}
+		if (config.cgi.empty())
+			config.cgi = "off"; // Valore di default per cgi
+		for (std::map<std::string, t_location>::iterator locIt = config.location.begin(); locIt != config.location.end(); ++locIt)
+		{
+			t_location &location = locIt->second;
+			if(location.upload_dir.empty())
+				location.upload_dir = config.upload_dir;
+		}
+	}
+}
+
 bool ServerConfigs::loadConfig(const std::string &filename)
 {
 	std::ifstream file(filename.c_str());
@@ -224,8 +267,8 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 			// Verifica che il percorso sia valido
 			if (start != std::string::npos && end != std::string::npos && end > start)
 			{
-				currentLocationPath = line.substr(start, end - start); // Estrai il percorso della location
-				currentLocationPath = trim(currentLocationPath);   // Rimuovi eventuali spazi
+				currentLocationPath = line.substr(start, end - start);								 // Estrai il percorso della location
+				currentLocationPath = trim(currentLocationPath);									 // Rimuovi eventuali spazi
 				currentLocationPath = currentLocationPath.substr(1, currentLocationPath.size() - 2); // Rimuovi eventuali virgolette
 			}
 			else
@@ -248,7 +291,7 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 			if (currentLocation.root.empty())
 				currentLocation.root = currentConfig.root; // Copia la root del server se non specificata nella location
 			if (currentLocation.index.empty())
-				currentLocation.index = currentConfig.index; // Copia l'index del server se non specificato nella location
+				currentLocation.index = currentConfig.index;			   // Copia l'index del server se non specificato nella location
 			currentConfig.location[currentLocationPath] = currentLocation; // Salva la location nella mappa
 			inLocationBlock = false;
 		}
@@ -278,10 +321,7 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 				else if (key == "autoindex")
 					currentLocation.autoindex = (value == "on");
 				else if (key == "cgi")
-				{
-					currentConfig.cgi_path = value;
 					currentLocation.cgi = value;
-				}
 				else if (key == "upload_dir")
 					currentLocation.upload_dir = value;
 				else if (key == "return")
@@ -324,6 +364,11 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 					{
 						currentConfig.accepted_methods.push_back(trim(method));
 					}
+				}
+				else if(key == "upload_dir")
+					currentConfig.upload_dir = value;
+				else if (key == "cgi") {
+					currentConfig.cgi = value;
 				}
 			}
 		}

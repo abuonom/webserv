@@ -13,7 +13,7 @@
 typedef struct s_location
 {
 	bool autoindex; // Se true, abilita il listing delle directory. Se false, disabilita il listing delle directory.
-	std::string cgi; // Specifica il percorso al programma CGI da eseguire per file con determinate estensioni (ad esempio, per .php).
+	std::string cgi; // Se true, abilita l'esecuzione di script CGI. Se false, disabilita l'esecuzione di script CGI.
 	std::string upload_dir; // Directory dove i file caricati tramite richieste POST verranno salvati.
 	std::string return_code; // Codice di redirezione HTTP e, opzionalmente, l'URL di destinazione (es. "301 /newpath").
 	std::string root; // Directory root per questa route. I file saranno cercati all'interno di questa directory (ad esempio, /tmp/www per /route).
@@ -23,7 +23,6 @@ typedef struct s_location
 
 typedef struct s_config
 {
-	std::string	cgi;
 	int port;									// listen
 	std::string	upload_dir;
 	std::string host;							// host
@@ -34,7 +33,7 @@ typedef struct s_config
 	std::string root;							// root
 	std::map<std::string, t_location> location; // location[]
 	std::map<int, std::string> error_pages;
-	std::string cgi_path;
+	std::string cgi;
 } t_config;
 
 class ServerConfigs
@@ -45,13 +44,14 @@ public:
 	const t_config *getConfigForPort(int port) const;
 	void printConfigs() const;
 	bool loadConfig(const std::string &filename);
-
+	void validateAndFillDefaults();
 	int max_clients;
 	std::map<int, std::string> error_pages; // Mappa delle error pages
 	std::map<int, t_config> configs;		// Mappa delle configurazioni per ciascun server
 
 private:
 	bool isValidKey(const std::string &key, const std::string &type) const;
+
 };
 
 #endif

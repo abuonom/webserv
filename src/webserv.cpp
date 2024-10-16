@@ -51,17 +51,20 @@ int main(int argc, char **argv)
 		VerifyExtension("default.config", ".config");
 		std::cout << "WebServer started with default config file" << std::endl;
 		configs.loadConfig("config/default.config");
-		// configs.printConfigs();
+		configs.validateAndFillDefaults();
+		configs.printConfigs();
 	}
 	else
 	{
 		VerifyExtension(argv[1], ".config");
 		configs.loadConfig(argv[1]);
+		configs.validateAndFillDefaults();
+		configs.printConfigs();
 	}
 
 	g_server = new Server(configs); // Assegna il server al puntatore globale
 	g_server->run(configs);
-
+	
 	// Termina il server
 	delete g_server;
 	g_server = NULL;
