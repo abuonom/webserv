@@ -123,7 +123,7 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 	{
 		if (flag_cgi == true &&  findEXT(name) == ".py")
 		{
-			req._path = "./" + trim(mygetcwd(), '/') + "/" + trim(temp.location[location].root, '/') + "/" + location + "/" + name;
+			req._path = "/" + trim(mygetcwd(), '/') + "/" + trim(temp.location[location].root, '/') + "/" + location + "/" + name;
 			postResponse = cgiRequest(req);
 			return 200;
 		}
