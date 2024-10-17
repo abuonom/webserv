@@ -170,5 +170,11 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 		send(client_fd, result.c_str(), result.length(), 0);
 		close(client_fd);
 	}
-	// Potresti aggiungere qui altre logiche per POST, DELETE, ecc.
+	else if (request._method == "DELETE")
+	{
+		DeleteMethod del;
+		std::string result = del.generateResponse(request, serverConfigs);
+		send(client_fd, result.c_str(), result.length(), 0);
+		close(client_fd);
+	}
 }

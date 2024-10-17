@@ -146,7 +146,7 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 				name = "post_data";
 			std::string filePath = s + "/" + root + "/" + name;
 			filePath = get_unique_filename(filePath);
-			open(filePath.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0666);
+			open(filePath.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0777);
 			std::ofstream file(filePath.c_str(), std::ios::in | std::ios::binary);
 			if (!file.is_open())
 				return 500;
