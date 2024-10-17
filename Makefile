@@ -21,6 +21,9 @@ $(NAME): $(OBJ)
 	$(CXX) $(CXXFLAGS) $(OBJ) -o $(NAME)
 	@echo "$(GREEN)$(NAME) created!$(DEFAULT)"
 
+valgrind : $(NAME)
+	valgrind --leak-check=full ./$(NAME)
+
 clean:
 	rm -f $(OBJ)
 	@echo "$(YELLOW)object files deleted!$(DEFAULT)"

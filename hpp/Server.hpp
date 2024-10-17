@@ -5,6 +5,7 @@
 #include "ServerConfigs.hpp"
 #include "GetMethod.hpp"
 #include "PostMethod.hpp"
+#include "DeleteMethod.hpp"
 #include <fcntl.h>
 #include <cstring>
 #include <iostream>
