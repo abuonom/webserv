@@ -142,9 +142,6 @@ void ServerConfigs::validateAndFillDefaults()
 	for (std::map<int, t_config>::iterator it = configs.begin(); it != configs.end(); ++it)
 	{
 		t_config &config = it->second;
-
-		if(config.port == 0)
-			config.port = 8080;
 		if (config.upload_dir.empty())
 			config.upload_dir = "upload_dir"; // Valore di default per upload_dir
 		if (config.host.empty())
@@ -170,6 +167,8 @@ void ServerConfigs::validateAndFillDefaults()
 			t_location &location = locIt->second;
 			if(location.upload_dir.empty())
 				location.upload_dir = config.upload_dir;
+			if (location.cgi.empty())
+				location.cgi = "off";
 		}
 	}
 }

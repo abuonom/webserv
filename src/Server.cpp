@@ -58,8 +58,11 @@ Server::~Server()
 	{
 		if (_server_fds[i] >= 0)
 		{
-			close(_server_fds[i]);											   // Chiudi il file descriptor del socket
-			std::cout << "Socket close on port: " << _ports[i] << std::endl; // Log della porta chiusa
+			if (_ports[i] != 0)										   // Chiudi il file descriptor del socket
+			{
+				close(_server_fds[i]);
+				std::cout << "Socket close on port: " << _ports[i] << std::endl; // Log della porta chiusa
+			}
 		}
 	}
 }
@@ -130,7 +133,6 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	char buffer[BUFFER_SIZE];
 	memset(buffer, 0, BUFFER_SIZE);
 	int total_read = 0;
-
 	// Leggiamo i dati dal client
 	while (true)
 	{
@@ -142,9 +144,18 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 		for (int i = 0; i < bytes_read; i++)
 			rec += buffer[i];
 	}
+	for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
+	{
+		if (it->fd == client_fd)
+		{
+			_poll_fds.erase(it);
+			break;
+		}
+	}
 	buffer[total_read] = '\0';
 	rec += '\0';
 	Request request(rec);
+	rec.clear();
 	if (request._method == "GET")
 	{
 		GetMethod get;

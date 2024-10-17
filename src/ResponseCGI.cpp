@@ -8,7 +8,7 @@ void Response::env_cgi(Request req)
 	getcwd(buffer, sizeof(buffer));
 	std::string s(buffer);
 
-	tmp_env["CONTENT_LENGTH"] = getContentLength(req._path);
+	tmp_env["CONTENT_LENGTH"] = req._length;
 	tmp_env["CONTENT_TYPE"] = req._type;
 	tmp_env["REQUEST_METHOD"] = req._method;
 	tmp_env["SCRIPT_FILENAME"] = s + req._path;
