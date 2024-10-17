@@ -169,6 +169,8 @@ void ServerConfigs::validateAndFillDefaults()
 				location.upload_dir = config.upload_dir;
 			if (location.cgi.empty())
 				location.cgi = "off";
+			if(location.accepted_methods.empty())
+				location.accepted_methods = config.accepted_methods;
 		}
 	}
 }
@@ -285,12 +287,6 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 		}
 		else if (inLocationBlock && line.find("]") != std::string::npos)
 		{
-			if (currentLocation.accepted_methods.empty())
-				currentLocation.accepted_methods = currentConfig.accepted_methods; // Copia i metodi accettati dal server se non specificati nella location
-			if (currentLocation.root.empty())
-				currentLocation.root = currentConfig.root; // Copia la root del server se non specificata nella location
-			if (currentLocation.index.empty())
-				currentLocation.index = currentConfig.index;			   // Copia l'index del server se non specificato nella location
 			currentConfig.location[currentLocationPath] = currentLocation; // Salva la location nella mappa
 			inLocationBlock = false;
 		}
