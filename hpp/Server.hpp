@@ -23,6 +23,7 @@
 #include <string>
 #include <sstream>
 #include <signal.h>
+#include <sys/stat.h>
 
 class Server
 {

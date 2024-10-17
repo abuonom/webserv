@@ -11,15 +11,12 @@ int PostMethod::save_file_from_request(Request req, std::string root)
 	std::string content;
 	std::string tmp = req._body;
 	std::string boundary = req._boundary;
-	//std::cout << "boundary = " << boundary << std::endl << "\n\n";
 	if (tmp.find("filename=") != std::string::npos)
 	{
 		std::string filename_start = tmp.substr(tmp.find("filename=") + 10);
 		if (name.empty())
 			name = filename_start.substr(0, filename_start.find("\""));
 		std::string file_path = mygetcwd() + "/" + root + "/" + name;
-		std::cout <<std::endl;
-		std::cout << file_path << std::endl;
 		int content_end = tmp.find("\r\n\r\n");
 		std::string upcontent = tmp.substr(content_end + 4, tmp.length() - content_end - boundary.length() - 13);
 		std::ofstream upfile;
@@ -44,7 +41,37 @@ int PostMethod::save_file_from_request(Request req, std::string root)
 	return 200;
 }
 
-//uploads/image.jpeg
+bool create_directory(std::string path) {
+	std::string command = "mkdir " + path + " > /dev/null 2>&1";
+	int risultato = std::system((command).c_str());
+	if (risultato == 0)
+		return 0;
+	else
+		return 1;
+	return 0;
+}
+
+bool PostMethod::fileexists(const std::string& filename) {
+    struct stat buffer;
+    return (stat(filename.c_str(), &buffer) == 0);
+}
+
+// Funzione per generare un nuovo nome file se il file esiste già
+std::string PostMethod::get_unique_filename(const std::string& filename) {
+    std::string new_filename = filename;
+    int counter = 1;
+
+    // Continua a cercare un nome disponibile
+    while (fileexists(new_filename)) {
+		std::stringstream ss;
+		ss << counter;
+		std::string ext = findEXT(filename);
+		new_filename = filename.substr(0, filename.find(ext)) + "(" + ss.str() + ")"+ ext;
+        counter++;
+    }
+
+    return new_filename;
+}
 
 int PostMethod::fillMap(Request req, ServerConfigs serv)
 {
@@ -55,9 +82,12 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 	std::string location = req._path;
 	if(!name.empty())
 		location = req._path.substr(0, req._path.find_last_of("/"));
+	if (name == location)
+		location = "";
 	if(serv.configs.find(req.host) == serv.configs.end()) //se trova config
 		return 500;
 	t_config temp = serv.configs[req.host];
+	bool flag_cgi = false;
 	std::string root = trim(temp.root, '/') + "/" + trim(temp.upload_dir, '/');
 	if (!location.empty())
 	{
@@ -65,7 +95,9 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 		{
 			t_location loc;
 			loc = temp.location[location];
-			root = trim(loc.root, '/') + "/" + trim(loc.upload_dir, '/');
+			if (loc.cgi == "on")
+				flag_cgi = true;
+			root = trim(loc.root, '/') + "/" + location + "/" + trim(loc.upload_dir, '/');
 			for (size_t i = 0; i < loc.accepted_methods.size(); ++i)
 			{
 				if(loc.accepted_methods[i] == "POST")
@@ -77,14 +109,24 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 	}
 	if (location.empty())
 	{
+		if (temp.cgi == "on")
+			flag_cgi = true;
 		for (size_t i = 0; i < temp.accepted_methods.size(); ++i)
 		{
 			if(temp.accepted_methods[i] == "POST")
 				accepted = true;
 		}
 	}
+	if (!create_directory( "/" + trim(mygetcwd(), '/') + "/" + root + "/"))
+		return 500;
 	if (accepted == true)
 	{
+		if (flag_cgi == true &&  findEXT(name) == ".py")
+		{
+			req._path = "./" + trim(mygetcwd(), '/') + "/" + trim(temp.location[location].root, '/') + "/" + location + "/" + name;
+			postResponse = cgiRequest(req);
+			return 200;
+		}
 		if(req._type == "application/x-www-form-urlencoded")
 		{
 			if (req.lung > temp.max_body_size)
@@ -94,7 +136,6 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 				size_t pos = pair.find('=');
 				if (pos != std::string::npos)
 				{
-
 					std::string key_value = pair.substr(0, pos);
 					std::string data_value = pair.substr(pos + 1, pair.find("\r\n") - pos - 2);
 					data_map[key_value] = data_value;
@@ -104,7 +145,8 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 			if (name.empty())
 				name = "post_data";
 			std::string filePath = s + "/" + root + "/" + name;
-			open(filePath.c_str(), O_RDWR | O_CREAT, 0666);
+			filePath = get_unique_filename(filePath);
+			open(filePath.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0666);
 			std::ofstream file(filePath.c_str(), std::ios::in | std::ios::binary);
 			if (!file.is_open())
 				return 500;
@@ -165,7 +207,14 @@ std::string PostMethod::generateResponse(Request req, ServerConfigs serv)
 	code = fillMap(req, serv);
 	if (code != 200)
 		return (err(code, req._version));
-	response += "200 OK";
+	if (postResponse != "")
+	{
+		response += "200 OK\r\n";
+		response += "Content-Type: text/html\r\n\r\n";
+		response += postResponse;
+		return response;
+	}
+	response += "200 OK\r\n";
 	response += "Content-Type: text/html\r\n";
 	response += "Content-Length: " + getContentLength("var/www/upload_success.html") + "\r\n\r\n";
 	response += getFile("var/www/upload_success.html");

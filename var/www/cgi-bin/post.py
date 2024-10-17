@@ -1,15 +1,5 @@
 import cgi, os, sys
 
-erorr_405 = ("""<blockquote>
-<h1 style="text-align: center;">SCRIPT CHE FUNZIONA SU METHOD POST</h1>
-</blockquote>""")
-
-method = os.environ.get('REQUEST_METHOD')
-
-if method == "GET":
-	print(erorr_405)
-	sys.exit()
-
 form = cgi.FieldStorage()
 
 fileitem = form['file1']
