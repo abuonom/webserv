@@ -4,6 +4,11 @@ Response::Response()
 {
 }
 
+void Response::errorResponse(std::map<int, std::string> map)
+{
+	error = map;
+}
+
 std::string Response::getExtension(std::string path, std::string accepted)
 {
 	int pos = path.find_last_of(".");

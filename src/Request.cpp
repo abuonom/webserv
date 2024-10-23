@@ -1,15 +1,27 @@
 #include "../hpp/Server.hpp"
 #include "../hpp/Response.hpp"
 
-Request::Request(std::string request)
+void Request::generateMapError(ServerConfigs serv, int port)
+{
+	t_config conf = serv.configs[port];
+	error = conf.error_pages;
+	for (std::map<int, std::string>::const_iterator it = serv.g_error_pages.begin(); it != serv.g_error_pages.end(); ++it)
+	{
+		if (error.find(it->first) == error.end())
+			error.insert(std::make_pair(it->first, it->second));
+	}
+}
+
+Request::Request(std::string request, ServerConfigs serv)
 {
 	_full = request;
 	getData(request);
 	getInfo(request);
 	std::stringstream ss(_host);
 	ss >> host;
-	std::cout << "Host: " << host << std::endl;
-	std::cout << request << std::endl;
+	generateMapError(serv, host);
+	// std::cout << "Host: " << host << std::endl;
+	// std::cout << request << std::endl;
 }
 
 int	myatoi(const char *str)

@@ -5,6 +5,7 @@
 #include <cstring>
 #include <vector>
 #include <map>
+#include "ServerConfigs.hpp"
 
 class Request
 {
@@ -24,10 +25,12 @@ class Request
 		std::string _length;
 		int			host;
 		int			lung;
-		Request(std::string request);
+		Request(std::string request, ServerConfigs serv);
 		void getData(std::string request);
 		void getInfo(std::string request);
 		void divide_url(std::string url);
+		std::map<int, std::string> error;
+		void generateMapError(ServerConfigs serv, int port);
 };
 
 #endif

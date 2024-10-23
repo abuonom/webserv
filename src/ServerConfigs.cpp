@@ -272,7 +272,7 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 					max_clients = ft_atoi(value.c_str());
 				else if (key == "error_page")
 				{
-					size_t spacePos = value.find(" ");
+					size_t spacePos = value.find("\t");
 					int errorCode = ft_atoi(value.substr(0, spacePos).c_str());
 					std::string errorPagePath = value.substr(spacePos + 1);
 					g_error_pages[errorCode] = trim(errorPagePath);
@@ -372,7 +372,7 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 					currentConfig.index = value;
 				else if (key == "error_page")
 				{
-					size_t spacePos = value.find(" ");
+					size_t spacePos = value.find("\t");
 					int errorCode = ft_atoi(value.substr(0, spacePos).c_str());
 					std::string errorPagePath = value.substr(spacePos + 1);
 					currentConfig.error_pages[errorCode] = trim(errorPagePath);
