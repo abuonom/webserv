@@ -156,53 +156,28 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	rec += '\0';
 	Request request(rec, serverConfigs);
 	rec.clear();
-	int d;
-	int retries = 0;
-	int max_retries = 5;
-	while(retries < max_retries)
+	if (request._method == "GET")
 	{
-		if (request._method == "GET")
-		{
-			GetMethod get;
-			get.errorResponse(request.error);
-			std::string result = get.generateResponse(request, serverConfigs);
-			d = send(client_fd, result.c_str(), result.length(), 0);
-		}
-		else if (request._method == "POST")
-		{
-			PostMethod post;
-			post.errorResponse(request.error);
-			std::string result = post.generateResponse(request, serverConfigs);
-			d = send(client_fd, result.c_str(), result.length(), 0);
-		}
-		else if (request._method == "DELETE")
-		{
-			DeleteMethod del;
-			del.errorResponse(request.error);
-			std::string result = del.generateResponse(request, serverConfigs);
-			d = send(client_fd, result.c_str(), result.length(), 0);
-		}
-		if (d == 0) {
-			// Connessione chiusa dal client
-			std::cerr << "Client has closed the connection." << std::endl;
-			close(client_fd);  // Chiudi la connessione
-			break;
-		} else if (d == -1) {
-			retries++;
-			std::cerr << "Send error, retrying... (" << retries << ")" << std::endl;
-
-			if (retries == max_retries) {
-				std::cerr << "Max retries reached, closing connection." << std::endl;
-				close(client_fd);  // Chiudi la connessione dopo troppi tentativi
-				break;
-			}
-			// Qui puoi aggiungere timeout opzionale
-		} else {
-			// L'invio è andato a buon fine, d contiene il numero di byte inviati
-			std::cout << "Sent " << d << " bytes successfully." << std::endl;
-			if (request._connection != "keep-alive") {
-				close(client_fd);
-			break;
-		}
+		GetMethod get;
+		get.errorResponse(request.error);
+		std::string result = get.generateResponse(request, serverConfigs);
+		send(client_fd, result.c_str(), result.length(), 0);
+		close(client_fd);
+	}
+	else if (request._method == "POST")
+	{
+		PostMethod post;
+		post.errorResponse(request.error);
+		std::string result = post.generateResponse(request, serverConfigs);
+		send(client_fd, result.c_str(), result.length(), 0);
+		close(client_fd);
+	}
+	else if (request._method == "DELETE")
+	{
+		DeleteMethod del;
+		del.errorResponse(request.error);
+		std::string result = del.generateResponse(request, serverConfigs);
+		send(client_fd, result.c_str(), result.length(), 0);
+		close(client_fd);
 	}
 }
