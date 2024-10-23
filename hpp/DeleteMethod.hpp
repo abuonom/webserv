@@ -2,7 +2,6 @@
 #define DELETEMETHOD_HPP
 
 #include "Server.hpp"
-#include <cstdio>
 
 class DeleteMethod : public Response
 {

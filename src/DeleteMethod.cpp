@@ -4,6 +4,20 @@
 DeleteMethod::DeleteMethod() : Response()
 {
 }
+int removeFile(const char *path)
+{
+	pid_t pid = fork();
+	const char* cmd = "/bin/rm";
+	char* const argv[] = { (char*)cmd, (char*)"-rf", (char*)path, NULL };
+	if (pid < 0)
+		return (1);
+	if (pid == 0)
+	{
+		execve(cmd, argv, NULL);
+		return 1;
+	}
+	return 0;
+}
 
 std::string DeleteMethod::generateResponse(Request req, ServerConfigs serv)
 {
@@ -25,9 +39,9 @@ std::string DeleteMethod::generateResponse(Request req, ServerConfigs serv)
 					std::string path = "/" + trim(mygetcwd(), '/') + "/" + trim(loc.root, '/') + "/" + trim(req._path, '/');
 					if (access(path.c_str(), F_OK) != 0)
 						return err404(req._version); //se non esiste
-					if (access(path.c_str(), W_OK) != 0 || access(path.c_str(), X_OK) != 0)
-						return err403(req._version); //se non hai permessi devi avere tutti e 3 o solo scrittura e lettura non si sa 
-					if (remove(path.c_str()) != 0)
+					if (access(path.c_str(), W_OK) != 0 || access(path.c_str(), X_OK) != 0 || access(path.c_str(), R_OK) != 0)
+						return err403(req._version); //se non hai permessi devi avere tutti e 3 o solo scrittura e lettura non si sa
+					if (removeFile(path.c_str()) != 0)
 						return err500(req._version); // se remove fallisce perchè il kernel è stronzo
 					return (req._version + " 204 No Content\r\n\r\n");
 				}
