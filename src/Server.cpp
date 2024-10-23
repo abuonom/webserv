@@ -200,6 +200,8 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 		} else {
 			// L'invio è andato a buon fine, d contiene il numero di byte inviati
 			std::cout << "Sent " << d << " bytes successfully." << std::endl;
+			if (request._connection != "keep-alive") {
+				close(client_fd);
 			break;
 		}
 	}
