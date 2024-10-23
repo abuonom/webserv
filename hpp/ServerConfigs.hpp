@@ -46,7 +46,7 @@ public:
 	bool loadConfig(const std::string &filename);
 	void validateAndFillDefaults();
 	int max_clients;
-	std::map<int, std::string> error_pages; // Mappa delle error pages
+	std::map<int, std::string> g_error_pages; // Mappa delle error pages
 	std::map<int, t_config> configs;		// Mappa delle configurazioni per ciascun server
 
 private:

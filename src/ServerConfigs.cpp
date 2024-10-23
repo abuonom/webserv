@@ -97,7 +97,7 @@ void ServerConfigs::printConfigs() const
 	std::cout << "SERVER CONFIGS:" << std::endl;
 	std::cout << "Max Clients: " << max_clients << std::endl;
 	std::cout << "Error Pages:" << std::endl;
-	for (std::map<int, std::string>::const_iterator it = error_pages.begin(); it != error_pages.end(); ++it)
+	for (std::map<int, std::string>::const_iterator it = g_error_pages.begin(); it != g_error_pages.end(); ++it)
 	{
 		std::cout << "  " << it->first << ": " << it->second << std::endl;
 	}
@@ -275,7 +275,7 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 					size_t spacePos = value.find(" ");
 					int errorCode = ft_atoi(value.substr(0, spacePos).c_str());
 					std::string errorPagePath = value.substr(spacePos + 1);
-					error_pages[errorCode] = trim(errorPagePath);
+					g_error_pages[errorCode] = trim(errorPagePath);
 				}
 			}
 			continue;

@@ -8,7 +8,8 @@ Request::Request(std::string request)
 	getInfo(request);
 	std::stringstream ss(_host);
 	ss >> host;
-	//std::cout << request << std::endl;
+	std::cout << "Host: " << host << std::endl;
+	std::cout << request << std::endl;
 }
 
 int	myatoi(const char *str)
@@ -115,8 +116,10 @@ void Request::getInfo(std::string request)
 		}
 		if (tmp.find("Host:") != std::string::npos)
 		{
-			int fine = tmp.find("/r") - 16;
-			_host = tmp.substr(tmp.find("Host: localhost:") + 16, fine);
+			int start = tmp.find_last_of(":");
+			int fine = tmp.find("/r");
+			_host = tmp.substr(start + 1);
+			_host = _host.substr(0, fine);
 		}
 		if (tmp.find("Content-Type:") != std::string::npos)
 		{
