@@ -8,7 +8,12 @@ def main():
     # Assicurati di inviare l'intestazione Content-Type
 
     # Leggere la lunghezza del contenuto inviato nella richiesta POST
-    content_length = int(os.environ.get('CONTENT_LENGTH', 0))
+    content_length_str = os.environ.get('CONTENT_LENGTH', '')
+
+    if content_length_str:  # Verifica se non è una stringa vuota
+        content_length = int(content_length_str)
+    else:
+        content_length = 0
     if content_length > 0:
         # Leggere i dati dal corpo della richiesta (stdin)
         postdata = sys.stdin.read(content_length)

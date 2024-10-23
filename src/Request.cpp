@@ -20,34 +20,8 @@ Request::Request(std::string request, ServerConfigs serv)
 	std::stringstream ss(_host);
 	ss >> host;
 	generateMapError(serv, host);
-	// std::cout << "Host: " << host << std::endl;
+	//std::cout << "Host: " << host << "fine" << std::endl;
 	// std::cout << request << std::endl;
-}
-
-int	myatoi(const char *str)
-{
-	int	i;
-	int	sign;
-	int	result;
-
-	i = 0;
-	while ((str[i] >= 9 && str[i] <= 13) || (str[i] == 32))
-		i++;
-	sign = 1;
-	if (str[i] == '-' || str[i] == '+')
-	{
-		if (str[i] == '-')
-			sign *= -1;
-		i++;
-	}
-	result = 0;
-	while (str[i] >= '0' && str[i] <= '9')
-	{
-		result = result * 10;
-		result = result + str[i] - '0';
-		i++;
-	}
-	return (result * sign);
 }
 
 void Request::divide_url(std::string url)
@@ -144,7 +118,7 @@ void Request::getInfo(std::string request)
 			size_t fine = tmp.find(";") - 16;
 			size_t inizio = tmp.find("Content-Length:") + 16;
 			_length = tmp.substr(inizio, fine);
-			lung = myatoi(_length.c_str());
+			lung = atoi(_length.c_str());
 			// std::cout << "COntent-Length: " << _length << std::endl;
 		}
 		if (*it == "")

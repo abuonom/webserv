@@ -16,32 +16,6 @@ ServerConfigs::~ServerConfigs()
 {
 }
 
-int	ft_atoi(const char *str)
-{
-	int	i;
-	int	sign;
-	int	result;
-
-	i = 0;
-	while ((str[i] >= 9 && str[i] <= 13) || (str[i] == 32))
-		i++;
-	sign = 1;
-	if (str[i] == '-' || str[i] == '+')
-	{
-		if (str[i] == '-')
-			sign *= -1;
-		i++;
-	}
-	result = 0;
-	while (str[i] >= '0' && str[i] <= '9')
-	{
-		result = result * 10;
-		result = result + str[i] - '0';
-		i++;
-	}
-	return (result * sign);
-}
-
 const t_config *ServerConfigs::getConfigForPort(int port) const
 {
 	std::map<int, t_config>::const_iterator it = configs.find(port);
@@ -269,11 +243,11 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 			if (isValidKey(key, "GLOBAL"))
 			{
 				if (key == "max_clients")
-					max_clients = ft_atoi(value.c_str());
+					max_clients = std::atoi(value.c_str());
 				else if (key == "error_page")
 				{
 					size_t spacePos = value.find("\t");
-					int errorCode = ft_atoi(value.substr(0, spacePos).c_str());
+					int errorCode = std::atoi(value.substr(0, spacePos).c_str());
 					std::string errorPagePath = value.substr(spacePos + 1);
 					g_error_pages[errorCode] = trim(errorPagePath);
 				}
@@ -359,7 +333,7 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 			if (isValidKey(key, "SERVER"))
 			{
 				if (key == "listen")
-					currentConfig.port = ft_atoi(value.c_str());
+					currentConfig.port = std::atoi(value.c_str());
 				else if (key == "host")
 					currentConfig.host = value;
 				else if (key == "server_name")
@@ -367,13 +341,13 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 				else if (key == "root")
 					currentConfig.root = value;
 				else if (key == "max_body_size")
-					currentConfig.max_body_size = ft_atoi(value.c_str());
+					currentConfig.max_body_size = std::atoi(value.c_str());
 				else if (key == "index")
 					currentConfig.index = value;
 				else if (key == "error_page")
 				{
 					size_t spacePos = value.find("\t");
-					int errorCode = ft_atoi(value.substr(0, spacePos).c_str());
+					int errorCode = std::atoi(value.substr(0, spacePos).c_str());
 					std::string errorPagePath = value.substr(spacePos + 1);
 					currentConfig.error_pages[errorCode] = trim(errorPagePath);
 				}

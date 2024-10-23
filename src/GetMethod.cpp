@@ -7,8 +7,9 @@ GetMethod::GetMethod() : Response()
 std::string GetMethod::autoindexResponse(std::string s, std::string root)
 {
 	std::string response;
-	std::string absolute_path = s + root;
+	std::string absolute_path = s + "/" + root;
 	root = trim(root, '/');
+	std::cout << s << " " << root << " " << absolute_path << std::endl;
 	DIR *dir = opendir(absolute_path.c_str());
 	if (dir != 0)
 	{
@@ -18,7 +19,7 @@ std::string GetMethod::autoindexResponse(std::string s, std::string root)
 			if (dir_info->d_name[0] != '.')
 			{
 				std::string temp = "/";
-				temp += dir_info->d_name;
+				temp += root.substr(root.find_last_of("/") + 1) + "/" + dir_info->d_name;
 				response += "<a href=\"" + temp + "\">" + dir_info->d_name + "</a><br>";
 			}
 			dir_info = readdir(dir);
@@ -71,6 +72,7 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 						}
 						if (loc.autoindex == true && name.empty() && loc.index == "")
 						{
+							//CONTROLLARE I TRIM
 							response += "200 OK\r\n";
 							response += "Content-Type: text/html\r\n\r\n";
 							std::string s = mygetcwd();
@@ -80,6 +82,7 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 						if (findEXT(name) == ".py" && loc.cgi == "on")
 						{
 							req._path = "/" + mycwd + "/" + loc.root + "/" + location + "/" + name;
+							std::cout << req._path <<std::endl;
 							if (access(req._path.c_str(), F_OK) != 0)
 								return err404(req._version);
 							response += "200 OK \r\n\r\n";
