@@ -16,7 +16,7 @@ std::string GetMethod::autoindexResponse(std::string s, std::string root)
 		dirent *dir_info = readdir(dir);
 		while(dir_info != 0)
 		{
-			if (dir_info->d_name[0] != '.')
+			if (dir_info->d_name[0] != '.' && dir_info->d_type != DT_DIR)
 			{
 				std::string temp = "/";
 				temp += root.substr(root.find_last_of("/") + 1) + "/" + dir_info->d_name;
@@ -39,12 +39,11 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 	name = trim(name, '/');
 	std::string location = req._path;
 	if(!name.empty())
-		location = req._path.substr(0, req._path.find_last_of("/"));
+		location = req._path.substr(0, req._path.find_first_of("/"));
 	location = trim(location, '/');
 	if (location == name)
 		location = "";
 	std::string mycwd = trim(mygetcwd(), '/');
-
 	if(serv.configs.find(req.host) != serv.configs.end()) //se trova config
 	{
 		t_config temp;
@@ -57,6 +56,7 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 				loc = temp.location[location];
 				loc.root = trim(loc.root, '/');
 				int flag = 0;
+				location = req._path.substr(0, req._path.find_last_of("/"));
 				for (size_t i = 0; i < loc.accepted_methods.size(); ++i)
 				{
 					if (loc.accepted_methods[i] == "GET")

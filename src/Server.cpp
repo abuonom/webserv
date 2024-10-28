@@ -58,7 +58,7 @@ Server::~Server()
 	{
 		if (_server_fds[i] >= 0)
 		{
-			if (_ports[i] != 0)										   // Chiudi il file descriptor del socket
+			if (_ports[i] != 0) // Chiudi il file descriptor del socket
 			{
 				close(_server_fds[i]);
 				std::cout << "Socket close on port: " << _ports[i] << std::endl; // Log della porta chiusa
@@ -177,6 +177,13 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 		DeleteMethod del;
 		del.errorResponse(request.error);
 		std::string result = del.generateResponse(request, serverConfigs);
+		send(client_fd, result.c_str(), result.length(), 0);
+		close(client_fd);
+	}
+	else
+	{
+		GetMethod error;
+		std::string result = error.err405(request._version);
 		send(client_fd, result.c_str(), result.length(), 0);
 		close(client_fd);
 	}

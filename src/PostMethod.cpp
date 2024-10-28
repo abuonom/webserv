@@ -41,7 +41,9 @@ int PostMethod::save_file_from_request(Request req, std::string root)
 	return 200;
 }
 
-bool create_directory(std::string path) {
+bool create_directory(std::string path)
+{
+	errno = 0;
 	std::string command = "mkdir " + path + " > /dev/null 2>&1";
 	int risultato = std::system((command).c_str());
 	if (risultato == 0)
@@ -51,26 +53,40 @@ bool create_directory(std::string path) {
 	return 0;
 }
 
-bool PostMethod::fileexists(const std::string& filename) {
-    struct stat buffer;
-    return (stat(filename.c_str(), &buffer) == 0);
+bool PostMethod::fileexists(const std::string &filename)
+{
+	struct stat buffer;
+	return (stat(filename.c_str(), &buffer) == 0);
 }
 
-// Funzione per generare un nuovo nome file se il file esiste già
-std::string PostMethod::get_unique_filename(const std::string& filename) {
-    std::string new_filename = filename;
-    int counter = 1;
+std::string PostMethod::get_unique_filename(const std::string &filename)
+{
+	std::string new_filename = filename;
+	int counter = 1;
+	std::string ext = findEXT(filename);
 
-    // Continua a cercare un nome disponibile
-    while (fileexists(new_filename)) {
+	if (ext.empty())
+	{
+		while (fileexists(new_filename))
+		{
+			std::stringstream ss;
+			ss << counter;
+			new_filename = filename + "(" + ss.str() + ")";
+			counter++;
+		}
+		return new_filename;
+	}
+
+	// Continua a cercare un nome disponibile
+	while (fileexists(new_filename))
+	{
 		std::stringstream ss;
 		ss << counter;
-		std::string ext = findEXT(filename);
-		new_filename = filename.substr(0, filename.find(ext)) + "(" + ss.str() + ")"+ ext;
-        counter++;
-    }
+		new_filename = filename.substr(0, filename.find(ext)) + "(" + ss.str() + ")" + ext;
+		counter++;
+	}
 
-    return new_filename;
+	return new_filename;
 }
 
 int PostMethod::fillMap(Request req, ServerConfigs serv)
@@ -80,11 +96,11 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 	std::string pair;
 	std::string name = getNameFile(req._path);
 	std::string location = req._path;
-	if(!name.empty())
+	if (!name.empty())
 		location = req._path.substr(0, req._path.find_last_of("/"));
 	if (name == location)
 		location = "";
-	if(serv.configs.find(req.host) == serv.configs.end()) //se trova config
+	if (serv.configs.find(req.host) == serv.configs.end()) // se trova config
 		return 500;
 	t_config temp = serv.configs[req.host];
 	bool flag_cgi = false;
@@ -100,7 +116,7 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 			root = trim(loc.root, '/') + "/" + location + "/" + trim(loc.upload_dir, '/');
 			for (size_t i = 0; i < loc.accepted_methods.size(); ++i)
 			{
-				if(loc.accepted_methods[i] == "POST")
+				if (loc.accepted_methods[i] == "POST")
 					accepted = true;
 			}
 		}
@@ -113,25 +129,25 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 			flag_cgi = true;
 		for (size_t i = 0; i < temp.accepted_methods.size(); ++i)
 		{
-			if(temp.accepted_methods[i] == "POST")
+			if (temp.accepted_methods[i] == "POST")
 				accepted = true;
 		}
 	}
-	if (!create_directory( "/" + trim(mygetcwd(), '/') + "/" + root + "/"))
-		return 500;
 	if (accepted == true)
 	{
-		if (flag_cgi == true &&  findEXT(name) == ".py")
+		if (!create_directory("/" + trim(mygetcwd(), '/') + "/" + root + "/"))
+			return 500;
+		if (flag_cgi == true && findEXT(name) == ".py")
 		{
 			req._path = "/" + trim(mygetcwd(), '/') + "/" + trim(temp.location[location].root, '/') + "/" + location + "/" + name;
 			postResponse = cgiRequest(req);
 			return 200;
 		}
-		if(req._type == "application/x-www-form-urlencoded")
+		if (req._type == "application/x-www-form-urlencoded")
 		{
 			if (req.lung > temp.max_body_size)
 				return 413;
-			while(std::getline(stream, pair,'&'))
+			while (std::getline(stream, pair, '&'))
 			{
 				size_t pos = pair.find('=');
 				if (pos != std::string::npos)
@@ -146,21 +162,22 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 				name = "post_data";
 			std::string filePath = s + "/" + root + "/" + name;
 			filePath = get_unique_filename(filePath);
+			std::cout << filePath << std::endl;
 			open(filePath.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0777);
 			std::ofstream file(filePath.c_str(), std::ios::in | std::ios::binary);
 			if (!file.is_open())
 				return 500;
 			std::map<std::string, std::string>::iterator it;
 			std::map<std::string, std::string>::iterator next_it;
-			for(it = data_map.begin(); it != data_map.end(); ++it)
+			for (it = data_map.begin(); it != data_map.end(); ++it)
 			{
 				file << it->second;
 				next_it = it;
 				++next_it;
 				if (next_it == data_map.end())
-						file << std::endl;
-					else
-						file << ",";
+					file << std::endl;
+				else
+					file << ",";
 			}
 			file.close();
 			return 200;
@@ -178,7 +195,7 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 	return 405;
 }
 
-std::string	PostMethod::err(int code, std::string version)
+std::string PostMethod::err(int code, std::string version)
 {
 	if (code == 403)
 		return err403(version);
