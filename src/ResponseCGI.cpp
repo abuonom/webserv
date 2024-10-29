@@ -32,9 +32,9 @@ const char *commandSelect(std::string ext)
 {
 	const char *ret = 0;
 	if (ext == ".py")
-	{
 		ret = "/usr/bin/python3";
-	}
+	if (ext == ".php")
+		ret = "/opt/homebrew/bin/php";
 	return ret;
 }
 

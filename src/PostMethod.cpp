@@ -144,7 +144,7 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 		if (access(tmp.c_str(), F_OK) != 0)
 			return 500;
 		std::cout << "tmp = " + tmp << std::endl;
-		if (flag_cgi == true && findEXT(name) == ".py")
+		if (flag_cgi == true && (findEXT(name) == ".py" || findEXT(name) == ".php"))
 		{
 			req._path = "/" + trim(mygetcwd(), '/') + "/" + trim(temp.location[location].root, '/') + "/" + location + "/" + name;
 			postResponse = cgiRequest(req);
