@@ -9,7 +9,6 @@ std::string GetMethod::autoindexResponse(std::string s, std::string root)
 	std::string response;
 	std::string absolute_path = s + "/" + root;
 	root = trim(root, '/');
-	std::cout << s << " " << root << " " << absolute_path << std::endl;
 	DIR *dir = opendir(absolute_path.c_str());
 	if (dir != 0)
 	{
@@ -82,7 +81,6 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 						if (findEXT(name) == ".py" && loc.cgi == "on")
 						{
 							req._path = "/" + mycwd + "/" + loc.root + "/" + location + "/" + name;
-							std::cout << req._path <<std::endl;
 							if (access(req._path.c_str(), F_OK) != 0)
 								return err404(req._version);
 							response += "200 OK \r\n\r\n";
