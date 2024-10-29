@@ -43,13 +43,17 @@ int PostMethod::save_file_from_request(Request req, std::string root)
 
 bool create_directory(std::string path)
 {
-	errno = 0;
-	std::string command = "mkdir " + path + " > /dev/null 2>&1";
-	int risultato = std::system((command).c_str());
-	if (risultato == 0)
-		return 0;
-	else
-		return 1;
+	pid_t pid = fork();
+	const char *cmd = "/bin/mkdir";
+	char *const argv[] = {(char *)cmd, (char *)"-p", (char *)path.c_str(), NULL};
+	if (pid < 0)
+		return (1);
+	if (pid == 0)
+	{
+		execve(cmd, argv, NULL);
+		exit (1);
+	}
+	waitpid(pid, 0, 0);
 	return 0;
 }
 
@@ -135,8 +139,11 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 	}
 	if (accepted == true)
 	{
-		if (!create_directory("/" + trim(mygetcwd(), '/') + "/" + root + "/"))
+		std::string tmp = "/" + trim(mygetcwd(), '/') + "/" + root + "/";
+		create_directory(tmp);
+		if (access(tmp.c_str(), F_OK) != 0)
 			return 500;
+		std::cout << "tmp = " + tmp << std::endl;
 		if (flag_cgi == true && findEXT(name) == ".py")
 		{
 			req._path = "/" + trim(mygetcwd(), '/') + "/" + trim(temp.location[location].root, '/') + "/" + location + "/" + name;
