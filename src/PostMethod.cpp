@@ -162,7 +162,6 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 				name = "post_data";
 			std::string filePath = s + "/" + root + "/" + name;
 			filePath = get_unique_filename(filePath);
-			std::cout << filePath << std::endl;
 			open(filePath.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0777);
 			std::ofstream file(filePath.c_str(), std::ios::in | std::ios::binary);
 			if (!file.is_open())
@@ -188,6 +187,21 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 				return 413;
 			int stat = save_file_from_request(req, root);
 			return stat;
+		}
+		else if (req._type == "text/plain")
+		{
+			std::string s = trim(mygetcwd(), '/');
+			if (name.empty())
+				name = "post_data.txt";
+			std::string filePath = "/" + s + "/" + root + "/" + name;
+			filePath = get_unique_filename(filePath);
+			open(filePath.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0777);
+			std::ofstream file(filePath.c_str(), std::ios::in | std::ios::binary);
+			if (!file.is_open())
+				return 500;
+			file << req._body.c_str();
+			file.close();
+			return 200;
 		}
 		else
 			return 415;

@@ -1,10 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Success Upload</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Dosis:300,400,500');
+
+        /* Animazioni per il movimento del razzo e la luminosità delle stelle */
+        @keyframes glow-star {
+            40% { opacity: 0.3; }
+            90%, 100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Stili generali */
+        body {
+            font-family: 'Dosis', sans-serif;
+            font-weight: 300;
+            background-color: #58af90;
+            color: #3b5323;
+            margin: 0;
+            height: 100vh; /* Imposta l'altezza del body per centrare verticalmente */
+            display: flex; /* Imposta il body come contenitore flex */
+            justify-content: center; /* Centra orizzontalmente */
+            align-items: center; /* Centra verticalmente */
+            position: relative; /* Posizionamento relativo per le stelle */
+            overflow: hidden; /* Nasconde il trabocco dello sfondo */
+        }
+
+        .stars {
+            background: url(http://salehriaz.com/404Page/img/overlay_stars.svg);
+            background-repeat: repeat;
+            background-size: contain;
+            background-position: left top;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* Stile per il contenitore del messaggio */
+        .message-container {
+            max-width: 800px; /* Larghezza massima */
+            padding: 30px; /* Padding maggiore */
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative; /* Posizionamento relativo per sovrapporre le stelle */
+            z-index: 2; /* Assicurati che il contenitore sia sopra le stelle */
+        }
+
+        h1 {
+            font-size: 36px; /* Dimensione del titolo */
+            color: #3b5323;
+        }
+
+        p {
+            font-size: 20px; /* Dimensione del testo del paragrafo */
+            color: #3b5323;
+        }
+    </style>
 </head>
 <body>
-    <h1>Success Upload</h1>
-    <p>Your file has been successfully uploaded.</p>
+
+    <div class="stars"></div> <!-- Sfondo delle stelle -->
+
+    <div class="message-container">
+        <h1>Success Upload</h1>
+        <p>Your file has been successfully uploaded.</p>
+    </div>
+
 </body>
 </html>

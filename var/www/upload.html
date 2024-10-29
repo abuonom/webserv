@@ -4,22 +4,98 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>File Upload Form</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Dosis:300,400,500');
+
+        /* Animazioni per il movimento del razzo e la luminosità delle stelle */
+        @keyframes glow-star {
+            40% { opacity: 0.3; }
+            90%, 100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Stili generali */
+        body {
+            font-family: 'Dosis', sans-serif;
+            font-weight: 300;
+            background-color: #58af90;
+            color: #3b5323;
+            margin: 0;
+            padding: 20px;
+            position: relative; /* Posizionamento relativo per le stelle */
+            overflow: hidden; /* Nasconde il trabocco dello sfondo */
+        }
+
+        .stars {
+            background: url(http://salehriaz.com/404Page/img/overlay_stars.svg);
+            background-repeat: repeat;
+            background-size: contain;
+            background-position: left top;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* Stile per i form */
+        form {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 60px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative; /* Posizionamento relativo per sovrapporre le stelle */
+            z-index: 2; /* Assicurati che il form sia sopra le stelle */
+        }
+
+        label {
+            display: block;
+            margin: 10px 0;
+            font-size: 20px;
+            font-weight: bold; /* Grassetto per il label */
+        }
+
+        input[type="file"] {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: calc(100% - 22px);
+        }
+
+        button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            background-color: #3b5323;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2e3d15;
+        }
+    </style>
 </head>
 <body>
 
-<form action="/upload.php" method="post" enctype="multipart/form-data">
-    <!-- File Input -->
-    <label for="fileInput">Choose a file:</label>
-    <input type="file" id="fileInput" name="file" accept=".jpg, .jpeg, .png">
+    <div class="stars"></div> <!-- Sfondo delle stelle -->
 
-    <!-- Hidden Input for upload_id -->
-    <input type="hidden" name="upload_id" value="your_generated_uuid_here">
+    <form action="/upload.php" method="post" enctype="multipart/form-data">
+        <label for="fileInput">Choose a file:</label>
+        <input type="file" id="fileInput" name="file" accept=".jpg, .jpeg, .png">
 
-    <br><br>
+        <!-- Hidden Input for upload_id -->
+        <input type="hidden" name="upload_id" value="your_generated_uuid_here">
 
-    <!-- Submit Button -->
-    <button type="submit">Upload File</button>
-</form>
+        <!-- Submit Button -->
+        <button type="submit">Upload File</button>
+    </form>
 
 </body>
 </html>

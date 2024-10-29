@@ -1,28 +1,267 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title></title>
-<meta name="description" content="">
-<style type="text/css">/* Caratteristiche generali del corpo della pagina */
-body {
- margin: 0;
- padding: 0;
- background-color: #000000;
- font-family: arial, verdana, sans-serif;
- color: #ffffff;
-}
-/* caratteristiche del contenitore del codice HTML */
-.container {
- width: 80%;
- margin: 0 auto;
-}</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEBSERVER</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Dosis:300,400,500');
+
+        /* Animazioni per il movimento del razzo e la luminosità delle stelle */
+        @keyframes rocket-movement { 100% {transform: translate(1200px,-600px);} }
+        @keyframes glow-star {
+            40% { opacity: 0.3; }
+            90%, 100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Stili generali */
+        html, body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Dosis', sans-serif;
+            font-weight: 300;
+            user-select: none;
+            font-size: 18px;
+            background-color: #58af90;
+        }
+
+        .stars {
+            background: url(http://salehriaz.com/404Page/img/overlay_stars.svg);
+            background-repeat: repeat;
+            background-size: contain;
+            background-position: left top;
+            position: fixed;
+            width: 100%;
+			height: 100%; /* Estensione oltre il contenuto */
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+		.container {
+			position: relative;
+			max-width: 600px;
+			margin: 40px auto;
+			padding: 20px;
+			background-color: #ffffff;
+			border-radius: 8px;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+			z-index: 3;
+			text-align: center;
+			margin-bottom: 40px; /* Margine inferiore globale */
+		}
+
+        /* Stili per i singoli container */
+        .container-title {
+			position: relative;
+            max-width: 600px;
+            margin: 40px auto 20px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+			z-index: 3;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: #3b5323;
+        }
+
+        label {
+            display: block;
+            margin-top: 20px;
+			margin-bottom: 10px;
+			font-weight: bold;
+            color: #3b5323;
+        }
+
+        input[type="text"],
+        input[type="file"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin: 10px auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+		hr.divider {
+			border: none; /* Rimuove il bordo di default */
+			border-top: 1px dashed rgba(59, 83, 35, 0.3); /* Linea tratteggiata, colore e opacità */
+			margin: 20px; /* Margine sopra e sotto */
+			width: 100%; /* Larghezza completa */
+		}
+
+        button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            background-color: #3b5323;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2e3d15;
+        }
+
+    </style>
 </head>
 <body>
-<div class="container">
-<p style="text-align: center;">BENVENUTI NEL MEGAGIGATERA SERVER DI LPICCIRI GPECCI ABUONOMO<br /><br />SIATE BUONI E DIVERTITEVI CIAOOOO<br /><br /><img src="https://hips.hearstapps.com/hmg-prod/images/spongebob-rainbow-meme-video-16x9-0-1543415942.jpg?resize=640:*" alt="" width="640" height="427" /></p>
-<p style="text-align: center;">&nbsp;</p>
-<p style="text-align: center;">&nbsp;</p>
-<p>&nbsp;</p>
-</div>
+
+    <div class="stars"></div>
+
+    <div class="container-title">
+        <h1>BENVENUTO SUL MEGAGIGATERAWEBSERVER DI ABUONOMO GPECCI E LPICCIRI</h1>
+    </div>
+
+    <div class="container">
+        <h2>Handle Requests</h2>
+
+        <form id="getRequestForm" method="get" onsubmit="return false;">
+            <label for="getRequestData">Enter Data for GET Request:</label>
+            <input type="text" id="getRequestData" name="getRequestData">
+            <button type="button" onclick="makeGetRequest()">Submit GET Request</button>
+        </form>
+
+        <hr class="divider">
+
+        <form id="urlEncodedForm" method="post" enctype="application/x-www-form-urlencoded" onsubmit="return false;">
+            <label for="urlEncodedData">Enter Data (application/x-www-form-urlencoded):</label>
+            <input type="text" id="urlEncodedData" name="urlEncodedData">
+            <button type="button" onclick="makeUrlEncodedRequest()">Submit POST Request</button>
+        </form>
+
+        <hr class="divider">
+
+        <form id="plainTextForm" method="post" enctype="text/plain" onsubmit="return false;">
+            <label for="plainTextData">Enter Data (text/plain):</label>
+            <input type="text" id="plainTextData" name="plainTextData">
+            <button type="button" onclick="makePlainTextRequest()">Submit POST Request (text/plain)</button>
+        </form>
+
+        <hr class="divider">
+
+        <form id="deleteRequestForm" method="delete" onsubmit="return false;">
+            <label for="deleteRequestData">Enter Data for DELETE Request:</label>
+            <input type="text" id="deleteRequestData" name="deleteRequestData">
+            <button type="button" onclick="makeDeleteRequest()">Submit DELETE Request</button>
+        </form>
+    </div>
+
+    <div class="container">
+        <h2>File Upload</h2>
+        <form id="multipartForm" method="post" enctype="multipart/form-data" onsubmit="return false;">
+            <label for="multipartData">Select File (multipart/form-data):</label>
+            <input type="file" id="multipartData" name="multipartData">
+            <button type="button" onclick="makeMultipartRequest()">Upload File</button>
+        </form>
+    </div>
+
+    <div class="container" style="margin-bottom: 80px;">
+        <h2>Upload/Redirect</h2>
+        <p>Vai alla pagina di upload o prova un redirect.</p>
+        <button type="button" onclick="window.location.href = 'upload.html'">Go to Upload Page</button>
+        <button type="button" onclick="redirectUrl()">Test Redirect</button>
+    </div>
+
+    <script>
+		function getBaseUrl() {
+			return window.location.origin; // Assicurati che la funzione ritorni l'URL corretto
+		}
+
+		function makeGetRequest() {
+			var requestData = document.getElementById("getRequestData").value;
+			var url = getBaseUrl() + "/" + requestData;
+			window.location.href = url; // Effettua il redirect alla URL indicata
+		}
+
+		function makeUrlEncodedRequest() {
+			var requestData = document.getElementById("urlEncodedData").value;
+			var url = getBaseUrl();
+			fetch(url, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+				body: new URLSearchParams({ data: requestData })
+			})
+			.then(response => {
+				if (response.ok) {
+					window.location.href = url; // Effettua il redirect alla URL indicata
+				} else {
+					alert('There was a problem with your POST request.');
+				}
+			})
+			.catch(error => {
+				console.error('Error:', error);
+				alert('An error occurred while making the POST request.');
+			});
+		}
+
+		function makePlainTextRequest() {
+			var requestData = document.getElementById("plainTextData").value;
+			var url = getBaseUrl();
+			fetch(url, {
+				method: 'POST',
+				headers: { 'Content-Type': 'text/plain' },
+				body: requestData
+			})
+			.then(response => {
+				if (response.ok) {
+					window.location.href = url; // Effettua il redirect alla URL indicata
+				} else {
+					alert('There was a problem with your POST request.');
+				}
+			})
+			.catch(error => {
+				console.error('Error:', error);
+				alert('An error occurred while making the POST request.');
+			});
+		}
+
+		function makeDeleteRequest() {
+			var requestData = document.getElementById("deleteRequestData").value;
+			var url = getBaseUrl();
+			fetch(url, {
+				method: 'DELETE',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ data: requestData })
+			})
+			.then(response => {
+				if (response.ok) {
+					window.location.href = url; // Effettua il redirect alla URL indicata
+				} else {
+					alert('There was a problem with your DELETE request.');
+				}
+			})
+			.catch(error => {
+				console.error('Error:', error);
+				alert('An error occurred while making the DELETE request.');
+			});
+		}
+
+		function makeMultipartRequest() {
+			var fileInput = document.getElementById("multipartData");
+			var formData = new FormData();
+			formData.append("file", fileInput.files[0]);
+			var url = getBaseUrl();
+			fetch(url, { method: 'POST', body: formData })
+				.then(response => {
+					if (response.ok) {
+						window.location.href = url; // Effettua il redirect alla URL indicata
+					} else {
+						alert('There was a problem with your file upload.');
+					}
+				})
+				.catch(error => {
+					console.error('Error:', error);
+					alert('An error occurred while uploading the file.');
+				});
+		}
+	</script>
 </body>
+<div style="height: 10px;"></div> <!-- footer invisibile -->
 </html>
