@@ -109,6 +109,18 @@
             background-color: #2e3d15;
         }
 
+        .form-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
     </style>
 </head>
 <body>
@@ -132,7 +144,21 @@
 
         <form id="urlEncodedForm" method="post" enctype="application/x-www-form-urlencoded" onsubmit="return false;">
             <label for="urlEncodedData">Enter Data (application/x-www-form-urlencoded):</label>
-            <input type="text" id="urlEncodedData" name="urlEncodedData">
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nameData">Name</label>
+                    <input type="text" id="nameData" name="nameData">
+                </div>
+                <div class="form-group">
+                    <label for="surnameData">Surname</label>
+                    <input type="text" id="surnameData" name="surnameData">
+                </div>
+                <div class="form-group">
+                    <label for="mailData">E-Mail</label>
+                    <input type="text" id="mailData" name="mailData">
+                </div>
+            </div>
             <button type="button" onclick="makeUrlEncodedRequest()">Submit POST Request</button>
         </form>
 
@@ -154,18 +180,14 @@
     </div>
 
     <div class="container">
-        <h2>File Upload</h2>
-        <form id="multipartForm" method="post" enctype="multipart/form-data" onsubmit="return false;">
-            <label for="multipartData">Select File (multipart/form-data):</label>
-            <input type="file" id="multipartData" name="multipartData">
-            <button type="button" onclick="makeMultipartRequest()">Upload File</button>
-        </form>
+        <h2>Upload</h2>
+        <p>Vai alla pagina di upload</p>
+        <button type="button" onclick="window.location.href = 'upload.html'">Go to Upload Page</button>
     </div>
 
     <div class="container" style="margin-bottom: 80px;">
-        <h2>Upload/Redirect</h2>
-        <p>Vai alla pagina di upload o prova un redirect.</p>
-        <button type="button" onclick="window.location.href = 'upload.html'">Go to Upload Page</button>
+        <h2>Redirect</h2>
+        <p>Prova redirect</p>
         <button type="button" onclick="redirectUrl()">Test Redirect</button>
     </div>
 
@@ -180,87 +202,91 @@
 			window.location.href = url; // Effettua il redirect alla URL indicata
 		}
 
-		function makeUrlEncodedRequest() {
-			var requestData = document.getElementById("urlEncodedData").value;
-			var url = getBaseUrl();
-			fetch(url, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-				body: new URLSearchParams({ data: requestData })
-			})
-			.then(response => {
-				if (response.ok) {
-					window.location.href = url; // Effettua il redirect alla URL indicata
-				} else {
-					alert('There was a problem with your POST request.');
-				}
-			})
-			.catch(error => {
-				console.error('Error:', error);
-				alert('An error occurred while making the POST request.');
-			});
-		}
+        function makeUrlEncodedRequest() {
+            // Ottieni i valori dei campi "Key" e "Value" dal modulo
+            var nameData = document.getElementById("nameData").value;
+            var surnameData = document.getElementById("surnameData").value;
+            var mailData = document.getElementById("mailData").value;
+            var url = getBaseUrl(); // Ottieni l'URL di base
 
-		function makePlainTextRequest() {
-			var requestData = document.getElementById("plainTextData").value;
-			var url = getBaseUrl();
-			fetch(url, {
-				method: 'POST',
-				headers: { 'Content-Type': 'text/plain' },
-				body: requestData
-			})
-			.then(response => {
-				if (response.ok) {
-					window.location.href = url; // Effettua il redirect alla URL indicata
-				} else {
-					alert('There was a problem with your POST request.');
-				}
-			})
-			.catch(error => {
-				console.error('Error:', error);
-				alert('An error occurred while making the POST request.');
-			});
-		}
+            // Crea il corpo della richiesta come una stringa formattata "key=value" senza codifica
+            var bodyData = 'name=' + nameData + '&surname=' + surnameData + '&e-mail=' + mailData + '\r\n\r\n';
 
-		function makeDeleteRequest() {
-			var requestData = document.getElementById("deleteRequestData").value;
-			var url = getBaseUrl();
-			fetch(url, {
-				method: 'DELETE',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ data: requestData })
-			})
-			.then(response => {
-				if (response.ok) {
-					window.location.href = url; // Effettua il redirect alla URL indicata
-				} else {
-					alert('There was a problem with your DELETE request.');
-				}
-			})
-			.catch(error => {
-				console.error('Error:', error);
-				alert('An error occurred while making the DELETE request.');
-			});
-		}
+            fetch(url, {
+                method: 'POST', // Imposta il metodo a POST
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, // Imposta l'intestazione Content-Type
+                body: bodyData // Passa la stringa come corpo della richiesta
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Se la risposta è positiva, reindirizza a upload_success.html
+                    window.location.href = 'upload_success.html';
+                } else {
+                    // Mostra un alert in caso di errore
+                    alert('There was a problem with your POST request: ' + response.statusText);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Mostra un alert in caso di errore di rete
+                alert('An error occurred while making the POST request: ' + error.message);
+            });
+        }
 
-		function makeMultipartRequest() {
-			var fileInput = document.getElementById("multipartData");
-			var formData = new FormData();
-			formData.append("file", fileInput.files[0]);
-			var url = getBaseUrl();
-			fetch(url, { method: 'POST', body: formData })
-				.then(response => {
-					if (response.ok) {
-						window.location.href = url; // Effettua il redirect alla URL indicata
-					} else {
-						alert('There was a problem with your file upload.');
-					}
-				})
-				.catch(error => {
-					console.error('Error:', error);
-					alert('An error occurred while uploading the file.');
-				});
-		}
+        function makePlainTextRequest() {
+            var requestData = document.getElementById("plainTextData").value; // Ottieni il valore dal campo di input
+            var url = getBaseUrl(); // Ottieni l'URL di base
+
+            fetch(url, {
+                method: 'POST', // Imposta il metodo a POST
+                headers: { 'Content-Type': 'text/plain' }, // Imposta l'intestazione Content-Type
+                body: requestData // Imposta il corpo della richiesta
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Se la risposta è positiva, reindirizza a upload_success.html
+                    window.location.href = 'upload_success.html';
+                } else {
+                    // Mostra un alert in caso di errore
+                    alert('There was a problem with your POST request: ' + response.statusText);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Mostra un alert in caso di errore di rete
+                alert('An error occurred while making the POST request: ' + error.message);
+            });
+        }
+
+        function makeDeleteRequest() {
+            var requestData = document.getElementById("deleteRequestData").value;
+            var url = getBaseUrl();
+
+            // Costruisci l'URL senza codificare l'intero percorso
+            var updatedUrl = `${url}/${requestData}`; // Non usare encodeURIComponent per requestData
+
+            console.log('Request URL:', updatedUrl); // Verifica l'URL
+
+            fetch(updatedUrl, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = "delete.html";
+                } else {
+                    alert('There was a problem with your DELETE request: ' + response.statusText);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while making the DELETE request: ' + error.message);
+            });
+        }
+
+        function redirectUrl() {
+            window.location.href = 'redirect'; // Assicurati di avere la rotta corretta per il redirect
+        }
 	</script>
 </body>
 <div style="height: 10px;"></div> <!-- footer invisibile -->
