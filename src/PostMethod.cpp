@@ -21,7 +21,7 @@ int PostMethod::save_file_from_request(Request req, std::string root)
 		std::string upcontent = tmp.substr(content_end + 4, tmp.length() - content_end - boundary.length() - 13);
 		std::ofstream upfile;
 		file_path = get_unique_filename(file_path);
-		//std::cout << file_path << std::endl;
+		// std::cout << file_path << std::endl;
 		upfile.open(file_path.c_str());
 		if (!upfile.is_open())
 			return 500;
@@ -53,7 +53,7 @@ bool create_directory(std::string path)
 	if (pid == 0)
 	{
 		execve(cmd, argv, NULL);
-		exit (1);
+		exit(1);
 	}
 	waitpid(pid, 0, 0);
 	return 0;
@@ -141,6 +141,8 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 	}
 	if (accepted == true)
 	{
+		if (req.lung > temp.max_body_size)
+			return 413;
 		std::string tmp = "/" + trim(mygetcwd(), '/') + "/" + root + "/";
 		create_directory(tmp);
 		if (access(tmp.c_str(), F_OK) != 0)
@@ -153,8 +155,6 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 		}
 		if (req._type == "application/x-www-form-urlencoded")
 		{
-			if (req.lung > temp.max_body_size)
-				return 413;
 			while (std::getline(stream, pair, '&'))
 			{
 				size_t pos = pair.find('=');

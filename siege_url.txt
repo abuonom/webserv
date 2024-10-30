@@ -1,0 +1,5 @@
+http://localhost:7170/
+http://localhost:7170/uploads/
+http://localhost:7170/cgi-bin/
+http://localhost:7170/redirect/
+http://localhost:7170/docs/

@@ -1,43 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WEBSERVER</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css?family=Dosis:300,400,500');
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>WEBSERVER</title>
+	<style>
+		@import url('https://fonts.googleapis.com/css?family=Dosis:300,400,500');
 
-        /* Animazioni per il movimento del razzo e la luminosità delle stelle */
-        @keyframes rocket-movement { 100% {transform: translate(1200px,-600px);} }
-        @keyframes glow-star {
-            40% { opacity: 0.3; }
-            90%, 100% { opacity: 1; transform: scale(1.2); }
-        }
+		/* Animazioni per il movimento del razzo e la luminosità delle stelle */
+		@keyframes rocket-movement {
+			100% {
+				transform: translate(1200px, -600px);
+			}
+		}
 
-        /* Stili generali */
-        html, body {
-            margin: 0;
-            width: 100%;
-            height: 100%;
-            font-family: 'Dosis', sans-serif;
-            font-weight: 300;
-            user-select: none;
-            font-size: 18px;
-            background-color: #58af90;
-        }
+		@keyframes glow-star {
+			40% {
+				opacity: 0.3;
+			}
 
-        .stars {
-            background: url(http://salehriaz.com/404Page/img/overlay_stars.svg);
-            background-repeat: repeat;
-            background-size: contain;
-            background-position: left top;
-            position: fixed;
-            width: 100%;
-			height: 100%; /* Estensione oltre il contenuto */
-            top: 0;
-            left: 0;
-            z-index: 1;
-        }
+			90%,
+			100% {
+				opacity: 1;
+				transform: scale(1.2);
+			}
+		}
+
+		/* Stili generali */
+		html,
+		body {
+			margin: 0;
+			width: 100%;
+			height: 100%;
+			font-family: 'Dosis', sans-serif;
+			font-weight: 300;
+			user-select: none;
+			font-size: 18px;
+			background-color: #58af90;
+		}
+
+		.stars {
+			background: url(http://salehriaz.com/404Page/img/overlay_stars.svg);
+			background-repeat: repeat;
+			background-size: contain;
+			background-position: left top;
+			position: fixed;
+			width: 100%;
+			height: 100%;
+			/* Estensione oltre il contenuto */
+			top: 0;
+			left: 0;
+			z-index: 1;
+		}
 
 		.container {
 			position: relative;
@@ -49,245 +64,252 @@
 			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 			z-index: 3;
 			text-align: center;
-			margin-bottom: 40px; /* Margine inferiore globale */
+			margin-bottom: 40px;
+			/* Margine inferiore globale */
 		}
 
-        /* Stili per i singoli container */
-        .container-title {
+		/* Stili per i singoli container */
+		.container-title {
 			position: relative;
-            max-width: 600px;
-            margin: 40px auto 20px;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 8px;
+			max-width: 600px;
+			margin: 40px auto 20px;
+			padding: 20px;
+			background-color: #ffffff;
+			border-radius: 8px;
 			z-index: 3;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+			text-align: center;
+		}
 
-        h1 {
-            color: #3b5323;
-        }
+		h1 {
+			color: #3b5323;
+		}
 
-        label {
-            display: block;
-            margin-top: 20px;
+		label {
+			display: block;
+			margin-top: 20px;
 			margin-bottom: 10px;
 			font-weight: bold;
-            color: #3b5323;
-        }
-
-        input[type="text"],
-        input[type="file"] {
-            width: calc(100% - 22px);
-            padding: 10px;
-            margin: 10px auto;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-		hr.divider {
-			border: none; /* Rimuove il bordo di default */
-			border-top: 1px dashed rgba(59, 83, 35, 0.3); /* Linea tratteggiata, colore e opacità */
-			margin: 20px; /* Margine sopra e sotto */
-			width: 100%; /* Larghezza completa */
+			color: #3b5323;
 		}
 
-        button {
-            padding: 10px 20px;
-            margin-top: 10px;
-            background-color: #3b5323;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
+		input[type="text"],
+		input[type="file"] {
+			width: calc(100% - 22px);
+			padding: 10px;
+			margin: 10px auto;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+			font-size: 16px;
+		}
 
-        button:hover {
-            background-color: #2e3d15;
-        }
+		hr.divider {
+			border: none;
+			/* Rimuove il bordo di default */
+			border-top: 1px dashed rgba(59, 83, 35, 0.3);
+			/* Linea tratteggiata, colore e opacità */
+			margin: 20px;
+			/* Margine sopra e sotto */
+			width: 100%;
+			/* Larghezza completa */
+		}
 
-        .form-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
+		button {
+			padding: 10px 20px;
+			margin-top: 10px;
+			background-color: #3b5323;
+			color: #fff;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+			transition: background-color 0.3s;
+		}
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-        }
+		button:hover {
+			background-color: #2e3d15;
+		}
 
-    </style>
+		.form-row {
+			display: flex;
+			gap: 10px;
+			align-items: center;
+		}
+
+		.form-group {
+			display: flex;
+			flex-direction: column;
+			flex: 1;
+		}
+	</style>
 </head>
+
 <body>
 
-    <div class="stars"></div>
+	<div class="stars"></div>
 
-    <div class="container-title">
-        <h1>BENVENUTO SUL MEGAGIGATERAWEBSERVER DI ABUONOMO GPECCI E LPICCIRI</h1>
-    </div>
+	<div class="container-title">
+		<h1>BENVENUTO SUL MEGAGIGATERAWEBSERVER DI ABUONOMO GPECCI E LPICCIRI</h1>
+	</div>
 
-    <div class="container">
-        <h2>Handle Requests</h2>
+	<div class="container">
+		<h2>Handle Requests</h2>
 
-        <form id="getRequestForm" method="get" onsubmit="return false;">
-            <label for="getRequestData">Enter Data for GET Request:</label>
-            <input type="text" id="getRequestData" name="getRequestData">
-            <button type="button" onclick="makeGetRequest()">Submit GET Request</button>
-        </form>
+		<form id="getRequestForm" method="get" onsubmit="return false;">
+			<label for="getRequestData">Enter Data for GET Request:</label>
+			<input type="text" id="getRequestData" name="getRequestData">
+			<button type="button" onclick="makeGetRequest()">Submit GET Request</button>
+		</form>
 
-        <hr class="divider">
+		<hr class="divider">
 
-        <form id="urlEncodedForm" method="post" enctype="application/x-www-form-urlencoded" onsubmit="return false;">
-            <label for="urlEncodedData">Enter Data (application/x-www-form-urlencoded):</label>
+		<form id="urlEncodedForm" method="post" enctype="application/x-www-form-urlencoded" onsubmit="return false;">
+			<label for="urlEncodedData">Enter Data (application/x-www-form-urlencoded):</label>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="nameData">Name</label>
-                    <input type="text" id="nameData" name="nameData">
-                </div>
-                <div class="form-group">
-                    <label for="surnameData">Surname</label>
-                    <input type="text" id="surnameData" name="surnameData">
-                </div>
-                <div class="form-group">
-                    <label for="mailData">E-Mail</label>
-                    <input type="text" id="mailData" name="mailData">
-                </div>
-            </div>
-            <button type="button" onclick="makeUrlEncodedRequest()">Submit POST Request</button>
-        </form>
+			<div class="form-row">
+				<div class="form-group">
+					<label for="nameData">Name</label>
+					<input type="text" id="nameData" name="nameData">
+				</div>
+				<div class="form-group">
+					<label for="surnameData">Surname</label>
+					<input type="text" id="surnameData" name="surnameData">
+				</div>
+				<div class="form-group">
+					<label for="mailData">E-Mail</label>
+					<input type="text" id="mailData" name="mailData">
+				</div>
+			</div>
+			<button type="button" onclick="makeUrlEncodedRequest()">Submit POST Request</button>
+		</form>
 
-        <hr class="divider">
+		<hr class="divider">
 
-        <form id="plainTextForm" method="post" enctype="text/plain" onsubmit="return false;">
-            <label for="plainTextData">Enter Data (text/plain):</label>
-            <input type="text" id="plainTextData" name="plainTextData">
-            <button type="button" onclick="makePlainTextRequest()">Submit POST Request (text/plain)</button>
-        </form>
+		<form id="plainTextForm" method="post" enctype="text/plain" onsubmit="return false;">
+			<label for="plainTextData">Enter Data (text/plain):</label>
+			<input type="text" id="plainTextData" name="plainTextData">
+			<button type="button" onclick="makePlainTextRequest()">Submit POST Request (text/plain)</button>
+		</form>
 
-        <hr class="divider">
+		<hr class="divider">
 
-        <form id="deleteRequestForm" method="delete" onsubmit="return false;">
-            <label for="deleteRequestData">Enter Data for DELETE Request:</label>
-            <input type="text" id="deleteRequestData" name="deleteRequestData">
-            <button type="button" onclick="makeDeleteRequest()">Submit DELETE Request</button>
-        </form>
-    </div>
+		<form id="deleteRequestForm" method="delete" onsubmit="return false;">
+			<label for="deleteRequestData">Enter Data for DELETE Request:</label>
+			<input type="text" id="deleteRequestData" name="deleteRequestData">
+			<button type="button" onclick="makeDeleteRequest()">Submit DELETE Request</button>
+		</form>
+	</div>
 
-    <div class="container">
-        <h2>Upload</h2>
-        <p>Vai alla pagina di upload</p>
-        <button type="button" onclick="window.location.href = 'upload.html'">Go to Upload Page</button>
-    </div>
+	<div class="container">
+		<h2>Upload</h2>
+		<p>Vai alla pagina di upload</p>
+		<button type="button" onclick="window.location.href = 'upload.html'">Go to Upload Page</button>
+	</div>
 
-    <div class="container" style="margin-bottom: 80px;">
-        <h2>Redirect</h2>
-        <p>Prova redirect</p>
-        <button type="button" onclick="redirectUrl()">Test Redirect</button>
-    </div>
+	<div class="container" style="margin-bottom: 80px;">
+		<h2>Redirect</h2>
+		<p>Prova redirect</p>
+		<button type="button" onclick="redirectUrl()">Test Redirect</button>
+	</div>
 
-    <script>
+	<script>
 		function getBaseUrl() {
 			return window.location.origin; // Assicurati che la funzione ritorni l'URL corretto
 		}
 
 		function makeGetRequest() {
 			var requestData = document.getElementById("getRequestData").value;
+			requestData = requestData.replace(/^\/|\/$/g, ''); // Rimuove '/' solo all'inizio e alla fine
 			var url = getBaseUrl() + "/" + requestData;
 			window.location.href = url; // Effettua il redirect alla URL indicata
 		}
 
-        function makeUrlEncodedRequest() {
-            // Ottieni i valori dei campi "Key" e "Value" dal modulo
-            var nameData = document.getElementById("nameData").value;
-            var surnameData = document.getElementById("surnameData").value;
-            var mailData = document.getElementById("mailData").value;
-            var url = getBaseUrl(); // Ottieni l'URL di base
+		function makeUrlEncodedRequest() {
+			// Ottieni i valori dei campi "Key" e "Value" dal modulo
+			var nameData = document.getElementById("nameData").value;
+			var surnameData = document.getElementById("surnameData").value;
+			var mailData = document.getElementById("mailData").value;
+			var url = getBaseUrl(); // Ottieni l'URL di base
 
-            // Crea il corpo della richiesta come una stringa formattata "key=value" senza codifica
-            var bodyData = 'name=' + nameData + '&surname=' + surnameData + '&e-mail=' + mailData + '\r\n\r\n';
+			// Crea il corpo della richiesta come una stringa formattata "key=value" senza codifica
+			var bodyData = 'name=' + nameData + '&surname=' + surnameData + '&e-mail=' + mailData + '\r\n\r\n';
 
-            fetch(url, {
-                method: 'POST', // Imposta il metodo a POST
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, // Imposta l'intestazione Content-Type
-                body: bodyData // Passa la stringa come corpo della richiesta
-            })
-            .then(response => {
-                if (response.ok) {
-                    // Se la risposta è positiva, reindirizza a upload_success.html
-                    window.location.href = 'upload_success.html';
-                } else {
-                    // Mostra un alert in caso di errore
-                    alert('There was a problem with your POST request: ' + response.statusText);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                // Mostra un alert in caso di errore di rete
-                alert('An error occurred while making the POST request: ' + error.message);
-            });
-        }
+			fetch(url, {
+				method: 'POST', // Imposta il metodo a POST
+				headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, // Imposta l'intestazione Content-Type
+				body: bodyData // Passa la stringa come corpo della richiesta
+			})
+				.then(response => {
+					if (response.ok) {
+						// Se la risposta è positiva, reindirizza a upload_success.html
+						window.location.href = 'upload_success.html';
+					} else {
+						// Mostra un alert in caso di errore
+						alert('There was a problem with your POST request: ' + response.statusText);
+					}
+				})
+				.catch(error => {
+					console.error('Error:', error);
+					// Mostra un alert in caso di errore di rete
+					alert('An error occurred while making the POST request: ' + error.message);
+				});
+		}
 
-        function makePlainTextRequest() {
-            var requestData = document.getElementById("plainTextData").value; // Ottieni il valore dal campo di input
-            var url = getBaseUrl(); // Ottieni l'URL di base
+		function makePlainTextRequest() {
+			var requestData = document.getElementById("plainTextData").value; // Ottieni il valore dal campo di input
+			var url = getBaseUrl(); // Ottieni l'URL di base
 
-            fetch(url, {
-                method: 'POST', // Imposta il metodo a POST
-                headers: { 'Content-Type': 'text/plain' }, // Imposta l'intestazione Content-Type
-                body: requestData // Imposta il corpo della richiesta
-            })
-            .then(response => {
-                if (response.ok) {
-                    // Se la risposta è positiva, reindirizza a upload_success.html
-                    window.location.href = 'upload_success.html';
-                } else {
-                    // Mostra un alert in caso di errore
-                    alert('There was a problem with your POST request: ' + response.statusText);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                // Mostra un alert in caso di errore di rete
-                alert('An error occurred while making the POST request: ' + error.message);
-            });
-        }
+			fetch(url, {
+				method: 'POST', // Imposta il metodo a POST
+				headers: { 'Content-Type': 'text/plain' }, // Imposta l'intestazione Content-Type
+				body: requestData // Imposta il corpo della richiesta
+			})
+				.then(response => {
+					if (response.ok) {
+						// Se la risposta è positiva, reindirizza a upload_success.html
+						window.location.href = 'upload_success.html';
+					} else {
+						// Mostra un alert in caso di errore
+						alert('There was a problem with your POST request: ' + response.statusText);
+					}
+				})
+				.catch(error => {
+					console.error('Error:', error);
+					// Mostra un alert in caso di errore di rete
+					alert('An error occurred while making the POST request: ' + error.message);
+				});
+		}
 
-        function makeDeleteRequest() {
-            var requestData = document.getElementById("deleteRequestData").value;
-            var url = getBaseUrl();
+		function makeDeleteRequest() {
+			var requestData = document.getElementById("deleteRequestData").value;
+			var url = getBaseUrl();
 
-            // Costruisci l'URL senza codificare l'intero percorso
-            var updatedUrl = `${url}/${requestData}`; // Non usare encodeURIComponent per requestData
+			// Costruisci l'URL senza codificare l'intero percorso
+			var updatedUrl = `${url}/${requestData}`; // Non usare encodeURIComponent per requestData
 
-            console.log('Request URL:', updatedUrl); // Verifica l'URL
+			console.log('Request URL:', updatedUrl); // Verifica l'URL
 
-            fetch(updatedUrl, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(response => {
-                if (response.ok) {
-                    window.location.href = "delete.html";
-                } else {
-                    alert('There was a problem with your DELETE request: ' + response.statusText);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while making the DELETE request: ' + error.message);
-            });
-        }
+			fetch(updatedUrl, {
+				method: 'DELETE',
+				headers: { 'Content-Type': 'application/json' }
+			})
+				.then(response => {
+					if (response.ok) {
+						window.location.href = "delete.html";
+					} else {
+						alert('There was a problem with your DELETE request: ' + response.statusText);
+					}
+				})
+				.catch(error => {
+					console.error('Error:', error);
+					alert('An error occurred while making the DELETE request: ' + error.message);
+				});
+		}
 
-        function redirectUrl() {
-            window.location.href = 'redirect'; // Assicurati di avere la rotta corretta per il redirect
-        }
+		function redirectUrl() {
+			window.location.href = 'redirect'; // Assicurati di avere la rotta corretta per il redirect
+		}
 	</script>
 </body>
 <div style="height: 10px;"></div> <!-- footer invisibile -->
+
 </html>

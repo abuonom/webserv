@@ -142,6 +142,12 @@ void ServerConfigs::validateAndFillDefaults()
 	for (std::map<int, t_config>::iterator it = configs.begin(); it != configs.end(); ++it)
 	{
 		t_config &config = it->second;
+		std::stringstream ss;
+		if (config.port == 0)
+		{
+			std::cerr << "Error: Port cannot be empty" << std::endl;
+			exit(1);
+		}
 		if (config.upload_dir.empty())
 			config.upload_dir = "upload_dir"; // Valore di default per upload_dir
 		if (config.host.empty())
@@ -150,10 +156,10 @@ void ServerConfigs::validateAndFillDefaults()
 			config.server_names = "localhost"; // Valore di default per server_names
 		if (config.max_body_size == 0)
 			config.max_body_size = 1000000; // Valore di default per max_body_size
-		if (config.index.empty())
-			config.index = "index.html"; // Valore di default per index
-		if (config.root.empty())
-			config.root = "/tmp/www"; // Valore di default per root
+		//if (config.index.empty())
+			//config.index = "index.html"; // Valore di default per index
+		//if (config.root.empty())
+			//config.root = "/var/www"; // Valore di default per root
 		if (config.accepted_methods.empty())
 		{
 			config.accepted_methods.push_back("GET");
@@ -165,11 +171,11 @@ void ServerConfigs::validateAndFillDefaults()
 		for (std::map<std::string, t_location>::iterator locIt = config.location.begin(); locIt != config.location.end(); ++locIt)
 		{
 			t_location &location = locIt->second;
-			if(location.upload_dir.empty())
+			if (location.upload_dir.empty())
 				location.upload_dir = config.upload_dir;
 			if (location.cgi.empty())
 				location.cgi = "off";
-			if(location.accepted_methods.empty())
+			if (location.accepted_methods.empty())
 				location.accepted_methods = config.accepted_methods;
 		}
 	}
@@ -333,7 +339,19 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 			if (isValidKey(key, "SERVER"))
 			{
 				if (key == "listen")
+				{
+					if (std::atoi(value.c_str()) < 1024 || std::atoi(value.c_str()) > 65535)
+					{
+						std::cerr << "Error: Port " << value << " out of range" << std::endl;
+						exit(1);
+					}
+					if (configs.find(std::atoi(value.c_str())) != configs.end())
+					{
+						std::cerr << "Error: Port " << value << " duplicated" << std::endl;
+						exit(1);
+					}
 					currentConfig.port = std::atoi(value.c_str());
+				}
 				else if (key == "host")
 					currentConfig.host = value;
 				else if (key == "server_name")
@@ -360,9 +378,10 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 						currentConfig.accepted_methods.push_back(trim(method));
 					}
 				}
-				else if(key == "upload_dir")
+				else if (key == "upload_dir")
 					currentConfig.upload_dir = value;
-				else if (key == "cgi") {
+				else if (key == "cgi")
+				{
 					currentConfig.cgi = value;
 				}
 			}
