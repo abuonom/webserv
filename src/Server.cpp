@@ -154,35 +154,18 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	rec += '\0';
 	Request request(rec, serverConfigs);
 	rec.clear();
+	std::string result;
+	GetMethod get;
+	PostMethod post;
+	DeleteMethod del;
 	if (request._method == "GET")
-	{
-		GetMethod get;
-		get.errorResponse(request.error);
-		std::string result = get.generateResponse(request, serverConfigs);
-		send(client_fd, result.c_str(), result.length(), 0);
-		close(client_fd);
-	}
+		result = get.generateResponse(request, serverConfigs);
 	else if (request._method == "POST")
-	{
-		PostMethod post;
-		post.errorResponse(request.error);
-		std::string result = post.generateResponse(request, serverConfigs);
-		send(client_fd, result.c_str(), result.length(), 0);
-		close(client_fd);
-	}
+		result = post.generateResponse(request, serverConfigs);
 	else if (request._method == "DELETE")
-	{
-		DeleteMethod del;
-		del.errorResponse(request.error);
-		std::string result = del.generateResponse(request, serverConfigs);
-		send(client_fd, result.c_str(), result.length(), 0);
-		close(client_fd);
-	}
+		result = del.generateResponse(request, serverConfigs);
 	else
-	{
-		GetMethod error;
-		std::string result = error.err405(request._version);
-		send(client_fd, result.c_str(), result.length(), 0);
-		close(client_fd);
-	}
+		result = get.err405(request._version);
+	send(client_fd, result.c_str(), result.length(), 0);
+	close(client_fd);
 }
