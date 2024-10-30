@@ -30,6 +30,7 @@ std::string GetMethod::autoindexResponse(std::string s, std::string root)
 
 std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 {
+	errorResponse(req.error);
 	std::string response;
 	response += req._version;
 	response += " ";

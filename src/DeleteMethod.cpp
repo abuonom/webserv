@@ -38,6 +38,7 @@ int	DeleteMethod::checkfile(std::string url, std::string tmp)
 
 std::string DeleteMethod::generateResponse(Request req, ServerConfigs serv)
 {
+	errorResponse(req.error);
 	req._path = trim(req._path, '/');
 	std::string filename = "";
 	std::string tmp = req._path.substr(req._path.find_last_of("/") + 1, req._path.length() - req._path.find_last_of("/") - 1);

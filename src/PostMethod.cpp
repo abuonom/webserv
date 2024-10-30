@@ -20,6 +20,8 @@ int PostMethod::save_file_from_request(Request req, std::string root)
 		int content_end = tmp.find("\r\n\r\n");
 		std::string upcontent = tmp.substr(content_end + 4, tmp.length() - content_end - boundary.length() - 13);
 		std::ofstream upfile;
+		file_path = get_unique_filename(file_path);
+		//std::cout << file_path << std::endl;
 		upfile.open(file_path.c_str());
 		if (!upfile.is_open())
 			return 500;
@@ -236,6 +238,7 @@ std::string PostMethod::err(int code, std::string version)
 
 std::string PostMethod::generateResponse(Request req, ServerConfigs serv)
 {
+	errorResponse(req.error);
 	int code;
 	std::string response;
 	response += req._version;
