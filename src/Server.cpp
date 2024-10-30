@@ -1,5 +1,5 @@
 #include "../hpp/Server.hpp"
-#define BUFFER_SIZE 1011111
+#define BUFFER_SIZE 1024
 
 Server::Server(const ServerConfigs &serverConfigs)
 {
