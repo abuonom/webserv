@@ -21,7 +21,6 @@ int removeFile(const char *path)
 int	DeleteMethod::checkfile(std::string url, std::string tmp)
 {
 	std::string path = mygetcwd() + "/" + url.substr(0, url.find_last_of("/"));
-	std::cout << "path = " << path << std::endl;
 	DIR *dir = opendir(path.c_str());
 	if (dir != 0)
 	{

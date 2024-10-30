@@ -46,13 +46,43 @@ void Request::divide_url(std::string url)
 
 void Request::getData(std::string request)
 {
-	char tmp[300000];
-	strcpy(tmp, request.c_str());
-	char *line = strtok(tmp, "\r\n");
-	_method = strtok(line, " ");
-	_url = strtok(NULL, " ");
-	divide_url(_url);
-	_version = strtok(NULL, " ");
+    size_t pos = request.find("\r\n");
+    if (pos == std::string::npos) {
+        pos = request.find('\n'); // Se non ci sono "\r\n", controlla solo "\n"
+    }
+    // Se non ci sono nuove linee, usa l'intera stringa
+    size_t length = (pos != std::string::npos) ? pos : request.length();
+    // Copia solo la parte desiderata in tmp
+    char tmp[300000];
+    strncpy(tmp, request.c_str(), length);
+    tmp[length] = '\0'; // Aggiungi un terminatore di stringa
+
+    char *line = strtok(tmp, "\r\n");
+
+    if (line) {
+        char *method = strtok(line, " ");
+        if (method != NULL) {
+            _method = method;
+        } else {
+            _method = ""; // Assegna una stringa vuota se `method` è NULL
+        }
+
+        char *url = strtok(NULL, " ");
+        if (url != NULL) {
+            _url = url;
+        } else {
+            _url = ""; // Assegna una stringa vuota se `url` è NULL
+        }
+
+        divide_url(_url);
+
+        char *version = strtok(NULL, " ");
+        if (version != NULL) {
+            _version = version;
+        } else {
+            _version = ""; // Assegna una stringa vuota se `version` è NULL
+        }
+    }
 }
 
 std::vector<std::string> split(std::string &s, const std::string &delimiter)

@@ -132,13 +132,12 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	std::string rec;
 	char buffer[BUFFER_SIZE];
 	memset(buffer, 0, BUFFER_SIZE);
-	int total_read = 0;
+	//int total_read = 0;
 	// Leggiamo i dati dal client
-	while (true)
+	int bytes_read = 1;
+	while (bytes_read != 0)
 	{
-		int bytes_read = 0;
 		bytes_read = read(client_fd, buffer, BUFFER_SIZE - 1);
-		total_read += bytes_read;
 		if (bytes_read < 0)
 			break;
 		for (int i = 0; i < bytes_read; i++)
@@ -152,7 +151,6 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 			break;
 		}
 	}
-	buffer[total_read] = '\0';
 	rec += '\0';
 	Request request(rec, serverConfigs);
 	rec.clear();
