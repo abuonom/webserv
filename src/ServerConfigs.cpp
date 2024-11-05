@@ -138,7 +138,12 @@ static std::string trim(const std::string &str)
 
 void ServerConfigs::validateAndFillDefaults()
 {
-
+	// Se non ci sono configurazioni, esce
+	/*if (configs.empty())
+	{
+		std::cerr << "Error: No server configurations found" << std::endl;
+		exit(1);
+	}*/
 	for (std::map<int, t_config>::iterator it = configs.begin(); it != configs.end(); ++it)
 	{
 		t_config &config = it->second;
@@ -156,10 +161,10 @@ void ServerConfigs::validateAndFillDefaults()
 			config.server_names = "localhost"; // Valore di default per server_names
 		if (config.max_body_size == 0)
 			config.max_body_size = 1000000; // Valore di default per max_body_size
-		//if (config.index.empty())
-			//config.index = "index.html"; // Valore di default per index
-		//if (config.root.empty())
-			//config.root = "/var/www"; // Valore di default per root
+		// if (config.index.empty())
+		// config.index = "index.html"; // Valore di default per index
+		// if (config.root.empty())
+		// config.root = "/var/www"; // Valore di default per root
 		if (config.accepted_methods.empty())
 		{
 			config.accepted_methods.push_back("GET");
@@ -197,8 +202,6 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 	bool inGlobalBlock = true; // Variabile per controllare se siamo nel blocco globale
 	std::string currentLocationPath;
 
-	bool serverBlockFound = false; // Controlla se almeno un blocco server è presente
-
 	// Controlla se il file è vuoto
 	if (file.peek() == std::ifstream::traits_type::eof())
 	{
@@ -209,14 +212,15 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 	while (std::getline(file, line))
 	{
 		line = trim(line);
-
 		if (line.empty() || line[0] == '#')
 		{
 			continue; // Skip empty lines and comments
 		}
 
-		// Verifica che la riga termini con ";"
-		if (line[line.size() - 1] != ';' && line.find("server {") == std::string::npos && line.find("[") == std::string::npos && line.find("}") == std::string::npos && line.find("]") == std::string::npos)
+		// Verifica che la riga termini con ";" e non sia una riga di inizio server o location
+		if (line.find("{") == std::string::npos && line.find("}") == std::string::npos &&
+			line.find("[") == std::string::npos && line.find("]") == std::string::npos &&
+			line[line.size() - 1] != ';')
 		{
 			std::cerr << "Error: Missing semicolon at the end of the line: " << line << std::endl;
 			exit(1);
@@ -227,16 +231,6 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 		{
 			line = line.substr(0, line.size() - 1); // Rimuove l'ultimo carattere
 			line = trim(line);						// Rimuove eventuali spazi in eccesso
-		}
-
-		// Inizia un nuovo blocco server
-		if (inGlobalBlock && line.find("server {") != std::string::npos)
-		{
-			inServerBlock = true;
-			inGlobalBlock = false;		// Stop reading global params
-			serverBlockFound = true;	// Indica che è stato trovato un blocco server
-			currentConfig = t_config(); // Reset for new server block
-			continue;
 		}
 
 		// Parsing dei parametri globali
@@ -258,16 +252,22 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 					g_error_pages[errorCode] = trim(errorPagePath);
 				}
 			}
-			continue;
 		}
 
+		// Inizio di un blocco server
+		if (line.find("server {") != std::string::npos)
+		{
+			inServerBlock = true;
+			inGlobalBlock = false;		// Stop reading global params
+			currentConfig = t_config(); // Reset for new server block
+		}
+		
 		// Parsing dei blocchi server e location
 		if (inServerBlock && line.find("location ") != std::string::npos && line.find("[") != std::string::npos)
 		{
 			inLocationBlock = true;
 			currentLocation = t_location(); // Reset for new location block
 
-			// Cerca l'inizio e la fine delle parentesi quadre
 			size_t start = line.find("location ") + 9; // Perché "location " è lunga 9 caratteri
 			size_t end = line.find("[");
 
@@ -278,18 +278,12 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 				currentLocationPath = trim(currentLocationPath);									 // Rimuovi eventuali spazi
 				currentLocationPath = currentLocationPath.substr(1, currentLocationPath.size() - 2); // Rimuovi eventuali virgolette
 			}
-			else
-			{
-				std::cerr << "Error: Invalid location block format" << std::endl;
-				return false; // Interrompe il parsing per formato non valido
-			}
 		}
 		else if (inServerBlock && !inLocationBlock && line.find("}") != std::string::npos)
 		{
 			// Fine di un blocco server, salva la configurazione
 			configs[currentConfig.port] = currentConfig;
 			inServerBlock = false;
-			inGlobalBlock = true; // Riprendi il parsing globale per eventuali blocchi server successivi
 		}
 		else if (inLocationBlock && line.find("]") != std::string::npos)
 		{
@@ -387,11 +381,9 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 			}
 		}
 	}
-
-	// Controlla se è stato trovato almeno un blocco server
-	if (!serverBlockFound)
+	if (inServerBlock || inLocationBlock)
 	{
-		std::cerr << "Error: No server block found in the config file" << std::endl;
+		std::cerr << "Error: Missing closing bracket for server or location block" << std::endl;
 		exit(1);
 	}
 

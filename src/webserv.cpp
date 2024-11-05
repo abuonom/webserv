@@ -60,8 +60,8 @@ int main(int argc, char **argv)
 		configs.validateAndFillDefaults();
 	}
 	configs.printConfigs();
-	g_server = new Server(configs); // Assegna il server al puntatore globale
-	g_server->run(configs);
+	//g_server = new Server(configs); // Assegna il server al puntatore globale
+	//g_server->run(configs);
 
 	// Termina il server
 	delete g_server;
