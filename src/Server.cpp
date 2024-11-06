@@ -86,6 +86,17 @@ void Server::setNonBlocking(int fd)
 // Metodo aggiornato per gestire più server contemporaneamente
 void Server::run(const ServerConfigs &serverConfigs)
 {
+	//Ciclo di stampa per comunicare host e porte disponibili
+	std::cout<<"Server started on the following hosts and ports:"<<std::endl;
+	std::cout<<"--------------------------------------------"<<std::endl;
+	for (std::map<int, t_config>::const_iterator it = serverConfigs.configs.begin(); it != serverConfigs.configs.end(); ++it)
+	{
+		if(!it->second.server_names.empty())
+			std::cout << "Server Name: " << it->second.server_names << std::endl;
+		std::cout << "Host: " << it->second.host << ":" << it->second.port << std::endl;
+		std::cout<<"--------------------------------------------"<<std::endl;
+	}
+
 	while (true)
 	{
 		// Eseguiamo il polling su tutti i file descriptor
@@ -118,7 +129,7 @@ void Server::run(const ServerConfigs &serverConfigs)
 				}
 				else
 				{
-					// Gestiamo le richieste dei client
+					std::cout << "Handling client: " << _poll_fds[i].fd << std::endl;
 					handleClient(_poll_fds[i].fd, serverConfigs);
 				}
 			}
@@ -132,9 +143,8 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	std::string rec;
 	char buffer[BUFFER_SIZE];
 	memset(buffer, 0, BUFFER_SIZE);
-	//int total_read = 0;
-	// Leggiamo i dati dal client
 	int bytes_read = 1;
+	//Qui avviene il loop ed anche il controllo read < 0 oppure = 0
 	while (bytes_read != 0)
 	{
 		bytes_read = read(client_fd, buffer, BUFFER_SIZE - 1);
@@ -166,6 +176,14 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 		result = del.generateResponse(request, serverConfigs);
 	else
 		result = get.err405(request._version);
-	send(client_fd, result.c_str(), result.length(), 0);
+	ssize_t bytes_sent = send(client_fd, result.c_str(), result.length(), 0);
+	if (bytes_sent <= 0)
+	{
+		if (bytes_sent == -1)
+			std::cerr << "send failed: " << strerror(errno) << std::endl;
+		else
+			std::cerr << "send returned 0, connection closed by peer" << std::endl;
+	}
+	std::cout << "Response " <<request._method<<" sent to client: " << client_fd << std::endl;
 	close(client_fd);
 }
