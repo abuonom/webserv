@@ -107,7 +107,7 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 	if (name == location)
 		location = "";
 	if (serv.configs.find(req.host) == serv.configs.end()) // se trova config
-		return 500;
+		return 400;
 	t_config temp = serv.configs[req.host];
 	bool flag_cgi = false;
 	std::string root = trim(temp.root, '/') + "/" + trim(temp.upload_dir, '/');
@@ -219,6 +219,8 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 
 std::string PostMethod::err(int code, std::string version)
 {
+	if (code == 400)
+		return err400(version);
 	if (code == 403)
 		return err403(version);
 	if (code == 404)
@@ -239,6 +241,8 @@ std::string PostMethod::err(int code, std::string version)
 std::string PostMethod::generateResponse(Request req, ServerConfigs serv)
 {
 	errorResponse(req.error);
+	if (!strcmp(req._version.c_str(), "HTTP/1.1") && !strcmp(req._version.c_str(), "HTTP/1.0"))
+		return err400("HTTP/1.1");
 	int code;
 	std::string response;
 	response += req._version;

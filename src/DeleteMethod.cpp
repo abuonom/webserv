@@ -44,6 +44,8 @@ std::string DeleteMethod::generateResponse(Request req, ServerConfigs serv)
 	std::string tmp = req._path.substr(req._path.find_last_of("/") + 1, req._path.length() - req._path.find_last_of("/") - 1);
 	std::string location = req._path.substr(0, req._path.find_first_of("/"));
 	std::string response;
+	if (!strcmp(req._version.c_str(), "HTTP/1.1") && !strcmp(req._version.c_str(), "HTTP/1.0"))
+		return err400("HTTP/1.1");
 	if (serv.configs.find(req.host) != serv.configs.end())
 	{
 		t_config temp = serv.configs[req.host];
@@ -92,5 +94,5 @@ std::string DeleteMethod::generateResponse(Request req, ServerConfigs serv)
 			return response;
 		}
 	}
-	return err500(req._version); // non trova il config per qualche motivo a me sconosciuto senno da errore in compilazione
+	return err400(req._version); // non trova il config per qualche motivo a me sconosciuto senno da errore in compilazione
 }

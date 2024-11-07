@@ -1,4 +1,19 @@
 #include "../hpp/Response.hpp"
+
+std::string Response::err400(std::string version)
+{
+	std::string response;
+	response += version;
+	response += " 400 Bad Request\r\n";
+	response += "Content-Type: text/html\r\n\r\n";
+	std::string url = "error_pages/400.html";
+	if(error.find(400) != error.end())
+		url = error[400];
+	url = trim(url, '/');
+	response += getFile(url);
+	return response;
+}
+
 std::string Response::err403(std::string version)
 {
 	std::string response;

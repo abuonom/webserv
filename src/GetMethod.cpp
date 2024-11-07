@@ -44,6 +44,8 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 	if (location == name)
 		location = "";
 	std::string mycwd = trim(mygetcwd(), '/');
+	if (!strcmp(req._version.c_str(), "HTTP/1.1") && !strcmp(req._version.c_str(), "HTTP/1.0"))
+		return err400("HTTP/1.1");
 	if(serv.configs.find(req.host) != serv.configs.end()) //se trova config
 	{
 		t_config temp;
@@ -149,5 +151,5 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 			}
 		}
 	}
-	return err500(req._version);
+	return err400(req._version);
 }
