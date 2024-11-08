@@ -7,169 +7,75 @@
 #include <cctype>
 #include <cstdlib> // Per std::atoi
 
-// Funzione di verifica per il metodo HTTP valido
-bool isValidMethod(const std::string& method) {
-	return (method == "GET" || method == "POST" || method == "DELETE" ||
-			method == "HEAD" || method == "PUT");
-}
 
-// Funzione per controllare se un header è valido
-bool isValidHeaderName(const std::string& headerName) {
-	if (headerName.empty()) return false;
-	for (size_t i = 0; i < headerName.size(); ++i) {
-		if (!std::isalnum(headerName[i]) && headerName[i] != '-') {
-			return false; // Solo caratteri alfanumerici e "-" sono permessi
+bool validateRequestLine(const std::string &line) {
+	// Elenco dei metodi HTTP validi
+	const char *methods[] = {"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS", "PATCH"};
+	bool validMethod = false;
+
+	// Verifica se il metodo è valido
+	for (int i = 0; i < 7; ++i) {
+		if (line.find(methods[i]) == 0 && line[std::strlen(methods[i])] == ' ') {
+			validMethod = true;
+			break;
 		}
 	}
-	// Controllo che l'header non termini con '-'
-	return headerName[headerName.size() - 1] != '-';
+
+	if (!validMethod) {
+		return false;
+	}
+
+	// Trova la posizione della versione HTTP
+	std::size_t versionPos = line.rfind("HTTP/1.");
+	if (versionPos == std::string::npos || (line[versionPos + 7] != '0' && line[versionPos + 7] != '1')) {
+		return false;
+	}
+
+	// Controlla che ci sia uno spazio prima di "HTTP/1.x"
+	return line[versionPos - 1] == ' ';
 }
 
-// Funzione per controllare il valore dell'intestazione Host
-bool isValidHostValue(const std::string& value) {
-	if (value.empty()) return false;
-	size_t colonPos = value.find(':');
-	if (colonPos != std::string::npos) {
-		std::string portStr = value.substr(colonPos + 1);
-		// Controlla che la parte dopo i ":" sia un numero (porta)
-		for (size_t i = 0; i < portStr.size(); ++i) {
-			if (!std::isdigit(portStr[i])) return false;
-		}
+bool validateHeaderLine(const std::string &line) {
+	// Controlla che la linea contenga il carattere ':' seguito da uno spazio
+	std::size_t colonPos = line.find_first_of(':');
+	std::cout << line<< std::endl;
+	if (colonPos == std::string::npos || colonPos == 0 || colonPos == line.length() - 1) {
+		return false;
+	}
+	if (line[colonPos + 1] != ' ') {
+		return false;
 	}
 	return true;
 }
 
-// Funzione per controllare il valore dell'intestazione Content-Length
-bool isValidContentLength(const std::string& value) {
-	if (value.empty()) return false;
-	for (size_t i = 0; i < value.size(); ++i) {
-		if (!std::isdigit(value[i])) return false;
-	}
-	return true;
-}
+bool validateHttpRequest(const std::string &request) {
+	std::istringstream stream(request);
+	std::string line;
+	bool isFirstLine = true;
 
-bool isValidContentType(const std::string& value) {
-    // In questo caso, stiamo solo facendo un controllo basilare sul tipo di contenuto
-    // Poiché 'test/' non è un tipo MIME valido, restituiremo false se è malformato
-    // Puoi aggiungere controlli più avanzati se necessario
-    if (value.empty()) return false;
-
-    // Controllo che il tipo di contenuto segua il formato "type/subtype"
-    size_t slashPos = value.find('/');
-    if (slashPos == std::string::npos || slashPos == 0 || slashPos == value.size() - 1) {
-        return false;
-    }
-
-    // Controllo che il "type" e "subtype" siano alfanumerici (alcuni tipi MIME possono includere '-')
-    for (size_t i = 0; i < slashPos; ++i) {
-        if (!std::isalnum(value[i]) && value[i] != '-') {
-            return false;
-        }
-    }
-    for (size_t i = slashPos + 1; i < value.size(); ++i) {
-        if (!std::isalnum(value[i]) && value[i] != '-') {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-// Funzione di validazione della richiesta
-bool isValidRequest(const std::string& request, std::string& errorMessage) {
-	std::vector<std::string> lines;
-	size_t pos = 0, end;
-
-	// Separazione della richiesta in righe usando "\r\n" come delimitatore
-	while ((end = request.find("\r\n", pos)) != std::string::npos) {
-		lines.push_back(request.substr(pos, end - pos));
-		pos = end + 2;
-	}
-
-	if (lines.empty()) {
-		errorMessage = "La richiesta è vuota o non contiene linee valide.";
-		return false;
-	}
-
-	// 1. Analisi della prima linea per metodo, percorso e versione
-	std::string firstLine = lines[0];
-	size_t methodEnd = firstLine.find(' ');
-	if (methodEnd == std::string::npos) {
-		errorMessage = "Formato della prima linea non corretto (manca il metodo).";
-		return false;
-	}
-	std::string method = firstLine.substr(0, methodEnd);
-
-	// Verifica che il metodo sia valido
-	if (!isValidMethod(method)) {
-		errorMessage = "Metodo HTTP non supportato: " + method;
-		return false;
-	}
-
-	size_t pathEnd = firstLine.find(' ', methodEnd + 1);
-	if (pathEnd == std::string::npos) {
-		errorMessage = "Formato della prima linea non corretto (manca il percorso o la versione).";
-		return false;
-	}
-	std::string path = firstLine.substr(methodEnd + 1, pathEnd - methodEnd - 1);
-
-	std::string version = firstLine.substr(pathEnd + 1);
-	if (version != "HTTP/1.0" && version != "HTTP/1.1") {
-		errorMessage = "Versione HTTP non supportata: " + version;
-		return false;
-	}
-
-	// 2. Controllo dell'intestazione Host se la versione è HTTP/1.1
-	bool hasHostHeader = false;
-	for (size_t i = 1; i < lines.size(); ++i) {
-		size_t colonPos = lines[i].find(':');
-		if (colonPos == std::string::npos && !lines[i].empty()) {
-			errorMessage = "Intestazione malformata: manca ':' in \"" + lines[i] + "\"";
-			return false;
+	while (std::getline(stream, line)) {
+		// Rimuove eventuali spazi alla fine della linea
+		if (!line.empty() && line[line.length() - 1] == '\r') {
+			line.erase(line.length() - 1);
 		}
-
-		// Estrai il nome e il valore dell'intestazione
-		std::string headerName = lines[i].substr(0, colonPos);
-		std::string headerValue = lines[i].substr(colonPos + 1);
-
-		// Rimuovi spazi bianchi iniziali nel valore dell'intestazione
-		while (!headerValue.empty() && std::isspace(headerValue[0])) {
-			headerValue.erase(0, 1);
-		}
-
-		// Verifica che il nome dell'intestazione sia valido
-		if (!isValidHeaderName(headerName)) {
-			errorMessage = "Nome dell'intestazione non valido: \"" + headerName + "\"";
-			return false;
-		}
-
-		// Controlli specifici per intestazioni importanti
-		if (headerName == "Host") {
-			hasHostHeader = true;
-			if (!isValidHostValue(headerValue)) {
-				errorMessage = "Valore dell'intestazione Host non valido: " + headerValue;
+		if (isFirstLine) {
+			// Controlla che la prima riga sia nel formato METHOD URL VERSION
+			if (!validateRequestLine(line)) {
+				std::cerr << "Errore: la prima riga della richiesta non è valida.\n";
 				return false;
 			}
-		} else if (headerName == "Content-Length") {
-			if (!isValidContentLength(headerValue)) {
-					errorMessage = "Valore dell'intestazione Content-Length non valido: " + headerValue;
-					return false;
-				}
+			isFirstLine = false;
+		} else {
+			if (line.empty()) {
+				break;
 			}
-			else if (headerName == "Content-Type") {
-			if (!isValidContentType(headerValue)) {
-				errorMessage = "Tipo di contenuto non valido: " + headerValue;
+			// Controlla che ogni altra riga segua il formato "Chiave: Valore"
+			if (!line.empty() && !validateHeaderLine(line)) {
+				std::cerr << "Errore: l'intestazione non è nel formato corretto.\n";
 				return false;
 			}
 		}
 	}
-
-	if (version == "HTTP/1.1" && !hasHostHeader) {
-		errorMessage = "L'intestazione Host è obbligatoria per HTTP/1.1.";
-		return false;
-	}
-
-	// La richiesta è valida se tutti i controlli sono passati
 	return true;
 }
 
@@ -336,16 +242,19 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	rec += '\0';
 	std::string bad;
 	std::string result;
-	if (isValidRequest(rec, bad) == false)
+	std::cout << "------------" << std::endl;
+	std::cout << rec.c_str() << std::endl;
+	std::cout << "------------" << std::endl;
+	GetMethod get;
+	if (validateHttpRequest(rec) == false)
 	{
 		std::cout << bad << std::endl;
-		result = "HTTP/1.1 400 Bad Request\r\n\r\n";
+		result = get.err400("HTTP/1.1");
 	}
 	else
 	{
 		Request request(rec, serverConfigs);
 		rec.clear();
-		GetMethod get;
 		PostMethod post;
 		DeleteMethod del;
 		std::string error;
@@ -357,10 +266,10 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 			result = del.generateResponse(request, serverConfigs);
 		else
 			result = get.err405(request._version);
-		std::cout << "**********" << std::endl;
-		std::cout << result.c_str() << std::endl;
-		std::cout << "**********" << std::endl;
 	}
+	std::cout << "**********" << std::endl;
+	std::cout << result.c_str() << std::endl;
+	std::cout << "**********" << std::endl;
 	size_t bytes_sent = 0;
 	while (bytes_sent < result.length()) {
 		int sent = send(client_fd, result.c_str() + bytes_sent, result.length() - bytes_sent, 0);
@@ -374,5 +283,6 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 		}
 		bytes_sent += sent;
 	}
+	shutdown(client_fd, SHUT_WR);
 	close(client_fd);
 }

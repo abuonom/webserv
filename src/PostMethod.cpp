@@ -241,8 +241,6 @@ std::string PostMethod::err(int code, std::string version)
 std::string PostMethod::generateResponse(Request req, ServerConfigs serv)
 {
 	errorResponse(req.error);
-	if (!strcmp(req._version.c_str(), "HTTP/1.1") && !strcmp(req._version.c_str(), "HTTP/1.0"))
-		return err400("HTTP/1.1");
 	int code;
 	std::string response;
 	response += req._version;

@@ -20,9 +20,6 @@ Request::Request(std::string request, ServerConfigs serv)
 	std::stringstream ss(_host);
 	ss >> host;
 	generateMapError(serv, host);
-	std::cout << "-------" << std::endl;
-	std::cout << request << std::endl;
-	std::cout << "-------" << std::endl;
 }
 
 void Request::divide_url(std::string url)
