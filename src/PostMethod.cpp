@@ -102,6 +102,8 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 	std::string pair;
 	std::string name = getNameFile(req._path);
 	std::string location = req._path;
+	if (req._type.empty() || req._length.empty())
+		return 204;
 	if (!name.empty())
 		location = req._path.substr(0, req._path.find_last_of("/"));
 	if (name == location)
@@ -219,6 +221,8 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 
 std::string PostMethod::err(int code, std::string version)
 {
+	if (code == 204)
+		return "HTTP/1.1 204 No Content\r\n\r\n";
 	if (code == 400)
 		return err400(version);
 	if (code == 403)

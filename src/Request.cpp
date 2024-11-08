@@ -14,6 +14,8 @@ void Request::generateMapError(ServerConfigs serv, int port)
 
 Request::Request(std::string request, ServerConfigs serv)
 {
+	if (request == "")
+		return;
 	_full = request;
 	getData(request);
 	getInfo(request);

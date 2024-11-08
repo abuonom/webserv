@@ -1,12 +1,6 @@
 #include "../hpp/Server.hpp"
 #define BUFFER_SIZE 1024
 
-#include <iostream>
-#include <string>
-#include <vector>
-#include <cctype>
-#include <cstdlib> // Per std::atoi
-
 
 bool validateRequestLine(const std::string &line) {
 	// Elenco dei metodi HTTP validi
@@ -38,7 +32,6 @@ bool validateRequestLine(const std::string &line) {
 bool validateHeaderLine(const std::string &line) {
 	// Controlla che la linea contenga il carattere ':' seguito da uno spazio
 	std::size_t colonPos = line.find_first_of(':');
-	std::cout << line<< std::endl;
 	if (colonPos == std::string::npos || colonPos == 0 || colonPos == line.length() - 1) {
 		return false;
 	}
@@ -54,26 +47,25 @@ bool validateHttpRequest(const std::string &request) {
 	bool isFirstLine = true;
 
 	while (std::getline(stream, line)) {
-		// Rimuove eventuali spazi alla fine della linea
-		if (!line.empty() && line[line.length() - 1] == '\r') {
+		if (!line.empty() && line[line.length() - 1] == '\r')
 			line.erase(line.length() - 1);
-		}
-		if (isFirstLine) {
-			// Controlla che la prima riga sia nel formato METHOD URL VERSION
+		if (isFirstLine)
+		{
 			if (!validateRequestLine(line)) {
 				std::cerr << "Errore: la prima riga della richiesta non è valida.\n";
 				return false;
 			}
 			isFirstLine = false;
-		} else {
-			if (line.empty()) {
-				break;
-			}
-			// Controlla che ogni altra riga segua il formato "Chiave: Valore"
-			if (!line.empty() && !validateHeaderLine(line)) {
+		}
+		else
+		{
+			if (line.find("Host:") != std::string::npos && !validateHeaderLine(line))
+			{
 				std::cerr << "Errore: l'intestazione non è nel formato corretto.\n";
 				return false;
 			}
+			if (line.empty())
+				break;
 		}
 	}
 	return true;
@@ -221,39 +213,45 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	std::string rec;
 	char buffer[BUFFER_SIZE];
 	memset(buffer, 0, BUFFER_SIZE);
-	int bytes_read = 1;
+	int bytes_read;
 	//Qui avviene il loop ed anche il controllo read < 0 oppure = 0
-	while (bytes_read != 0)
+	while (true)
 	{
-		bytes_read = read(client_fd, buffer, BUFFER_SIZE - 1);
+		bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
 		if (bytes_read < 0)
-			break;
-		for (int i = 0; i < bytes_read; i++)
-			rec += buffer[i];
-	}
-	for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
-	{
-		if (it->fd == client_fd)
 		{
-			_poll_fds.erase(it);
-			break;
+			if (errno == EWOULDBLOCK)
+			{
+				continue;
+			}
+			else
+			{
+				std::cerr << "recv failed: " << strerror(errno) << std::endl;
+				break;
+			}
 		}
+		rec.append(buffer, bytes_read);
+		if (rec.find("Transfer-Encoding: chunked") != std::string::npos && rec.find("\r\n0\r\n\r\n") != std::string::npos)
+			break;
+		else if (rec.find("Transfer-Encoding: chunked") == std::string::npos && rec.find("\r\n\r\n") != std::string::npos)
+			break;
 	}
-	rec += '\0';
-	std::string bad;
 	std::string result;
 	std::cout << "------------" << std::endl;
 	std::cout << rec.c_str() << std::endl;
 	std::cout << "------------" << std::endl;
 	GetMethod get;
+	bool flag = false;
 	if (validateHttpRequest(rec) == false)
 	{
-		std::cout << bad << std::endl;
+		flag = true;
 		result = get.err400("HTTP/1.1");
+		rec.clear();
 	}
 	else
 	{
 		Request request(rec, serverConfigs);
+		flag = (request._connection == "close");
 		rec.clear();
 		PostMethod post;
 		DeleteMethod del;
@@ -268,7 +266,7 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 			result = get.err405(request._version);
 	}
 	std::cout << "**********" << std::endl;
-	std::cout << result.c_str() << std::endl;
+	std::cout << result.substr(0, result.find_first_of("\r\n")) << std::endl;
 	std::cout << "**********" << std::endl;
 	size_t bytes_sent = 0;
 	while (bytes_sent < result.length()) {
@@ -283,6 +281,17 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 		}
 		bytes_sent += sent;
 	}
-	shutdown(client_fd, SHUT_WR);
-	close(client_fd);
+	if (flag == true)
+	{
+		std::cout << "Closing connection" << std::endl;
+		for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
+		{
+			if (it->fd == client_fd)
+			{
+				_poll_fds.erase(it);
+				break;
+			}
+		}
+		close(client_fd);
+	}
 }
