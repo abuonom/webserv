@@ -222,7 +222,7 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 std::string PostMethod::err(int code, std::string version)
 {
 	if (code == 204)
-		return "HTTP/1.1 204 No Content\r\n\r\n";
+		return "HTTP/1.1 405 Method Not Allowed\r\nConnection: close\r\n\r\n";
 	if (code == 400)
 		return err400(version);
 	if (code == 403)

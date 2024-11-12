@@ -47,6 +47,7 @@ std::string Response::err405(std::string version)
 	std::string response;
 	response += version;
 	response += " 405 Method Not Allowed\r\n";
+	response += "Connection: close\r\n";
 	response += "Content-Type: text/html\r\n\r\n";
 	std::string url = "error_pages/405.html";
 	if(error.find(405) != error.end())
