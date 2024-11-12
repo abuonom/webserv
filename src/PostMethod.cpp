@@ -104,8 +104,7 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 	std::string location = req._path;
 	if (req._type.empty() || req._length.empty())
 		return 204;
-	if (!name.empty())
-		location = req._path.substr(0, req._path.find_last_of("/"));
+	location = req._path.substr(0, req._path.find_last_of("/"));
 	if (name == location)
 		location = "";
 	if (serv.configs.find(req.host) == serv.configs.end()) // se trova config
@@ -113,6 +112,7 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 	t_config temp = serv.configs[req.host];
 	bool flag_cgi = false;
 	std::string root = trim(temp.root, '/') + "/" + trim(temp.upload_dir, '/');
+	std::cout << "location = " << location << " name = " << name << std::endl;
 	if (!location.empty())
 	{
 		if (temp.location.find(location) != temp.location.end()) // se trovo location

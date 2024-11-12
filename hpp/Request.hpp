@@ -24,7 +24,7 @@ class Request
 		std::string _boundary;
 		std::string _length;
 		int			host;
-		int			lung;
+		size_t		lung;
 		Request(std::string request, ServerConfigs serv);
 		void getData(std::string request);
 		void getInfo(std::string request);
