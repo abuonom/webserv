@@ -18,24 +18,6 @@ int removeFile(const char *path)
 	return 0;
 }
 
-int	DeleteMethod::checkfile(std::string url, std::string tmp)
-{
-	std::string path = mygetcwd() + "/" + url.substr(0, url.find_last_of("/"));
-	DIR *dir = opendir(path.c_str());
-	if (dir != 0)
-	{
-		dirent *dir_info = readdir(dir);
-		while(dir_info != 0)
-		{
-			if (!strcmp(dir_info->d_name, tmp.c_str()) && dir_info->d_type != DT_DIR)
-				return (1);
-			dir_info = readdir(dir);
-		}
-		closedir(dir);
-	}
-	return (0);
-}
-
 std::string DeleteMethod::generateResponse(Request req, ServerConfigs serv)
 {
 	errorResponse(req.error);

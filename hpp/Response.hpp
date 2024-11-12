@@ -4,6 +4,25 @@
 #include "Request.hpp"
 #include "ServerConfigs.hpp"
 #include <unistd.h>
+#include <fcntl.h>
+#include <cstring>
+#include <iostream>
+#include <fstream>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <errno.h>
+#include <vector>
+#include <algorithm>
+#include <vector>
+#include <poll.h>
+#include <netinet/in.h>
+#include <string>
+#include <sstream>
+#include <signal.h>
+#include <sys/stat.h>
+#include <sys/dir.h>
 
 class Response {
 	public:
@@ -33,6 +52,7 @@ class Response {
 		std::string err501(std::string version);
 		std::string trim(std::string s, char c);
 		std::string mygetcwd();
+		int	checkfile(std::string url, std::string tmp);
 	};
 
 #endif
