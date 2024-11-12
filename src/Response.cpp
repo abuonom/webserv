@@ -81,3 +81,21 @@ std::string Response::getNameFile(std::string url)
 		ret = url.substr(url.find_last_of("/") + 1, url.size());
 	return ret;
 }
+
+int	Response::checkfile(std::string url, std::string tmp)
+{
+	std::string path = mygetcwd() + "/" + url.substr(0, url.find_last_of("/"));
+	DIR *dir = opendir(path.c_str());
+	if (dir != 0)
+	{
+		dirent *dir_info = readdir(dir);
+		while(dir_info != 0)
+		{
+			if (!strcmp(dir_info->d_name, tmp.c_str()) && dir_info->d_type != DT_DIR)
+				return (1);
+			dir_info = readdir(dir);
+		}
+		closedir(dir);
+	}
+	return (0);
+}

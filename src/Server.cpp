@@ -227,7 +227,7 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 		else
 		{
 			max_retries++;
-			if (max_retries < 1000)
+			if (max_retries < 100000000)
 				continue; // Ritenta la lettura
 			else
 				break;
@@ -394,7 +394,7 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	}
 	if (result.find("Connection: close\r\n") != std::string::npos)
 		flag = true;
-	std::cout << "flag = " << flag << std::endl;
+	//std::cout << "flag = " << flag << std::endl;
 	if (flag == true)
 	{
 		std::cout << "Closing connection" << std::endl;

@@ -42,6 +42,9 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 	location = trim(location, '/');
 	if (location == name)
 		location = "";
+	std::string snd = req._path.substr(req._path.find_first_of("/") + 1);
+	if (name.empty() && !snd.empty() && snd != location)
+		name = snd;
 	std::string mycwd = trim(mygetcwd(), '/');
 	if (!strcmp(req._version.c_str(), "HTTP/1.1") && !strcmp(req._version.c_str(), "HTTP/1.0"))
 		return err400("HTTP/1.1");
@@ -108,11 +111,21 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 							{
 								std::string s = "/" + mycwd + "/" + trim(loc.root, '/') + "/"  + location + "/" + name;
 								std::cout << "S = " << s << std::endl;
-								if (access(s.c_str(), F_OK) == 0)
+								if (access(s.c_str(), F_OK) == 0 && (checkfile(s, name) == 1 || !findEXT(name).empty()))
 								{
 									response += "200 OK\r\n";
 									response += "Content-Length: " + getContentLength(s) + "\r\n\r\n";
 									response += getFile(s);
+									return response;
+								}
+								std::string tent = s + "/" + loc.index;
+								if ((access(tent.c_str(), F_OK) == 0))
+								{
+									std::cout << tent << std::endl;
+									response += "200 OK \r\n";
+									response += "Content-Type: text/html\r\n";
+									response += "Content-Length: " + getContentLength(tent) + "\r\n\r\n";
+									response += getFile(tent);
 									return response;
 								}
 								return err404(req._version);
