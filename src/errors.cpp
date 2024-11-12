@@ -33,6 +33,7 @@ std::string Response::err404(std::string version)
 	std::string response;
 	response += version;
 	response += " 404 Not Found\r\n";
+	response += "Connection: close\r\n";
 	response += "Content-Type: text/html\r\n\r\n";
 	std::string url = "error_pages/404.html";
 	if(error.find(404) != error.end())

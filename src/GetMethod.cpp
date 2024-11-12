@@ -38,8 +38,7 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 	std::string name = getNameFile(req._path);
 	name = trim(name, '/');
 	std::string location = req._path;
-	if(!name.empty())
-		location = req._path.substr(0, req._path.find_first_of("/"));
+	location = req._path.substr(0, req._path.find_first_of("/"));
 	location = trim(location, '/');
 	if (location == name)
 		location = "";
@@ -50,6 +49,8 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 	{
 		t_config temp;
 		temp = serv.configs[req.host];
+		std::cout << "location = " << location <<std::endl;
+		std::cout << "name = " << name <<std::endl;
 		if (!location.empty()) //se url contiene location
 		{
 			if (temp.location.find(location) != temp.location.end()) // se trovo location
@@ -105,7 +106,8 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 							}
 							else
 							{
-								std::string s = "/" + mycwd + "/" + trim(temp.root, '/') + "/"  + location + "/" + name;
+								std::string s = "/" + mycwd + "/" + trim(loc.root, '/') + "/"  + location + "/" + name;
+								std::cout << "S = " << s << std::endl;
 								if (access(s.c_str(), F_OK) == 0)
 								{
 									response += "200 OK\r\n";

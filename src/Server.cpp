@@ -219,7 +219,7 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	while (true)
 	{
 		bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
-		std::cout << "n1 = " << bytes_read <<std::endl;
+		///std::cout << "n1 = " << bytes_read <<std::endl;
 		if (bytes_read > 0)
 			rec.append(buffer, bytes_read);
 		else if (bytes_read == 0)
@@ -234,6 +234,20 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 		}
 		if (rec.find("\r\n\r\n") != std::string::npos)
 			break;
+	}
+	if (rec.empty())
+	{
+		std::cout << "Closing connection" << std::endl;
+		for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
+		{
+			if (it->fd == client_fd)
+			{
+				_poll_fds.erase(it);
+				break;
+			}
+		}
+		close(client_fd);
+		return ;
 	}
 	// Verifica se c'è un body
 	std::string::size_type header_end = rec.find("\r\n\r\n");
@@ -257,7 +271,7 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 		while (body.size() < static_cast<size_t>(content_length))
 		{
 			bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
-			std::cout << "n2 = " << bytes_read <<std::endl;
+			//std::cout << "n2 = " << bytes_read <<std::endl;
 			if (bytes_read > 0)
 			{
 				body.append(buffer, bytes_read); // Aggiungi i nuovi dati letti al body
@@ -291,7 +305,7 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 			if (chunk_size_end == std::string::npos)
 			{
 				bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
-				std::cout << "n3 = " << bytes_read <<std::endl;
+				//std::cout << "n3 = " << bytes_read <<std::endl;
 				if (bytes_read > 0)
 					body.append(buffer, bytes_read);
 				else if (bytes_read == 0)
@@ -314,7 +328,7 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 			while (body.size() < chunk_end + 2) // +2 per includere \r\n alla fine del chunk
 			{
 				bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
-				std::cout << "n4 = " << bytes_read <<std::endl;
+				//std::cout << "n4 = " << bytes_read <<std::endl;
 				if (bytes_read > 0)
 					body.append(buffer, bytes_read);
 				else if (bytes_read == 0)
@@ -378,6 +392,8 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 			break;
 		}
 	}
+	if (result.find("Connection: close\r\n") != std::string::npos)
+		flag = true;
 	std::cout << "flag = " << flag << std::endl;
 	if (flag == true)
 	{
