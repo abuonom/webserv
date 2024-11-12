@@ -27,7 +27,7 @@ typedef struct s_config
 	std::string	upload_dir;
 	std::string host;							// host
 	std::string server_names;					// server_name
-	int max_body_size;							// max_body_size
+	size_t max_body_size;							// max_body_size
 	std::vector<std::string> accepted_methods;	// methods
 	std::string index;							// index
 	std::string root;							// root
