@@ -102,14 +102,13 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 	std::string pair;
 	std::string name = getNameFile(req._path);
 	std::string location = req._path;
-	if (req._type.empty() || req._length.empty())
-		return 204;
 	location = req._path.substr(0, req._path.find_last_of("/"));
 	if (name == location)
 		location = "";
 	if (serv.configs.find(req.host) == serv.configs.end()) // se trova config
 		return 400;
 	t_config temp = serv.configs[req.host];
+	std::cout << "max_size = " << temp.max_body_size << std::endl;
 	bool flag_cgi = false;
 	std::string root = trim(temp.root, '/') + "/" + trim(temp.upload_dir, '/');
 	std::cout << "location = " << location << " name = " << name << std::endl;
@@ -143,7 +142,11 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 	}
 	if (accepted == true)
 	{
-		if (req.lung > temp.max_body_size)
+		std::cout << "request length = " << req.lung << std::endl;
+		std::cout << "request chunk = " << req.chunk << std::endl;
+		if (req.lung == 0 && req.chunk == 0)
+			return 204;
+		if (req.lung > temp.max_body_size || req.chunk > temp.max_body_size)
 			return 413;
 		std::string tmp = "/" + trim(mygetcwd(), '/') + "/" + root + "/";
 		create_directory(tmp);
@@ -198,7 +201,7 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 			int stat = save_file_from_request(req, root);
 			return stat;
 		}
-		else if (req._type == "text/plain")
+		else
 		{
 			std::string s = trim(mygetcwd(), '/');
 			if (name.empty())
@@ -213,8 +216,6 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 			file.close();
 			return 200;
 		}
-		else
-			return 415;
 	}
 	return 405;
 }
@@ -222,7 +223,7 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 std::string PostMethod::err(int code, std::string version)
 {
 	if (code == 204)
-		return "HTTP/1.1 405 Method Not Allowed\r\nConnection: close\r\n\r\n";
+		return "HTTP/1.1 405 Method Not Allowed\r\n\r\n";
 	if (code == 400)
 		return err400(version);
 	if (code == 403)

@@ -12,11 +12,18 @@ void Request::generateMapError(ServerConfigs serv, int port)
 	}
 }
 
+void Request::initialize()
+{
+	lung = 0;
+	chunk = 0;
+}
+
 Request::Request(std::string request, ServerConfigs serv)
 {
 	if (request == "")
 		return;
 	_full = request;
+	initialize();
 	getData(request);
 	getInfo(request);
 	std::stringstream ss(_host);

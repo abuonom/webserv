@@ -4,7 +4,7 @@ Response::Response()
 {
 }
 
-void Response::errorResponse(std::map<int, std::string> map)
+void Response::errorResponse(const std::map<int, std::string>& map)
 {
 	error = map;
 }

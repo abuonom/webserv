@@ -160,7 +160,7 @@ void ServerConfigs::validateAndFillDefaults()
 		if (config.server_names.empty())
 			config.server_names = "localhost"; // Valore di default per server_names
 		if (config.max_body_size == 0)
-			config.max_body_size = 1000000; // Valore di default per max_body_size
+			config.max_body_size = 1000000000; // Valore di default per max_body_size
 		// if (config.index.empty())
 		// config.index = "index.html"; // Valore di default per index
 		// if (config.root.empty())
@@ -261,7 +261,7 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 			inGlobalBlock = false;		// Stop reading global params
 			currentConfig = t_config(); // Reset for new server block
 		}
-		
+
 		// Parsing dei blocchi server e location
 		if (inServerBlock && line.find("location ") != std::string::npos && line.find("[") != std::string::npos)
 		{

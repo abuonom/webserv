@@ -29,7 +29,7 @@ class Response {
 		char **env;
 		std::map<std::string, std::string> data_map;
 		std::map<int, std::string> error;
-		void errorResponse(std::map<int, std::string> map);
+		void errorResponse(const std::map<int, std::string>& map);
 		Response(std::map<int, std::string>map);
 		Response();
 		std::string findEXT(std::string filename);

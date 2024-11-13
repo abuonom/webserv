@@ -25,12 +25,14 @@ class Request
 		std::string _length;
 		int			host;
 		size_t		lung;
+		size_t		chunk;
 		Request(std::string request, ServerConfigs serv);
 		void getData(std::string request);
 		void getInfo(std::string request);
 		void divide_url(std::string url);
 		std::map<int, std::string> error;
 		void generateMapError(ServerConfigs serv, int port);
+		void initialize();
 };
 
 #endif

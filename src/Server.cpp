@@ -227,7 +227,7 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 		else
 		{
 			max_retries++;
-			if (max_retries < 100000000)
+			if (max_retries < 100000)
 				continue; // Ritenta la lettura
 			else
 				break;
@@ -258,7 +258,7 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	int content_length = 0;
 	bool flag = false;
 	//std::cout <<"chunked = " << is_chunked <<std::endl;
-
+	size_t chunktot = 0;
 	//
 	// Se abbiamo un Content-Length, aggiungi a rec il body
 	if (content_length_pos != std::string::npos)
@@ -297,7 +297,7 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	else if (is_chunked)
 	{
 		//std::cout << "AA" <<std::endl;
-		flag = true;
+		//flag = true;
 		body = rec.substr(header_end + 4); // Parte di body già ricevuta
 		while (true)
 		{
@@ -318,6 +318,7 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 			int chunk_size;
 			chunk_size_stream >> std::hex >> chunk_size;
 			std::cout << "chunk_size = " << chunk_size << std::endl;
+			chunktot += chunk_size;
 			if (chunk_size == 0)
 				break; // Ultimo chunk, interrompi il ciclo
 
@@ -356,6 +357,8 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	else
 	{
 		Request request(rec, serverConfigs);
+		// std::cout << chunktot << " ---" << std::endl;
+		request.chunk = chunktot;
 		if (flag == false)
 			flag = (request._connection == "close");
 		PostMethod post;
