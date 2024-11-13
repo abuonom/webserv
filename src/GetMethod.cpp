@@ -52,8 +52,8 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 	{
 		t_config temp;
 		temp = serv.configs[req.host];
-		std::cout << "location = " << location <<std::endl;
-		std::cout << "name = " << name <<std::endl;
+		//std::cout << "location = " << location <<std::endl;
+		//std::cout << "name = " << name <<std::endl;
 		if (!location.empty()) //se url contiene location
 		{
 			if (temp.location.find(location) != temp.location.end()) // se trovo location
@@ -110,7 +110,7 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 							else
 							{
 								std::string s = "/" + mycwd + "/" + trim(loc.root, '/') + "/"  + location + "/" + name;
-								std::cout << "S = " << s << std::endl;
+								//std::cout << "S = " << s << std::endl;
 								if (access(s.c_str(), F_OK) == 0 && (checkfile(s, name) == 1 || !findEXT(name).empty()))
 								{
 									response += "200 OK\r\n";
@@ -121,7 +121,7 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 								std::string tent = s + "/" + loc.index;
 								if ((access(tent.c_str(), F_OK) == 0))
 								{
-									std::cout << tent << std::endl;
+									//std::cout << tent << std::endl;
 									response += "200 OK \r\n";
 									response += "Content-Type: text/html\r\n";
 									response += "Content-Length: " + getContentLength(tent) + "\r\n\r\n";

@@ -15,6 +15,7 @@ void Response::env_cgi(Request req)
 	tmp_env["SERVER_PROTOCOL"] = req._version;
 	tmp_env["UPLOAD_PATH"] = s + "/uploads/";
 	tmp_env["QUERY_STRING"] = req._query;
+	tmp_env["PATH_INFO"] = "/test";
 
 	env = new char*[tmp_env.size() + 1];  // +1 per l'elemento nullo finale
 	int i = 0;
@@ -35,6 +36,8 @@ const char *commandSelect(std::string ext)
 		ret = "/usr/bin/python3";
 	if (ext == ".php")
 		ret = "/opt/homebrew/bin/php";
+	if (ext == ".bla")
+		ret = "./cgi_tester";
 	return ret;
 }
 
@@ -43,6 +46,7 @@ char **args_create(std::string path)
 	std::string ext = path.substr(path.find_last_of("."), path.length());
 	std::string cmd = commandSelect(ext);
 	std::string full_path = path;
+	//std::cout << "full_path = " << full_path << std::endl;
 
 	char **ret;
 	ret = new char *[3];

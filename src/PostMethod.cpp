@@ -108,10 +108,10 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 	if (serv.configs.find(req.host) == serv.configs.end()) // se trova config
 		return 400;
 	t_config temp = serv.configs[req.host];
-	std::cout << "max_size = " << temp.max_body_size << std::endl;
+	//std::cout << "max_size = " << temp.max_body_size << std::endl;
 	bool flag_cgi = false;
 	std::string root = trim(temp.root, '/') + "/" + trim(temp.upload_dir, '/');
-	std::cout << "location = " << location << " name = " << name << std::endl;
+	//std::cout << "location = " << location << " name = " << name << std::endl;
 	if (!location.empty())
 	{
 		if (temp.location.find(location) != temp.location.end()) // se trovo location
@@ -142,8 +142,8 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 	}
 	if (accepted == true)
 	{
-		std::cout << "request length = " << req.lung << std::endl;
-		std::cout << "request chunk = " << req.chunk << std::endl;
+		//std::cout << "request length = " << req.lung << std::endl;
+		//std::cout << "request chunk = " << req.chunk << std::endl;
 		if (req.lung == 0 && req.chunk == 0)
 			return 204;
 		if (req.lung > temp.max_body_size || req.chunk > temp.max_body_size)
@@ -152,10 +152,11 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 		create_directory(tmp);
 		if (access(tmp.c_str(), F_OK) != 0)
 			return 500;
-		if (flag_cgi == true && (findEXT(name) == ".py" || findEXT(name) == ".php"))
+		if (flag_cgi == true && (findEXT(name) == ".py" || findEXT(name) == ".php" || findEXT(name) == ".bla"))
 		{
 			req._path = "/" + trim(mygetcwd(), '/') + "/" + trim(temp.location[location].root, '/') + "/" + location + "/" + name;
 			postResponse = cgiRequest(req);
+			//std::cout << "##########\n" << postResponse << "\n##########\n";
 			return 200;
 		}
 		if (req._type == "application/x-www-form-urlencoded")
@@ -254,10 +255,10 @@ std::string PostMethod::generateResponse(Request req, ServerConfigs serv)
 	code = fillMap(req, serv);
 	if (code != 200)
 		return (err(code, req._version));
-	if (postResponse != "")
+	if (!postResponse.empty())
 	{
-		response += "200 OK\r\n";
-		response += "Content-Type: text/html\r\n\r\n";
+		size_t pos = postResponse.find("Status:");
+		postResponse.erase(pos, 7);
 		response += postResponse;
 		return response;
 	}
