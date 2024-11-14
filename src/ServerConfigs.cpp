@@ -62,7 +62,12 @@ bool ServerConfigs::isValidKey(const std::string &key, const std::string &type) 
 		return std::find(serverKeys.begin(), serverKeys.end(), key) != serverKeys.end();
 	else if (type == "LOCATION")
 		return std::find(locationKeys.begin(), locationKeys.end(), key) != locationKeys.end();
-	else
+	else if (type == "CGI")
+	{
+		//verifico se la chiave inizia con un punto
+		if (key[0] == '.')
+			return true;
+	}
 		return false;
 }
 
@@ -75,7 +80,11 @@ void ServerConfigs::printConfigs() const
 	{
 		std::cout << "  " << it->first << ": " << it->second << std::endl;
 	}
-
+	std::cout << "CGI Interpreters:" << std::endl;
+	for (std::map<std::string, std::string>::const_iterator it = cgimap.begin(); it != cgimap.end(); ++it)
+	{
+		std::cout << "  " << it->first << ": " << it->second << std::endl;
+	}
 	for (std::map<int, t_config>::const_iterator it = configs.begin(); it != configs.end(); ++it)
 	{
 		const t_config &config = it->second;
@@ -200,6 +209,7 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 	bool inServerBlock = false;
 	bool inLocationBlock = false;
 	bool inGlobalBlock = true; // Variabile per controllare se siamo nel blocco globale
+	bool inCgiBlock = false;
 	std::string currentLocationPath;
 
 	// Controlla se il file è vuoto
@@ -213,9 +223,7 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 	{
 		line = trim(line);
 		if (line.empty() || line[0] == '#')
-		{
 			continue; // Skip empty lines and comments
-		}
 
 		// Verifica che la riga termini con ";" e non sia una riga di inizio server o location
 		if (line.find("{") == std::string::npos && line.find("}") == std::string::npos &&
@@ -253,7 +261,21 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 				}
 			}
 		}
-
+		if (line.find("cgi {") != std::string::npos || line.find("}") != std::string::npos)
+		{
+			inCgiBlock = !inCgiBlock;
+			inGlobalBlock = false;
+		}
+		if (inCgiBlock)
+		{
+			if (isValidKey(line, "CGI"))
+			{
+				size_t spacePos = line.find("\t");
+				std::string key = line.substr(0, spacePos);
+				std::string value = trim(line.substr(spacePos + 1));
+				cgimap[key] = value;
+			}
+		}
 		// Inizio di un blocco server
 		if (line.find("server {") != std::string::npos)
 		{

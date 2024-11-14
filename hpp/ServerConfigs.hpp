@@ -48,7 +48,7 @@ public:
 	int max_clients;
 	std::map<int, std::string> g_error_pages; // Mappa delle error pages
 	std::map<int, t_config> configs;		// Mappa delle configurazioni per ciascun server
-
+	std::map<std::string,std::string> cgimap; // Mappa dei CGI interpreter
 private:
 	bool isValidKey(const std::string &key, const std::string &type) const;
 
