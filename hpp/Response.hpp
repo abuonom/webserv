@@ -39,7 +39,7 @@ class Response {
 		std::string getFile(std::string path);
 		std::string getContentLength(std::string path);
 		std::string getExtension(std::string path, std::string accepted);
-		std::string cgiRequest(Request req);
+		std::string cgiRequest(Request req, std::map<std::string, std::string> map);
 		virtual ~Response(){};
 		std::string getNameFile(std::string url);
 		std::string err400(std::string version);

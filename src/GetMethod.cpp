@@ -85,13 +85,13 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 							response += autoindexResponse(s , loc.root + "/" + location);
 							return response;
 						}
-						if ((findEXT(name) == ".py" || findEXT(name) == ".php") && loc.cgi == "on")
+						if (serv.cgimap.find(findEXT(name)) && loc.cgi == "on")
 						{
 							req._path = "/" + mycwd + "/" + loc.root + "/" + location + "/" + name;
 							if (access(req._path.c_str(), F_OK) != 0)
 								return err404(req._version);
 							response += "200 OK \r\n\r\n";
-							response += cgiRequest(req);
+							response += cgiRequest(req, serv.cgimap);
 							return response;
 						}
 						else
