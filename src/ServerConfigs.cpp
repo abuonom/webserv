@@ -81,7 +81,7 @@ void ServerConfigs::printConfigs() const
 		std::cout << "  " << it->first << ": " << it->second << std::endl;
 	}
 	std::cout << "CGI Interpreters:" << std::endl;
-	for (std::map<std::string, std::string>::const_iterator it = cgi_interpreter.begin(); it != cgi_interpreter.end(); ++it)
+	for (std::map<std::string, std::string>::const_iterator it = cgimap.begin(); it != cgimap.end(); ++it)
 	{
 		std::cout << "  " << it->first << ": " << it->second << std::endl;
 	}
@@ -273,7 +273,7 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 				size_t spacePos = line.find("\t");
 				std::string key = line.substr(0, spacePos);
 				std::string value = trim(line.substr(spacePos + 1));
-				cgi_interpreter[key] = value;
+				cgimap[key] = value;
 			}
 		}
 		// Inizio di un blocco server
