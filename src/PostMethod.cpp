@@ -152,7 +152,7 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 		create_directory(tmp);
 		if (access(tmp.c_str(), F_OK) != 0)
 			return 500;
-		if (flag_cgi == true && serv.cgimap.find(findEXT(name)))
+		if (flag_cgi == true && serv.cgimap.find(findEXT(name)) != serv.cgimap.end())
 		{
 			req._path = "/" + trim(mygetcwd(), '/') + "/" + trim(temp.location[location].root, '/') + "/" + location + "/" + name;
 			postResponse = cgiRequest(req, serv.cgimap);
