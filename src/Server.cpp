@@ -1,5 +1,8 @@
 #include "../hpp/Server.hpp"
 #define BUFFER_SIZE 1024
+#include <unistd.h>
+
+
 
 bool validateRequestLine(const std::string &line)
 {
@@ -93,7 +96,7 @@ Server::Server(const ServerConfigs &serverConfigs)
 		if (server_fd == -1)
 		{
 			std::cerr << "socket failed for port " << port << ": " << strerror(errno) << std::endl;
-			_exit(1);
+			exit(1);
 		}
 
 		// Configuriamo l'indirizzo del server per il binding
@@ -107,7 +110,7 @@ Server::Server(const ServerConfigs &serverConfigs)
 		{
 			std::cerr << "bind failed for port " << port << ": " << strerror(errno) << std::endl;
 			close(server_fd);
-			_exit(1);
+			exit(1);
 		}
 
 		// Impostiamo il socket in modalità di ascolto
@@ -115,7 +118,7 @@ Server::Server(const ServerConfigs &serverConfigs)
 		{
 			std::cerr << "listen failed for port " << port << ": " << strerror(errno) << std::endl;
 			close(server_fd);
-			_exit(1);
+			exit(1);
 		}
 
 		// Impostiamo il socket in modalità non bloccante
@@ -154,12 +157,12 @@ void Server::setNonBlocking(int fd)
 	if (flags < 0)
 	{
 		std::cerr << "fcntl F_GETFL failed: " << strerror(errno) << std::endl;
-		_exit(1);
+		exit(1);
 	}
 	if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0)
 	{
 		std::cerr << "fcntl F_SETFL failed: " << strerror(errno) << std::endl;
-		_exit(1);
+		exit(1);
 	}
 }
 
@@ -184,7 +187,7 @@ void Server::run(const ServerConfigs &serverConfigs)
 		if (errno != EINTR && poll_count < 0)
 		{
 			perror("poll error");
-			_exit(1);
+			exit(1);
 		}
 
 		// Controlliamo i file descriptor per nuovi eventi
@@ -311,16 +314,19 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	else if (is_chunked)
 	{
 		std::string final_body;
-		// flag = true;
 		body = rec.substr(header_end + 4); // Parte di body già ricevuta
+		if (body.find("\r\n") != std::string::npos)
+		{
+			size_t pos = body.find("\r\n");
+			body = body.substr(pos + 2);
+		}
+		// std::cout << "=========\n" << body << "\n=============\n";
 		while (true)
 		{
-			int chunk_size;
-			size_t chunk_size_end = body.find("\r\n");
+			size_t chunk_size_end = body.find_first_of("\r\n");
 			if (chunk_size_end == std::string::npos)
 			{
 				bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
-				// std::cout << "n3 = " << bytes_read <<std::endl;
 				if (bytes_read > 0)
 					body.append(buffer, bytes_read);
 				else if (bytes_read == 0)
@@ -328,39 +334,47 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 				continue;  // Riprova a cercare la dimensione del chunk
 			}
 
+			// std::cout << "find of separator = " << chunk_size_end << std::endl;
 			// Leggi la dimensione del chunk
-			std::istringstream chunk_size_stream(body.substr(0, chunk_size_end));
-			chunk_size_stream >> std::hex >> chunk_size;
-			// std::cout << "chunk_size = " << chunk_size << std::endl;
-			chunktot += chunk_size;
+			std::string chunk_size = body.substr(0, chunk_size_end);
+			// std::cout << "chunk size = " << chunk_size <<std::endl;
+			int num = strtol(chunk_size.c_str(), NULL, 16);
+			chunktot += num;
 
-			if (chunk_size == 0)
+			//std::cout << "{{{{{{{" << num << "}}}}}}}" << std::endl;
+
+			if (num == 0)
 				break; // Ultimo chunk, interrompi il ciclo
-			// Calcola la fine del chunk corrente
-			size_t chunk_data_start = chunk_size_end + 2;		   // Inizio dei dati dopo `\r\n`
-			size_t chunk_data_end = chunk_data_start + chunk_size; // Fine dei dati
 
-			// Leggi il corpo del chunk (se necessario)
-			while (body.size() < chunk_data_end + 2) // +2 per includere \r\n alla fine del chunk
+			// Calcola la posizione di inizio e fine del chunk
+			size_t chunk_data_start = chunk_size_end + 1; // Dopo `\r\n`
+			size_t chunk_data_end = chunk_data_start + num - 1;
+
+			// std::cout << "data_start = " << chunk_data_start << std::endl;
+			// std::cout << "data_end = " << chunk_data_end << std::endl;
+
+			// Assicurati che l'intero chunk sia stato ricevuto
+			while (body.size() < chunk_data_end + 2) // +2 per includere `\r\n`
 			{
-				//std::cout << "AA" << std::endl;
 				bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
-				// std::cout << "n = " << buffer <<std::endl;
 				if (bytes_read > 0)
 					body.append(buffer, bytes_read);
 				else if (bytes_read == 0)
-					break; // Se la connessione è chiusa, esci dal ciclo
+					break;
 			}
-			final_body += body.substr(chunk_data_start, chunk_size);
-			// Rimuovi il chunk appena letto, incluso "\r\n"
+
+			// Aggiungi il contenuto del chunk al corpo finale
+			final_body += body.substr(chunk_data_start, num);
+
+			// Rimuovi il chunk appena letto, inclusi `\r\n`
 			body = body.substr(chunk_data_end + 2);
+			// std::cout << "body aggiornato = \n" << body << std::endl;
 		}
-		// std::cout << "[ " << body << " ]" << std::endl;
-		rec = rec + final_body;
+		rec = rec.substr(0, header_end + 4) + final_body;
 	}
 
 	std::cout << "------------" << std::endl;
-	std::cout << rec << std::endl;
+	std::cout << rec.substr(0, rec.find("\r\n\r\n")) << std::endl;
 	std::cout << "------------" << std::endl;
 	std::string result;
 	GetMethod get;
@@ -393,12 +407,12 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	}
 	// result = result.substr(0, result.find_first_of("\r\n"));
 	std::cout << "**********" << std::endl;
-	std::cout << result << std::endl;
+	std::cout << result.substr(0, result.find_first_of("\r\n")) << std::endl;
 	std::cout << "**********" << std::endl;
 	size_t bytes_sent = 0;
 	while (bytes_sent < result.length())
 	{
-		int sent = send(client_fd, result.c_str() + bytes_sent, result.length() - bytes_sent, 0);
+		int sent = send(client_fd, result.c_str() + bytes_sent, result.length() - bytes_sent, MSG_NOSIGNAL);
 		if (sent > 0)
 		{
 			bytes_sent += sent;

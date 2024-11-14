@@ -156,7 +156,6 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 		{
 			req._path = "/" + trim(mygetcwd(), '/') + "/" + trim(temp.location[location].root, '/') + "/" + location + "/" + name;
 			postResponse = cgiRequest(req, serv.cgimap);
-			//std::cout << "##########\n" << postResponse << "\n##########\n";
 			return 200;
 		}
 		if (req._type == "application/x-www-form-urlencoded")

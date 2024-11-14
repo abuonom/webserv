@@ -85,7 +85,8 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 							response += autoindexResponse(s , loc.root + "/" + location);
 							return response;
 						}
-						if (serv.cgimap.find(findEXT(name)) != serv.cgimap.end() && loc.cgi == "on")
+						//ultima condizione nell'if per tester
+						if (serv.cgimap.find(findEXT(name)) != serv.cgimap.end() && loc.cgi == "on" && findEXT(name) != ".bla")
 						{
 							req._path = "/" + mycwd + "/" + loc.root + "/" + location + "/" + name;
 							if (access(req._path.c_str(), F_OK) != 0)
