@@ -29,22 +29,10 @@ void Response::env_cgi(Request req)
 	tmp_env.clear();
 }
 
-const char *commandSelect(std::string ext)
-{
-	const char *ret = 0;
-	if (ext == ".py")
-		ret = "/usr/bin/python3";
-	if (ext == ".php")
-		ret = "/opt/homebrew/bin/php";
-	if (ext == ".bla")
-		ret = "./cgi_tester";
-	return ret;
-}
-
-char **args_create(std::string path)
+char **args_create(std::string path, const char* command)
 {
 	std::string ext = path.substr(path.find_last_of("."), path.length());
-	std::string cmd = commandSelect(ext);
+	std::string cmd = command;
 	std::string full_path = path;
 	//std::cout << "full_path = " << full_path << std::endl;
 
@@ -67,7 +55,7 @@ char **args_create(std::string path)
 	return ret;
 }
 
-std::string Response::cgiRequest(Request req)
+std::string Response::cgiRequest(Request req, std::map<std::string, std::string> map)
 {
 	env_cgi(req);
 	std::string newBody;
@@ -78,8 +66,8 @@ std::string Response::cgiRequest(Request req)
 	int fdIn = fileno(fileIn);
 	int fdOut = fileno(fileOut);
 	int ret = 1;
-	const char *s1 = commandSelect(findEXT(req._path));
-	char **s2 = args_create(req._path);
+	const char *s1 = map[findEXT(req._path)].c_str();
+	char **s2 = args_create(req._path, s1);
 
 	write(fdIn, req._body.c_str(), req._body.size());
 	lseek(fdIn, 0, SEEK_SET);

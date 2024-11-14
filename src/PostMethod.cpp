@@ -152,10 +152,10 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 		create_directory(tmp);
 		if (access(tmp.c_str(), F_OK) != 0)
 			return 500;
-		if (flag_cgi == true && (findEXT(name) == ".py" || findEXT(name) == ".php" || findEXT(name) == ".bla"))
+		if (flag_cgi == true && serv.cgimap.find(findEXT(name)))
 		{
 			req._path = "/" + trim(mygetcwd(), '/') + "/" + trim(temp.location[location].root, '/') + "/" + location + "/" + name;
-			postResponse = cgiRequest(req);
+			postResponse = cgiRequest(req, serv.cgimap);
 			//std::cout << "##########\n" << postResponse << "\n##########\n";
 			return 200;
 		}
@@ -257,8 +257,9 @@ std::string PostMethod::generateResponse(Request req, ServerConfigs serv)
 		return (err(code, req._version));
 	if (!postResponse.empty())
 	{
-		size_t pos = postResponse.find("Status:");
-		postResponse.erase(pos, 7);
+		response += "200 OK\r\n\r\n";
+		// size_t pos = postResponse.find("Status:");
+		// postResponse.erase(pos, 7);
 		response += postResponse;
 		return response;
 	}
