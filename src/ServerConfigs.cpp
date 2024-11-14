@@ -296,9 +296,8 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 			// Verifica che il percorso sia valido
 			if (start != std::string::npos && end != std::string::npos && end > start)
 			{
-				currentLocationPath = line.substr(start, end - start);								 // Estrai il percorso della location
-				currentLocationPath = trim(currentLocationPath);									 // Rimuovi eventuali spazi
-				currentLocationPath = currentLocationPath.substr(1, currentLocationPath.size() - 2); // Rimuovi eventuali virgolette
+				currentLocationPath = line.substr(start, end - start);							 // Estrai il percorso della location
+				currentLocationPath = trim(currentLocationPath);
 			}
 		}
 		else if (inServerBlock && !inLocationBlock && line.find("}") != std::string::npos)
