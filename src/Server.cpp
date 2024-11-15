@@ -2,8 +2,6 @@
 #define BUFFER_SIZE 1024
 #include <unistd.h>
 
-
-
 bool validateRequestLine(const std::string &line)
 {
 	// Elenco dei metodi HTTP validi
@@ -183,7 +181,7 @@ void Server::run(const ServerConfigs &serverConfigs)
 	while (true)
 	{
 		// Eseguiamo il polling su tutti i file descriptor
-		int poll_count = poll(_poll_fds.data(), _poll_fds.size(), -1);
+		int poll_count = poll(_poll_fds.data(), _poll_fds.size(), 0);
 		if (errno != EINTR && poll_count < 0)
 		{
 			perror("poll error");
@@ -232,7 +230,6 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	while (true)
 	{
 		bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
-		/// std::cout << "n1 = " << bytes_read <<std::endl;
 		if (bytes_read > 0)
 			rec.append(buffer, bytes_read);
 		else if (bytes_read == 0)
@@ -240,7 +237,7 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 		else
 		{
 			max_retries++;
-			if (max_retries < 10000)
+			if (max_retries < 10000000)
 				continue; // Ritenta la lettura
 			else
 				break;
@@ -262,7 +259,6 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 		close(client_fd);
 		return;
 	}
-	// Verifica se c'è un body
 	std::string::size_type header_end = rec.find("\r\n\r\n");
 	std::string headers = rec.substr(0, header_end);
 	std::string body;
@@ -270,35 +266,26 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	std::string::size_type content_length_pos = headers.find("Content-Length:");
 	int content_length = 0;
 	bool flag = false;
-	// std::cout <<"chunked = " << is_chunked <<std::endl;
 	size_t chunktot = 0;
-	//
+	int retries = 0;
+	std::string final_body = "";
 	// Se abbiamo un Content-Length, aggiungi a rec il body
 	if (content_length_pos != std::string::npos)
 	{
 		std::istringstream iss(headers.substr(content_length_pos + 15));
 		iss >> content_length;			   // Estrai il valore di Content-Length
 		body = rec.substr(header_end + 4); // Aggiungi il corpo già ricevuto (se presente)
-
-		// Continua a leggere i dati fino a raggiungere il content_length
 		while (body.size() < static_cast<size_t>(content_length))
 		{
 			bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
-			// std::cout << "n2 = " << bytes_read <<std::endl;
 			if (bytes_read > 0)
-			{
 				body.append(buffer, bytes_read); // Aggiungi i nuovi dati letti al body
-			}
 			else if (bytes_read == 0)
-			{
 				break; // Connessione chiusa
-			}
 			else
 			{
 				if (errno == EWOULDBLOCK || errno == EAGAIN)
-				{
 					continue; // Retry se il socket non è pronto
-				}
 				else
 				{
 					std::cerr << "recv failed: " << strerror(errno) << std::endl;
@@ -308,73 +295,51 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 		}
 		rec = rec.substr(0, header_end + 4) + body;
 	}
-
-	// Alla fine, rec conterrà gli header + body completo
-	// Se Transfer-Encoding è chunked, leggi il body a blocchi
 	else if (is_chunked)
 	{
-		std::string final_body;
-		body = rec.substr(header_end + 4); // Parte di body già ricevuta
-		if (body.find("\r\n") != std::string::npos)
+		body = rec.substr(header_end + 4);
+		if (body.find("0\r\n\r\n") == std::string::npos)
 		{
-			size_t pos = body.find("\r\n");
-			body = body.substr(pos + 2);
-		}
-		// std::cout << "=========\n" << body << "\n=============\n";
-		while (true)
-		{
-			size_t chunk_size_end = body.find_first_of("\r\n");
-			if (chunk_size_end == std::string::npos)
+			while (true)
 			{
 				bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
 				if (bytes_read > 0)
 					body.append(buffer, bytes_read);
 				else if (bytes_read == 0)
-					break; // Se la connessione è chiusa, esci dal ciclo
-				continue;  // Riprova a cercare la dimensione del chunk
-			}
-
-			// std::cout << "find of separator = " << chunk_size_end << std::endl;
-			// Leggi la dimensione del chunk
-			std::string chunk_size = body.substr(0, chunk_size_end);
-			// std::cout << "chunk size = " << chunk_size <<std::endl;
-			int num = strtol(chunk_size.c_str(), NULL, 16);
-			chunktot += num;
-
-			//std::cout << "{{{{{{{" << num << "}}}}}}}" << std::endl;
-
-			if (num == 0)
-				break; // Ultimo chunk, interrompi il ciclo
-
-			// Calcola la posizione di inizio e fine del chunk
-			size_t chunk_data_start = chunk_size_end + 1; // Dopo `\r\n`
-			size_t chunk_data_end = chunk_data_start + num - 1;
-
-			// std::cout << "data_start = " << chunk_data_start << std::endl;
-			// std::cout << "data_end = " << chunk_data_end << std::endl;
-
-			// Assicurati che l'intero chunk sia stato ricevuto
-			while (body.size() < chunk_data_end + 2) // +2 per includere `\r\n`
-			{
-				bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
-				if (bytes_read > 0)
-					body.append(buffer, bytes_read);
-				else if (bytes_read == 0)
+					break; // connessione chiusa
+				else
+				{
+					retries++;
+					if (retries < 10000000)
+						continue; // Ritenta la lettura
+					else
+						break;
+				}
+				if (rec.find("0\r\n\r\n") != std::string::npos)
 					break;
 			}
-
-			// Aggiungi il contenuto del chunk al corpo finale
-			final_body += body.substr(chunk_data_start, num);
-
-			// Rimuovi il chunk appena letto, inclusi `\r\n`
-			body = body.substr(chunk_data_end + 2);
-			// std::cout << "body aggiornato = \n" << body << std::endl;
 		}
+		size_t num_pos = body.find("\r\n");
+		std::string number = body.substr(0, num_pos);
+		size_t num = strtol(number.c_str(), NULL, 16);
+		chunktot += num;
+		final_body.append(body.substr(num_pos + 2, num));
+		body = body.substr(num + num_pos + 4);
+		while (num != 0)
+		{
+			num_pos = body.find("\r\n");
+			number = body.substr(0, num_pos);
+			num = strtol(number.c_str(), NULL, 16);
+			chunktot += num;
+			if (num != 0)
+				final_body.append(body.substr(num_pos + 2, num));
+			body = body.substr(num + num_pos + 4);
+		}
+		final_body += "\r\n\r\n";
 		rec = rec.substr(0, header_end + 4) + final_body;
 	}
-
 	std::cout << "------------" << std::endl;
-	std::cout << rec.substr(0, rec.find("\r\n\r\n")) << std::endl;
+	std::cout << rec.substr(0, rec.find("\r\n\r\n"));
 	std::cout << "------------" << std::endl;
 	std::string result;
 	GetMethod get;
@@ -407,26 +372,24 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	}
 	// result = result.substr(0, result.find_first_of("\r\n"));
 	std::cout << "**********" << std::endl;
-	std::cout << result.substr(0, result.find_first_of("\r\n")) << std::endl;
+	std::cout << result.substr(0, result.find("\r\n\r\n"));
 	std::cout << "**********" << std::endl;
 	size_t bytes_sent = 0;
+	size_t send_try = 0;
 	while (bytes_sent < result.length())
 	{
 		int sent = send(client_fd, result.c_str() + bytes_sent, result.length() - bytes_sent, MSG_NOSIGNAL);
 		if (sent > 0)
-		{
 			bytes_sent += sent;
-		}
-		else if (sent == -1 && (errno == EWOULDBLOCK || errno == EAGAIN))
-		{
-			// Il socket non è temporaneamente pronto, riprova
-			continue;
-		}
+		else if (sent == 0)
+			break;
 		else
 		{
-			// Un errore si è verificato durante `send`
-			std::cerr << "send failed: " << strerror(errno) << std::endl;
-			break;
+			send_try++;
+			if (send_try < 10000000)
+				continue; // Ritenta la lettura
+			else
+				break;
 		}
 	}
 	if (result.find("Connection: close\r\n") != std::string::npos)
