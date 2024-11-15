@@ -247,7 +247,7 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	}
 	if (rec.empty())
 	{
-		std::cout << "Closing connection" << std::endl;
+		std::cout <<  "\033[31m" << "\nNo Request: Closing connection\n" << "\033[0m" << std::endl;
 		for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
 		{
 			if (it->fd == client_fd)
@@ -338,9 +338,9 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 		final_body += "\r\n\r\n";
 		rec = rec.substr(0, header_end + 4) + final_body;
 	}
-	std::cout << "------------" << std::endl;
-	std::cout << rec.substr(0, rec.find("\r\n\r\n"));
-	std::cout << "------------" << std::endl;
+	std::cout << "\033[33m" <<  "REQUEST HEADERS" << "\033[0m" << std::endl;
+	std::cout << rec.substr(0, rec.find("\r\n\r\n")) << std::endl;
+	std::cout << "----------------" << std::endl;
 	std::string result;
 	GetMethod get;
 	if (validateHttpRequest(rec) == false)
@@ -351,7 +351,6 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	else
 	{
 		Request request(rec, serverConfigs);
-		// std::cout << chunktot << " ---" << std::endl;
 		request.chunk = chunktot;
 		if (flag == false)
 			flag = (request._connection == "close");
@@ -371,9 +370,9 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 		}
 	}
 	// result = result.substr(0, result.find_first_of("\r\n"));
-	std::cout << "**********" << std::endl;
-	std::cout << result.substr(0, result.find("\r\n\r\n"));
-	std::cout << "**********" << std::endl;
+	std::cout << "\033[32m" << "RESPONSE HEADERS" << "\033[0m" << std::endl;
+	std::cout << result.substr(0, result.find("\r\n\r\n")) << std::endl;
+	std::cout << "----------------" << std::endl;
 	size_t bytes_sent = 0;
 	size_t send_try = 0;
 	while (bytes_sent < result.length())
@@ -394,10 +393,9 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	}
 	if (result.find("Connection: close\r\n") != std::string::npos)
 		flag = true;
-	// std::cout << "flag = " << flag << std::endl;
 	if (flag == true)
 	{
-		std::cout << "Closing connection" << std::endl;
+		std::cout << "\033[31m" << "\nClosing connection\n" << "\033[0m" << std::endl;
 		for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
 		{
 			if (it->fd == client_fd)
