@@ -21,7 +21,6 @@ int PostMethod::save_file_from_request(Request req, std::string root)
 		std::string upcontent = tmp.substr(content_end + 4, tmp.length() - content_end - boundary.length() - 13);
 		std::ofstream upfile;
 		file_path = get_unique_filename(file_path);
-		// std::cout << file_path << std::endl;
 		upfile.open(file_path.c_str());
 		if (!upfile.is_open())
 			return 500;
@@ -108,10 +107,10 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 	if (serv.configs.find(req.host) == serv.configs.end()) // se trova config
 		return 400;
 	t_config temp = serv.configs[req.host];
-	//std::cout << "max_size = " << temp.max_body_size << std::endl;
 	bool flag_cgi = false;
 	std::string root = trim(temp.root, '/') + "/" + trim(temp.upload_dir, '/');
-	//std::cout << "location = " << location << " name = " << name << std::endl;
+	if (location.empty() && temp.location.find("/") != temp.location.end())
+			location = "/";
 	if (!location.empty())
 	{
 		if (temp.location.find(location) != temp.location.end()) // se trovo location
@@ -142,8 +141,6 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 	}
 	if (accepted == true)
 	{
-		//std::cout << "request length = " << req.lung << std::endl;
-		//std::cout << "request chunk = " << req.chunk << std::endl;
 		if (req.lung == 0 && req.chunk == 0)
 			return 204;
 		if (req.lung > temp.max_body_size || req.chunk > temp.max_body_size)
@@ -223,7 +220,7 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 std::string PostMethod::err(int code, std::string version)
 {
 	if (code == 204)
-		return "HTTP/1.1 405 Method Not Allowed\r\nConnection: close\r\n\r\n";
+		return "HTTP/1.1 204 No Content\r\n\r\n";
 	if (code == 400)
 		return err400(version);
 	if (code == 403)

@@ -52,8 +52,8 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 	{
 		t_config temp;
 		temp = serv.configs[req.host];
-		//std::cout << "location = " << location <<std::endl;
-		//std::cout << "name = " << name <<std::endl;
+		if (location.empty() && temp.location.find("/") != temp.location.end())
+			location = "/";
 		if (!location.empty()) //se url contiene location
 		{
 			if (temp.location.find(location) != temp.location.end()) // se trovo location
@@ -62,7 +62,8 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 				loc = temp.location[location];
 				loc.root = trim(loc.root, '/');
 				int flag = 0;
-				location = req._path.substr(0, req._path.find_last_of("/"));
+				if (location != "/")
+					location = req._path.substr(0, req._path.find_last_of("/"));
 				for (size_t i = 0; i < loc.accepted_methods.size(); ++i)
 				{
 					if (loc.accepted_methods[i] == "GET")
@@ -100,6 +101,8 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 							if (name.empty())
 							{
 								std::string temp =	"/" + mycwd + "/" + loc.root + "/"  + location + "/" + trim(loc.index, '/');
+								if (location == "/")
+									temp =	"/" + mycwd + "/" + loc.root + "/" + trim(loc.index, '/');
 								if (loc.index == "" || (access(temp.c_str(), F_OK) != 0))
 									return err404(req._version);
 								response += "200 OK \r\n";
@@ -111,7 +114,6 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 							else
 							{
 								std::string s = "/" + mycwd + "/" + trim(loc.root, '/') + "/"  + location + "/" + name;
-								//std::cout << "S = " << s << std::endl;
 								if (access(s.c_str(), F_OK) == 0 && (checkfile(s, name) == 1 || !findEXT(name).empty()))
 								{
 									response += "200 OK\r\n";
@@ -122,7 +124,6 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 								std::string tent = s + "/" + loc.index;
 								if ((access(tent.c_str(), F_OK) == 0))
 								{
-									//std::cout << tent << std::endl;
 									response += "200 OK \r\n";
 									response += "Content-Type: text/html\r\n";
 									response += "Content-Length: " + getContentLength(tent) + "\r\n\r\n";

@@ -34,7 +34,6 @@ char **args_create(std::string path, const char* command)
 	std::string ext = path.substr(path.find_last_of("."), path.length());
 	std::string cmd = command;
 	std::string full_path = path;
-	//std::cout << "full_path = " << full_path << std::endl;
 
 	char **ret;
 	ret = new char *[3];

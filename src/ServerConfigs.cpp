@@ -145,6 +145,15 @@ static std::string trim(const std::string &str)
 	return "";
 }
 
+std::string ServerConfigs::trim1(std::string s, char c)
+{
+	size_t first = s.find_first_not_of(c);
+	if (first == std::string::npos)
+		return "";
+	size_t last = s.find_last_not_of(c);
+	return s.substr(first, last - first + 1);
+}
+
 void ServerConfigs::validateAndFillDefaults()
 {
 	// Se non ci sono configurazioni, esce
@@ -308,6 +317,8 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 		}
 		else if (inLocationBlock && line.find("]") != std::string::npos)
 		{
+			if (currentLocationPath != "/")
+				currentLocationPath = trim1(currentLocationPath, '/');
 			currentConfig.location[currentLocationPath] = currentLocation; // Salva la location nella mappa
 			inLocationBlock = false;
 		}

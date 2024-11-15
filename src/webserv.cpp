@@ -59,7 +59,7 @@ int main(int argc, char **argv)
 		configs.loadConfig(argv[1]);
 		configs.validateAndFillDefaults();
 	}
-	configs.printConfigs();
+	//configs.printConfigs();
 	g_server = new Server(configs); // Assegna il server al puntatore globale
 	g_server->run(configs);
 
