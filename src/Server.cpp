@@ -182,7 +182,7 @@ void Server::run(const ServerConfigs &serverConfigs)
 	{
 		// Eseguiamo il polling su tutti i file descriptor
 		int poll_count = poll(_poll_fds.data(), _poll_fds.size(), 0);
-		if ( != EINTR && poll_count < 0)
+		if (errno != EINTR && poll_count < 0)
 		{
 			perror("poll error");
 			exit(1);
