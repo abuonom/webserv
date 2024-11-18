@@ -11,11 +11,15 @@ int PostMethod::save_file_from_request(Request req, std::string root)
 	std::string content;
 	std::string tmp = req._body;
 	std::string boundary = req._boundary;
+	//std::cout << "\nBODY = \n" << tmp << std::endl;
 	if (tmp.find("filename=") != std::string::npos)
 	{
 		std::string filename_start = tmp.substr(tmp.find("filename=") + 10);
 		if (name.empty())
 			name = filename_start.substr(0, filename_start.find("\""));
+		//std::cout << "\nname(" << name << ")\n" << std::endl;
+		if (name.empty())
+			return 400;
 		std::string file_path = mygetcwd() + "/" + root + "/" + name;
 		int content_end = tmp.find("\r\n\r\n");
 		std::string upcontent = tmp.substr(content_end + 4, tmp.length() - content_end - boundary.length() - 13);
