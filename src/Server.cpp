@@ -385,7 +385,7 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 		else
 		{
 			send_try++;
-			if (send_try < 10000000)
+			if (send_try < 100000)
 				continue; // Ritenta la lettura
 			else
 				break;
