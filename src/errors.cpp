@@ -5,6 +5,7 @@ std::string Response::err400(std::string version)
 	std::string response;
 	response += version;
 	response += " 400 Bad Request\r\n";
+	response += "Connection: close\r\n";
 	response += "Content-Type: text/html\r\n\r\n";
 	std::string url = "error_pages/400.html";
 	if(error.find(400) != error.end())
@@ -19,6 +20,7 @@ std::string Response::err403(std::string version)
 	std::string response;
 	response += version;
 	response += " 403 Forbidden\r\n";
+	response += "Connection: close\r\n";
 	response += "Content-Type: text/html\r\n\r\n";
 	std::string url = "error_pages/403.html";
 	if(error.find(403) != error.end())
@@ -63,6 +65,7 @@ std::string Response::err413(std::string version)
 	std::string response;
 	response += version;
 	response += " 413 Payload Too Large\r\n";
+	response += "Connection: close\r\n";
 	response += "Content-Type: text/html\r\n\r\n";
 	std::string url = "error_pages/413.html";
 	if(error.find(413) != error.end())
