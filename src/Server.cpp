@@ -182,7 +182,7 @@ void Server::run(const ServerConfigs &serverConfigs)
 	{
 		// Eseguiamo il polling su tutti i file descriptor
 		int poll_count = poll(_poll_fds.data(), _poll_fds.size(), 0);
-		if (errno != EINTR && poll_count < 0)
+		if ( != EINTR && poll_count < 0)
 		{
 			perror("poll error");
 			exit(1);
@@ -279,6 +279,7 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 		body = rec.substr(header_end + 4); // Aggiungi il corpo già ricevuto (se presente)
 		while (body.size() < static_cast<size_t>(content_length))
 		{
+			usleep(20);
 			bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
 			if (bytes_read > 0)
 				body.append(buffer, bytes_read); // Aggiungi i nuovi dati letti al body
@@ -286,13 +287,11 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 				break; // Connessione chiusa
 			else
 			{
-				if (errno == EWOULDBLOCK || errno == EAGAIN)
-					continue; // Retry se il socket non è pronto
+				retries++;
+				if (retries < 200000)
+					continue; // Ritenta la lettura
 				else
-				{
-					std::cerr << "recv failed: " << strerror(errno) << std::endl;
 					break;
-				}
 			}
 		}
 		rec = rec.substr(0, header_end + 4) + body;
