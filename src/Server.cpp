@@ -247,7 +247,8 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	}
 	if (rec.empty())
 	{
-		std::cout <<  "\033[31m" << "\nNO REQUEST: CLOSING CONNECTION\n" << "\033[0m" << std::endl;
+		std::cout << "\033[31m" << "\nNO REQUEST: CLOSING CONNECTION\n"
+				  << "\033[0m" << std::endl;
 		for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
 		{
 			if (it->fd == client_fd)
@@ -304,8 +305,8 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 		{
 			while (true)
 			{
-				bytes_read = recv(client_fd, buffer_new, 32767, 0);
 				usleep(20);
+				bytes_read = recv(client_fd, buffer_new, 32767, 0);
 				if (bytes_read > 0)
 				{
 					body.append(buffer_new, bytes_read);
@@ -343,9 +344,9 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 		final_body += "\r\n\r\n";
 		rec = rec.substr(0, header_end + 4) + final_body;
 	}
-	std::cout << "\033[33m" <<  "REQUEST HEADERS" << "\033[0m" << std::endl;
-	std::cout << rec.substr(0, rec.find("\r\n\r\n")) << std::endl;
 	std::cout << "----------------" << std::endl;
+	std::cout << "\033[33m" << "REQUEST HEADERS" << "\033[0m" << std::endl;
+	std::cout << rec.substr(0, rec.find("\r\n\r\n")) << std::endl << std::endl;
 	std::string result;
 	GetMethod get;
 	if (validateHttpRequest(rec) == false)
@@ -382,6 +383,7 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	size_t send_try = 0;
 	while (bytes_sent < result.length())
 	{
+		usleep(20);
 		int sent = send(client_fd, result.c_str() + bytes_sent, result.length() - bytes_sent, MSG_NOSIGNAL);
 		if (sent > 0)
 			bytes_sent += sent;
@@ -390,18 +392,18 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 		else
 		{
 			send_try++;
-			if (send_try < 100000)
+			if (send_try < 200000)
 				continue; // Ritenta la lettura
 			else
 				break;
 		}
 	}
-	std::cout << "\033[34m" << "\nSENT " << bytes_sent << " bytes\n" << "\033[0m" << std::endl;
+	std::cout << "\033[34m" << "\n" << bytes_sent << " BYTES SENT\n" << "\033[0m" << std::endl;
 	if (result.find("Connection: close\r\n") != std::string::npos)
 		flag = true;
 	if (flag == true)
 	{
-		std::cout << "\033[31m" << "\nCLOSING CONNECTION\n" << "\033[0m" << std::endl;
+		std::cout << "\033[31m" << "CLOSING CONNECTION\n" << "\033[0m" << std::endl;
 		for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
 		{
 			if (it->fd == client_fd)
