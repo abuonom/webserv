@@ -257,11 +257,13 @@ std::string PostMethod::generateResponse(Request req, ServerConfigs serv)
 		return (err(code, req._version));
 	if (!postResponse.empty())
 	{
+		std::ostringstream oss;
+		oss << postResponse.size();
+		std::string size_response = oss.str();
 		response += "200 OK\r\n";
-		size_t pos = postResponse.find("\r\n");
-		postResponse.erase(0, pos + 2);
+		response += "Content-Type: text/html\r\n";
+		response += "Content-Length: " + size_response + "\r\n\r\n";
 		response += postResponse;
-		std::cout << "CGI RESPONSE\n" << response << std::endl;
 		return response;
 	}
 	response += "200 OK\r\n";

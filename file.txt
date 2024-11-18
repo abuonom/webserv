@@ -1,78 +1,21 @@
-# mozilla
-
+Server started on the following hosts and ports:
+--------------------------------------------
+Server Name: www.luca.com
+Host: 127.0.0.1:8080
+--------------------------------------------
+[33mREQUEST HEADERS[0m
 GET / HTTP/1.1
-Host: localhost:9093
-User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8
-Accept-Language: en-US,en;q=0.5
-Accept-Encoding: gzip, deflate, br, zstd
-Connection: keep-alive
-Upgrade-Insecure-Requests: 1
-Sec-Fetch-Dest: document
-Sec-Fetch-Mode: navigate
-Sec-Fetch-Site: none
-Sec-Fetch-User: ?1
-Priority: u=0, i
-
-
-# postman
-
-GET / HTTP/1.1
-User-Agent: PostmanRuntime/7.39.1
-Accept: */*
-Cache-Control: no-cache
-Postman-Token: 5a910fe5-c0dc-40b6-a0cd-1ee2d5501306
-Host: localhost:9092
-Accept-Encoding: gzip, deflate, br
-Connection: keep-alive
-
-
-# POST x-www-form-urlencoded
-WebServer started with default config file
-POST / HTTP/1.1
-User-Agent: PostmanRuntime/7.39.1
-Accept: */*
-Cache-Control: no-cache
-Postman-Token: 78447f66-d193-4193-921b-9a19129ab6c9
 Host: localhost:8080
-Accept-Encoding: gzip, deflate, br
-Connection: keep-alive
-Content-Type: application/x-www-form-urlencoded
-Content-Length: 25
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzip
+----------------
+[32mRESPONSE HEADERS[0m
+HTTP/1.1 200 OK 
+----------------
+[31m
+No Request: Closing connection
+[0m
 
-name=Gianmarco&name2=Luca
-
-# POST raw text
-POST / HTTP/1.1
-Content-Type: text/plain
-User-Agent: PostmanRuntime/7.39.1
-Accept: */*
-Cache-Control: no-cache
-Postman-Token: b7bd2384-8e18-447b-8570-fd0c57605a4b
-Host: localhost:8080
-Accept-Encoding: gzip, deflate, br
-Connection: keep-alive
-Content-Length: 42
-
-{
-  "key1": "value1",
-  "key2": "value2"
-}
-
-# POST raw JSON
-POST / HTTP/1.1
-Content-Type: application/json
-User-Agent: PostmanRuntime/7.39.1
-Accept: */*
-Cache-Control: no-cache
-Postman-Token: bd60c7cf-d68f-4170-a985-0f07d9ae87c7
-Host: localhost:8080
-Accept-Encoding: gzip, deflate, br
-Connection: keep-alive
-Content-Length: 42
-
-{
-  "key1": "value1",
-  "key2": "value2"
-}
-
+Caught CTRL + C
+Closing the server and freeing resources...
+Socket close on port: 8080

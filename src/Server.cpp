@@ -247,7 +247,7 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	}
 	if (rec.empty())
 	{
-		std::cout <<  "\033[31m" << "\nNo Request: Closing connection\n" << "\033[0m" << std::endl;
+		std::cout <<  "\033[31m" << "\nNO REQUEST: CLOSING CONNECTION\n" << "\033[0m" << std::endl;
 		for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
 		{
 			if (it->fd == client_fd)
@@ -262,6 +262,7 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	std::string::size_type header_end = rec.find("\r\n\r\n");
 	std::string headers = rec.substr(0, header_end);
 	std::string body;
+	body.reserve(100000000);
 	bool is_chunked = headers.find("Transfer-Encoding: chunked") != std::string::npos;
 	std::string::size_type content_length_pos = headers.find("Content-Length:");
 	int content_length = 0;
@@ -297,26 +298,30 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	}
 	else if (is_chunked)
 	{
+		char buffer_new[32768];
 		body = rec.substr(header_end + 4);
 		if (body.find("0\r\n\r\n") == std::string::npos)
 		{
 			while (true)
 			{
-				bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
+				bytes_read = recv(client_fd, buffer_new, 32767, 0);
+				usleep(20);
 				if (bytes_read > 0)
-					body.append(buffer, bytes_read);
+				{
+					body.append(buffer_new, bytes_read);
+					if (body.find("0\r\n\r\n") != std::string::npos)
+						break;
+				}
 				else if (bytes_read == 0)
 					break; // connessione chiusa
 				else
 				{
 					retries++;
-					if (retries < 10000000)
+					if (retries < 200000)
 						continue; // Ritenta la lettura
 					else
 						break;
 				}
-				if (rec.find("0\r\n\r\n") != std::string::npos)
-					break;
 			}
 		}
 		size_t num_pos = body.find("\r\n");
@@ -391,11 +396,12 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 				break;
 		}
 	}
+	std::cout << "\033[34m" << "\nSENT " << bytes_sent << " bytes\n" << "\033[0m" << std::endl;
 	if (result.find("Connection: close\r\n") != std::string::npos)
 		flag = true;
 	if (flag == true)
 	{
-		std::cout << "\033[31m" << "\nClosing connection\n" << "\033[0m" << std::endl;
+		std::cout << "\033[31m" << "\nCLOSING CONNECTION\n" << "\033[0m" << std::endl;
 		for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
 		{
 			if (it->fd == client_fd)
