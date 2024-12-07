@@ -97,6 +97,15 @@ Server::Server(const ServerConfigs &serverConfigs)
 			exit(1);
 		}
 
+		// Impostiamo l'opzione SO_REUSEADDR per consentire il riutilizzo dell'indirizzo del server
+		int opt = 1;
+		if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) < 0)
+		{
+			std::cerr << "setsockopt failed for port " << port << ": " << strerror(errno) << std::endl;
+			close(server_fd);
+			exit(1);
+		}
+
 		// Configuriamo l'indirizzo del server per il binding
 		struct sockaddr_in address;
 		address.sin_family = AF_INET;
