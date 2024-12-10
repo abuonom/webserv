@@ -354,7 +354,7 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	}
 	std::cout << "----------------" << std::endl;
 	std::cout << "\033[33m" << "REQUEST HEADERS" << "\033[0m" << std::endl;
-	std::cout << rec.substr(0, rec.find("\r\n\r\n")) << std::endl << std::endl;
+	std::cout << rec << std::endl << std::endl;
 	std::string result;
 	GetMethod get;
 	if (validateHttpRequest(rec) == false)

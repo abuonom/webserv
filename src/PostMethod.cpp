@@ -19,7 +19,10 @@ int PostMethod::save_file_from_request(Request req, std::string root)
 			name = filename_start.substr(0, filename_start.find("\""));
 		//std::cout << "\nname(" << name << ")\n" << std::endl;
 		if (name.empty())
+		{
+			std::cout << "name = " << name << std::endl;
 			return 400;
+		}
 		std::string file_path = mygetcwd() + "/" + root + "/" + name;
 		int content_end = tmp.find("\r\n\r\n");
 		std::string upcontent = tmp.substr(content_end + 4, tmp.length() - content_end - boundary.length() - 13);
@@ -197,6 +200,7 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 		}
 		else if (req._type == "multipart/form-data")
 		{
+			std::cout << "MULTIPART" << std::endl;
 			if (req.lung > temp.max_body_size)
 				return 413;
 			int stat = save_file_from_request(req, root);

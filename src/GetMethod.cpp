@@ -89,6 +89,8 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 						//ultima condizione nell'if per tester
 						if (serv.cgimap.find(findEXT(name)) != serv.cgimap.end() && loc.cgi == "on" && findEXT(name) != ".bla")
 						{
+							if (loc.index == "")
+								return err404(req._version);
 							req._path = "/" + mycwd + "/" + loc.root + "/" + location + "/" + name;
 							if (access(req._path.c_str(), F_OK) != 0)
 								return err404(req._version);
