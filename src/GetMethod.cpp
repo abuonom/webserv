@@ -145,6 +145,15 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 		}
 		else //se url non ha location quindi solo /
 		{
+			if (temp.autoindex == true && name.empty() && temp.index == "")
+			{
+				//CONTROLLARE I TRIM
+				response += "200 OK\r\n";
+				response += "Content-Type: text/html\r\n\r\n";
+				std::string s = mygetcwd();
+				response += autoindexResponse(s , temp.root);
+				return response;
+			}
 			if (name.empty())
 			{
 				std::string s =	"/" + mycwd + "/" + trim(temp.root, '/') + "/" + temp.index;
