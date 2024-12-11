@@ -49,17 +49,18 @@ int main(int argc, char **argv)
 	if (argc < 2)
 	{
 		VerifyExtension("default.config", ".config");
-		std::cout << "WebServer started with default config file" << std::endl;
+		std::cout << "\033[1;31mWebServer started with default config file\033[0m" << std::endl;
 		configs.loadConfig("config/default.config");
 		configs.validateAndFillDefaults();
 	}
 	else
 	{
 		VerifyExtension(argv[1], ".config");
+		std::cout << "\033[1;31mWebServer started with "<< argv[1] << " file\033[0m" << std::endl;
 		configs.loadConfig(argv[1]);
 		configs.validateAndFillDefaults();
 	}
-	//configs.printConfigs();
+	configs.printConfigs();
 	g_server = new Server(configs); // Assegna il server al puntatore globale
 	g_server->run(configs);
 

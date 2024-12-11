@@ -40,6 +40,7 @@ bool ServerConfigs::isValidKey(const std::string &key, const std::string &type) 
 		"root",
 		"max_body_size",
 		"index",
+		"autoindex",
 		"methods",
 		"error_page",
 		"cgi",
@@ -73,65 +74,81 @@ bool ServerConfigs::isValidKey(const std::string &key, const std::string &type) 
 
 void ServerConfigs::printConfigs() const
 {
-	std::cout << "SERVER CONFIGS:" << std::endl;
-	std::cout << "Max Clients: " << max_clients << std::endl;
-	std::cout << "Error Pages:" << std::endl;
+	std::cout << "\033[1;34mGLOBAL CONFIGS:\033[0m" << std::endl << std::endl;
+
+	std::cout << "\033[1;33mMax Clients:\033[0m " << max_clients << std::endl << std::endl;
+
+	std::cout << "\033[1;33mError Pages:\033[0m" << std::endl;
 	for (std::map<int, std::string>::const_iterator it = g_error_pages.begin(); it != g_error_pages.end(); ++it)
 	{
-		std::cout << "  " << it->first << ": " << it->second << std::endl;
+		std::cout << "  \033[1;36m" << it->first << "\033[0m: " << it->second << std::endl;
 	}
-	std::cout << "CGI Interpreters:" << std::endl;
+	std::cout << std::endl;
+
+	std::cout << "\033[1;33mCGI Interpreters:\033[0m" << std::endl;
 	for (std::map<std::string, std::string>::const_iterator it = cgimap.begin(); it != cgimap.end(); ++it)
 	{
-		std::cout << "  " << it->first << ": " << it->second << std::endl;
+		std::cout << "  \033[1;36m" << it->first << "\033[0m: " << it->second << std::endl;
 	}
+	std::cout << std::endl;
+
 	for (std::map<int, t_config>::const_iterator it = configs.begin(); it != configs.end(); ++it)
 	{
 		const t_config &config = it->second;
-		std::cout << "Server on port " << config.port << ":" << std::endl;
-		std::cout << "  Host: " << config.host << std::endl;
-		std::cout << "  Server Names: " << config.server_names << std::endl;
-		std::cout << "  Max Body Size: " << config.max_body_size << std::endl;
-		std::cout << "  Index: " << config.index << std::endl;
-		std::cout << "  Root: " << config.root << std::endl;
-		std::cout << "  CGI: " << config.cgi << std::endl;
-		std::cout << "  Upload Directory: " << config.upload_dir << std::endl;
-		std::cout << "  Error Pages:" << std::endl;
+
+		std::cout << "\033[1;34mServer on port " << config.port << ":\033[0m" << std::endl;
+
+		std::cout << "  \033[1;33mHost:\033[0m " << config.host << std::endl;
+		std::cout << "  \033[1;33mServer Names:\033[0m " << config.server_names << std::endl;
+		std::cout << "  \033[1;33mMax Body Size:\033[0m " << config.max_body_size << std::endl;
+		std::cout << "  \033[1;33mAutoindex:\033[0m " << (config.autoindex ? "on" : "off") << std::endl;
+		std::cout << "  \033[1;33mIndex:\033[0m " << config.index << std::endl;
+		std::cout << "  \033[1;33mRoot:\033[0m " << config.root << std::endl;
+		std::cout << "  \033[1;33mCGI:\033[0m " << config.cgi << std::endl;
+		std::cout << "  \033[1;33mUpload Directory:\033[0m " << config.upload_dir << std::endl << std::endl;
+
+		std::cout << "  \033[1;33mError Pages:\033[0m" << std::endl;
 		for (std::map<int, std::string>::const_iterator it = config.error_pages.begin(); it != config.error_pages.end(); ++it)
 		{
-			std::cout << "    " << it->first << ": " << it->second << std::endl;
+			std::cout << "    \033[1;36m" << it->first << "\033[0m: " << it->second << std::endl;
 		}
-		std::cout << "  Accepted Methods: ";
+		std::cout << std::endl;
+
+		std::cout << "  \033[1;33mAccepted Methods:\033[0m ";
 		for (size_t i = 0; i < config.accepted_methods.size(); ++i)
 		{
 			std::cout << config.accepted_methods[i];
 			if (i < config.accepted_methods.size() - 1)
 				std::cout << ", ";
 		}
-		std::cout << std::endl;
+		std::cout << std::endl << std::endl;
 
-		std::cout << "  Locations:" << std::endl;
+		std::cout << "  \033[1;33mLocations:\033[0m" << std::endl;
 		for (std::map<std::string, t_location>::const_iterator locIt = config.location.begin(); locIt != config.location.end(); ++locIt)
 		{
 			const t_location &location = locIt->second;
-			std::cout << "    Location " << locIt->first << ":" << std::endl;
-			std::cout << "      Autoindex: " << (location.autoindex ? "on" : "off") << std::endl;
-			std::cout << "      cgi: " << location.cgi << std::endl;
-			std::cout << "      Upload Directory: " << location.upload_dir << std::endl;
-			std::cout << "      Return Code: " << location.return_code << std::endl;
-			std::cout << "      Root: " << location.root << std::endl;
-			std::cout << "      Index: " << location.index << std::endl;
-			std::cout << "      Accepted Methods: ";
+
+			std::cout << "    \033[1;34mLocation " << locIt->first << ":\033[0m" << std::endl;
+
+			std::cout << "      \033[1;33mAutoindex:\033[0m " << (location.autoindex ? "on" : "off") << std::endl;
+			std::cout << "      \033[1;33mCGI:\033[0m " << location.cgi << std::endl;
+			std::cout << "      \033[1;33mUpload Directory:\033[0m " << location.upload_dir << std::endl;
+			std::cout << "      \033[1;33mReturn Code:\033[0m " << location.return_code << std::endl;
+			std::cout << "      \033[1;33mRoot:\033[0m " << location.root << std::endl;
+			std::cout << "      \033[1;33mIndex:\033[0m " << location.index << std::endl;
+
+			std::cout << "      \033[1;33mAccepted Methods:\033[0m ";
 			for (size_t i = 0; i < location.accepted_methods.size(); ++i)
 			{
 				std::cout << location.accepted_methods[i];
 				if (i < location.accepted_methods.size() - 1)
 					std::cout << ", ";
 			}
-			std::cout << std::endl;
+			std::cout << std::endl << std::endl;
 		}
 	}
 }
+
 
 // Funzione per rimuovere spazi iniziali e finali da una stringa
 static std::string trim(const std::string &str)
@@ -388,6 +405,8 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 					currentConfig.max_body_size = std::atoi(value.c_str());
 				else if (key == "index")
 					currentConfig.index = value;
+				else if (key == "autoindex")
+					currentConfig.autoindex = (value == "on");
 				else if (key == "error_page")
 				{
 					size_t spacePos = value.find("\t");

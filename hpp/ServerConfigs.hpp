@@ -30,6 +30,7 @@ typedef struct s_config
 	size_t max_body_size;							// max_body_size
 	std::vector<std::string> accepted_methods;	// methods
 	std::string index;							// index
+	bool autoindex;								// autoindex
 	std::string root;							// root
 	std::map<std::string, t_location> location; // location[]
 	std::map<int, std::string> error_pages;

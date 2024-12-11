@@ -177,14 +177,18 @@ void Server::setNonBlocking(int fd)
 void Server::run(const ServerConfigs &serverConfigs)
 {
 	// Ciclo di stampa per comunicare host e porte disponibili
-	std::cout << "Server started on the following hosts and ports:" << std::endl;
-	std::cout << "--------------------------------------------" << std::endl;
+	std::cout << "\033[1;32mServer started on the following hosts and ports:\033[0m" << std::endl;
+	std::cout << "\033[1;33m--------------------------------------------\033[0m" << std::endl;
+
 	for (std::map<int, t_config>::const_iterator it = serverConfigs.configs.begin(); it != serverConfigs.configs.end(); ++it)
 	{
 		if (!it->second.server_names.empty())
-			std::cout << "Server Name: " << it->second.server_names << std::endl;
-		std::cout << "Host: " << it->second.host << ":" << it->second.port << std::endl;
-		std::cout << "--------------------------------------------" << std::endl;
+		{
+			std::cout << "\033[1;34mServer Name:\033[0m " << it->second.server_names << std::endl;
+		}
+
+		std::cout << "\033[1;34mHost:\033[0m " << it->second.host << ":" << it->second.port << std::endl;
+		std::cout << "\033[1;33m--------------------------------------------\033[0m" << std::endl;
 	}
 
 	while (true)
@@ -354,7 +358,8 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 	}
 	std::cout << "----------------" << std::endl;
 	std::cout << "\033[33m" << "REQUEST HEADERS" << "\033[0m" << std::endl;
-	std::cout << rec << std::endl << std::endl;
+	std::cout << rec << std::endl
+			  << std::endl;
 	std::string result;
 	GetMethod get;
 	if (validateHttpRequest(rec) == false)
@@ -406,12 +411,15 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 				break;
 		}
 	}
-	std::cout << "\033[34m" << "\n" << bytes_sent << " BYTES SENT\n" << "\033[0m" << std::endl;
+	std::cout << "\033[34m" << "\n"
+			  << bytes_sent << " BYTES SENT\n"
+			  << "\033[0m" << std::endl;
 	if (result.find("Connection: close\r\n") != std::string::npos)
 		flag = true;
 	if (flag == true)
 	{
-		std::cout << "\033[31m" << "CLOSING CONNECTION\n" << "\033[0m" << std::endl;
+		std::cout << "\033[31m" << "CLOSING CONNECTION\n"
+				  << "\033[0m" << std::endl;
 		for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
 		{
 			if (it->fd == client_fd)
