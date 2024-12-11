@@ -45,24 +45,24 @@ int main(int argc, char **argv)
 	signal(SIGINT, handle_sigint);
 
 	//Comportamento uguale al precedente
-	ServerConfigs configs = ServerConfigs();
+	ServerConfigs serverConfigs;
 	if (argc < 2)
 	{
 		VerifyExtension("default.config", ".config");
 		std::cout << "\033[1;31mWebServer started with default config file\033[0m" << std::endl;
-		configs.loadConfig("config/default.config");
-		configs.validateAndFillDefaults();
+		serverConfigs.loadConfig("config/default.config");
+		serverConfigs.validateAndFillDefaults();
 	}
 	else
 	{
 		VerifyExtension(argv[1], ".config");
 		std::cout << "\033[1;31mWebServer started with "<< argv[1] << " file\033[0m" << std::endl;
-		configs.loadConfig(argv[1]);
-		configs.validateAndFillDefaults();
+		serverConfigs.loadConfig(argv[1]);
+		serverConfigs.validateAndFillDefaults();
 	}
-	configs.printConfigs();
-	g_server = new Server(configs); // Assegna il server al puntatore globale
-	g_server->run(configs);
+	serverConfigs.printConfigs();
+	g_server = new Server(serverConfigs); // Assegna il server al puntatore globale
+	g_server->run(serverConfigs);
 
 	// Termina il server
 	delete g_server;

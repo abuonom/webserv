@@ -14,6 +14,9 @@ ServerConfigs::ServerConfigs()
 
 ServerConfigs::~ServerConfigs()
 {
+	g_error_pages.clear();
+	configs.clear();
+	cgimap.clear();
 }
 
 const t_config *ServerConfigs::getConfigForPort(int port) const
