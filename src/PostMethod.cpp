@@ -116,36 +116,23 @@ int PostMethod::fillMap(Request req, ServerConfigs serv)
 	t_config temp = serv.configs[req.host];
 	bool flag_cgi = false;
 	std::string root = trim(temp.root, '/') + "/" + trim(temp.upload_dir, '/');
-	if (location.empty() && temp.location.find("/") != temp.location.end())
-			location = "/";
-	if (!location.empty())
-	{
-		if (temp.location.find(location) != temp.location.end()) // se trovo location
-		{
-			t_location loc;
-			loc = temp.location[location];
-			if (loc.cgi == "on")
-				flag_cgi = true;
-			root = trim(loc.root, '/') + "/" + location + "/" + trim(loc.upload_dir, '/');
-			for (size_t i = 0; i < loc.accepted_methods.size(); ++i)
-			{
-				if (loc.accepted_methods[i] == "POST")
-					accepted = true;
-			}
-		}
-		else
-			return 404;
-	}
 	if (location.empty())
+			location = "/";
+	if (temp.location.find(location) != temp.location.end()) // se trovo location
 	{
-		if (temp.cgi == "on")
+		t_location loc;
+		loc = temp.location[location];
+		if (loc.cgi == "on")
 			flag_cgi = true;
-		for (size_t i = 0; i < temp.accepted_methods.size(); ++i)
+		root = trim(loc.root, '/') + "/" + location + "/" + trim(loc.upload_dir, '/');
+		for (size_t i = 0; i < loc.accepted_methods.size(); ++i)
 		{
-			if (temp.accepted_methods[i] == "POST")
+			if (loc.accepted_methods[i] == "POST")
 				accepted = true;
 		}
 	}
+	else
+		return 404;
 	if (accepted == true)
 	{
 		if (req.lung == 0 && req.chunk == 0)
