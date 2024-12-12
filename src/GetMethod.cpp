@@ -138,7 +138,7 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 			if (flag == 0)
 				return err405(req._version);
 		}
-		else //se non trovo location
+		else
 			return err404(req._version);
 	}
 	return err400(req._version);
