@@ -15,7 +15,6 @@ void handle_sigint(int sig)
 	exit(0); // Uscita sicura
 }
 
-
 int stringToInt(const std::string &str)
 {
 	std::stringstream ss(str);
@@ -52,6 +51,7 @@ int main(int argc, char **argv)
 		std::cout << "\033[1;31mWebServer started with default config file\033[0m" << std::endl;
 		serverConfigs.loadConfig("config/default.config");
 		serverConfigs.validateAndFillDefaults();
+		serverConfigs.printConfigs();
 	}
 	else
 	{
