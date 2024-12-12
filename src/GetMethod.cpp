@@ -52,132 +52,94 @@ std::string GetMethod::generateResponse(Request req, ServerConfigs serv)
 	{
 		t_config temp;
 		temp = serv.configs[req.host];
-		if (location.empty() && temp.location.find("/") != temp.location.end())
+		if (location.empty())
 			location = "/";
-		if (!location.empty()) //se url contiene location
+		if (temp.location.find(location) != temp.location.end()) // se trovo location
 		{
-			if (temp.location.find(location) != temp.location.end()) // se trovo location
+			t_location loc;
+			loc = temp.location[location];
+			loc.root = trim(loc.root, '/');
+			int flag = 0;
+			if (location != "/")
+				location = req._path.substr(0, req._path.find_last_of("/"));
+			for (size_t i = 0; i < loc.accepted_methods.size(); ++i)
 			{
-				t_location loc;
-				loc = temp.location[location];
-				loc.root = trim(loc.root, '/');
-				int flag = 0;
-				if (location != "/")
-					location = req._path.substr(0, req._path.find_last_of("/"));
-				for (size_t i = 0; i < loc.accepted_methods.size(); ++i)
+				if (loc.accepted_methods[i] == "GET")
 				{
-					if (loc.accepted_methods[i] == "GET")
+					flag = 1;
+					if (req._path == "redirect")
 					{
-						flag = 1;
-						if (req._path == "redirect")
+						response += "301 Moved Permanently\r\n";
+						std::string code = loc.return_code.substr(4, loc.return_code.length());
+						response += "Location: " + code + "\r\n";
+						response += "Content-Length: 0\r\n\r\n";
+						return response;
+					}
+					if (loc.autoindex == true && name.empty() && loc.index == "")
+					{
+						//CONTROLLARE I TRIM
+						response += "200 OK\r\n";
+						response += "Content-Type: text/html\r\n\r\n";
+						std::string s = mygetcwd();
+						response += autoindexResponse(s , loc.root + "/" + location);
+						return response;
+					}
+					//ultima condizione nell'if per tester
+					if (serv.cgimap.find(findEXT(name)) != serv.cgimap.end() && loc.cgi == "on" && findEXT(name) != ".bla")
+					{
+						if (loc.index == "")
+							return err404(req._version);
+						req._path = "/" + mycwd + "/" + loc.root + "/" + location + "/" + name;
+						if (access(req._path.c_str(), F_OK) != 0)
+							return err404(req._version);
+						response += "200 OK \r\n\r\n";
+						response += cgiRequest(req, serv.cgimap);
+						return response;
+					}
+					else
+					{
+						if (name.empty())
 						{
-							response += "301 Moved Permanently\r\n";
-							std::string code = loc.return_code.substr(4, loc.return_code.length());
-							response += "Location: " + code + "\r\n";
-							response += "Content-Length: 0\r\n\r\n";
-							return response;
-						}
-						if (loc.autoindex == true && name.empty() && loc.index == "")
-						{
-							//CONTROLLARE I TRIM
-							response += "200 OK\r\n";
-							response += "Content-Type: text/html\r\n\r\n";
-							std::string s = mygetcwd();
-							response += autoindexResponse(s , loc.root + "/" + location);
-							return response;
-						}
-						//ultima condizione nell'if per tester
-						if (serv.cgimap.find(findEXT(name)) != serv.cgimap.end() && loc.cgi == "on" && findEXT(name) != ".bla")
-						{
-							if (loc.index == "")
+							std::string temp =	"/" + mycwd + "/" + loc.root + "/"  + location + "/" + trim(loc.index, '/');
+							if (location == "/")
+								temp =	"/" + mycwd + "/" + loc.root + "/" + trim(loc.index, '/');
+							if (loc.index == "" || (access(temp.c_str(), F_OK) != 0))
 								return err404(req._version);
-							req._path = "/" + mycwd + "/" + loc.root + "/" + location + "/" + name;
-							if (access(req._path.c_str(), F_OK) != 0)
-								return err404(req._version);
-							response += "200 OK \r\n\r\n";
-							response += cgiRequest(req, serv.cgimap);
+							response += "200 OK \r\n";
+							response += "Content-Type: text/html\r\n";
+							response += "Content-Length: " + getContentLength(temp) + "\r\n\r\n";
+							response += getFile(temp);
 							return response;
 						}
 						else
 						{
-							if (name.empty())
+							std::string s = "/" + mycwd + "/" + trim(loc.root, '/') + "/"  + location + "/" + name;
+							if (access(s.c_str(), F_OK) == 0 && (checkfile(s, name) == 1 || !findEXT(name).empty()))
 							{
-								std::string temp =	"/" + mycwd + "/" + loc.root + "/"  + location + "/" + trim(loc.index, '/');
-								if (location == "/")
-									temp =	"/" + mycwd + "/" + loc.root + "/" + trim(loc.index, '/');
-								if (loc.index == "" || (access(temp.c_str(), F_OK) != 0))
-									return err404(req._version);
-								response += "200 OK \r\n";
-								response += "Content-Type: text/html\r\n";
-								response += "Content-Length: " + getContentLength(temp) + "\r\n\r\n";
-								response += getFile(temp);
+								response += "200 OK\r\n";
+								response += "Content-Length: " + getContentLength(s) + "\r\n\r\n";
+								response += getFile(s);
 								return response;
 							}
-							else
+							std::string tent = s + "/" + loc.index;
+							if ((access(tent.c_str(), F_OK) == 0))
 							{
-								std::string s = "/" + mycwd + "/" + trim(loc.root, '/') + "/"  + location + "/" + name;
-								if (access(s.c_str(), F_OK) == 0 && (checkfile(s, name) == 1 || !findEXT(name).empty()))
-								{
-									response += "200 OK\r\n";
-									response += "Content-Length: " + getContentLength(s) + "\r\n\r\n";
-									response += getFile(s);
-									return response;
-								}
-								std::string tent = s + "/" + loc.index;
-								if ((access(tent.c_str(), F_OK) == 0))
-								{
-									response += "200 OK \r\n";
-									response += "Content-Type: text/html\r\n";
-									response += "Content-Length: " + getContentLength(tent) + "\r\n\r\n";
-									response += getFile(tent);
-									return response;
-								}
-								return err404(req._version);
+								response += "200 OK \r\n";
+								response += "Content-Type: text/html\r\n";
+								response += "Content-Length: " + getContentLength(tent) + "\r\n\r\n";
+								response += getFile(tent);
+								return response;
 							}
+							return err404(req._version);
 						}
 					}
 				}
-				if (flag == 0)
-					return err405(req._version);
 			}
-			else //se non trovo location
-				return err404(req._version);
+			if (flag == 0)
+				return err405(req._version);
 		}
-		else //se url non ha location quindi solo /
-		{
-			if (temp.autoindex == true && name.empty() && temp.index == "")
-			{
-				//CONTROLLARE I TRIM
-				response += "200 OK\r\n";
-				response += "Content-Type: text/html\r\n\r\n";
-				std::string s = mygetcwd();
-				response += autoindexResponse(s , temp.root);
-				return response;
-			}
-			if (name.empty())
-			{
-				std::string s =	"/" + mycwd + "/" + trim(temp.root, '/') + "/" + temp.index;
-				if (temp.index == "" || (access(s.c_str(), F_OK) != 0))
-					return err404(req._version);
-				response += "200 OK \r\n";
-				response += "Content-Type: text/html\r\n";
-				response += "Content-Length: " + getContentLength(s) + "\r\n\r\n";
-				response += getFile(s);
-				return response;
-			}
-			else
-			{
-				std::string s = "/" + mycwd + "/" + trim(temp.root, '/') + "/" + name;
-				if (access(s.c_str(), F_OK) == 0)
-				{
-					response += "200 OK\r\n";
-					response += "Content-Length: " + getContentLength(s) + "\r\n\r\n";
-					response += getFile(s);
-					return response;
-				}
-				return err404(req._version);
-			}
-		}
+		else //se non trovo location
+			return err404(req._version);
 	}
 	return err400(req._version);
 }
