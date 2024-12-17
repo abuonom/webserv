@@ -201,36 +201,13 @@ void ServerConfigs::validateAndFillDefaults()
 			std::cerr << "Error: Missing required field 'host' in server configuration" << std::endl;
 			exit(1);
 		}
-		if (config.root.empty())
-		{
-			std::cerr << "Error: Missing required field 'root' in server configuration" << std::endl;
-			exit(1);
-		}
-		if (config.max_body_size == 0)
-		{
-			std::cerr << "Error: Missing required field 'max_body_size' in server configuration" << std::endl;
-			exit(1);
-		}
-		if (config.index.empty())
-		{
-			std::cerr << "Error: Missing required field 'index' in server configuration" << std::endl;
-			exit(1);
-		}
-		if (config.upload_dir.empty())
-		{
-			std::cerr << "Error: Missing required field 'upload_dir' in server configuration" << std::endl;
-			exit(1);
-		}
-		if (config.accepted_methods.empty())
-		{
-			std::cerr << "Error: Missing required field 'methods' in server configuration" << std::endl;
-			exit(1);
-		}
 
 		if (config.max_body_size == 0)
 			config.max_body_size = 1000000; // Default 1MB
 		if (config.error_pages.empty())
 			config.error_pages = g_error_pages;
+		if(config.index.empty())
+			config.index = "off";
 		if (config.cgi.empty())
 			config.cgi = "off";
 
@@ -260,6 +237,19 @@ void ServerConfigs::validateAndFillDefaults()
 			if (default_location.root.empty())
 				default_location.root = config.root;
 			default_location.autoindex = default_location.autoindex || config.autoindex;
+		}
+
+		for (std::map<std::string, t_location>::iterator locIt = config.location.begin(); locIt != config.location.end(); ++locIt)
+		{
+			const std::string &locName = locIt->first;
+			t_location &location = locIt->second;
+
+			if (locName == "/")
+				continue; // Skip perché già processata
+			if(location.cgi.empty())
+				location.cgi = "off";
+			if(location.index.empty())
+				location.index = "off";
 		}
 	}
 }
