@@ -261,21 +261,6 @@ void ServerConfigs::validateAndFillDefaults()
 				default_location.root = config.root;
 			default_location.autoindex = default_location.autoindex || config.autoindex;
 		}
-
-		for (std::map<std::string, t_location>::iterator locIt = config.location.begin(); locIt != config.location.end(); ++locIt)
-		{
-			const std::string &locName = locIt->first;
-			t_location &location = locIt->second;
-
-			if (locName == "/")
-				continue; // Skip perché già processata
-
-			if (location.root.empty())
-			{
-				std::cerr << "Error: Missing required field 'root' in location " << locName << std::endl;
-				exit(1);
-			}
-		}
 	}
 }
 
