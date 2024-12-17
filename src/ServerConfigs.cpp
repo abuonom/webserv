@@ -68,18 +68,20 @@ bool ServerConfigs::isValidKey(const std::string &key, const std::string &type) 
 		return std::find(locationKeys.begin(), locationKeys.end(), key) != locationKeys.end();
 	else if (type == "CGI")
 	{
-		//verifico se la chiave inizia con un punto
+		// verifico se la chiave inizia con un punto
 		if (key[0] == '.')
 			return true;
 	}
-		return false;
+	return false;
 }
 
 void ServerConfigs::printConfigs() const
 {
-	std::cout << "\033[1;34mGLOBAL CONFIGS:\033[0m" << std::endl << std::endl;
+	std::cout << "\033[1;34mGLOBAL CONFIGS:\033[0m" << std::endl
+			  << std::endl;
 
-	std::cout << "\033[1;33mMax Clients:\033[0m " << max_clients << std::endl << std::endl;
+	std::cout << "\033[1;33mMax Clients:\033[0m " << max_clients << std::endl
+			  << std::endl;
 
 	std::cout << "\033[1;33mError Pages:\033[0m" << std::endl;
 	for (std::map<int, std::string>::const_iterator it = g_error_pages.begin(); it != g_error_pages.end(); ++it)
@@ -108,7 +110,8 @@ void ServerConfigs::printConfigs() const
 		std::cout << "  \033[1;33mIndex:\033[0m " << config.index << std::endl;
 		std::cout << "  \033[1;33mRoot:\033[0m " << config.root << std::endl;
 		std::cout << "  \033[1;33mCGI:\033[0m " << config.cgi << std::endl;
-		std::cout << "  \033[1;33mUpload Directory:\033[0m " << config.upload_dir << std::endl << std::endl;
+		std::cout << "  \033[1;33mUpload Directory:\033[0m " << config.upload_dir << std::endl
+				  << std::endl;
 
 		std::cout << "  \033[1;33mError Pages:\033[0m" << std::endl;
 		for (std::map<int, std::string>::const_iterator it = config.error_pages.begin(); it != config.error_pages.end(); ++it)
@@ -124,7 +127,8 @@ void ServerConfigs::printConfigs() const
 			if (i < config.accepted_methods.size() - 1)
 				std::cout << ", ";
 		}
-		std::cout << std::endl << std::endl;
+		std::cout << std::endl
+				  << std::endl;
 
 		std::cout << "  \033[1;33mLocations:\033[0m" << std::endl;
 		for (std::map<std::string, t_location>::const_iterator locIt = config.location.begin(); locIt != config.location.end(); ++locIt)
@@ -147,11 +151,11 @@ void ServerConfigs::printConfigs() const
 				if (i < location.accepted_methods.size() - 1)
 					std::cout << ", ";
 			}
-			std::cout << std::endl << std::endl;
+			std::cout << std::endl
+					  << std::endl;
 		}
 	}
 }
-
 
 // Funzione per rimuovere spazi iniziali e finali da una stringa
 static std::string trim(const std::string &str)
@@ -176,50 +180,94 @@ std::string ServerConfigs::trim1(std::string s, char c)
 
 void ServerConfigs::validateAndFillDefaults()
 {
-	// Se non ci sono configurazioni, esce
-	/*if (configs.empty())
+	
+	if (configs.empty())
 	{
 		std::cerr << "Error: No server configurations found" << std::endl;
 		exit(1);
-	}*/
+	}
+
 	for (std::map<int, t_config>::iterator it = configs.begin(); it != configs.end(); ++it)
 	{
 		t_config &config = it->second;
-		std::stringstream ss;
+
 		if (config.port == 0)
 		{
-			std::cerr << "Error: Port cannot be empty" << std::endl;
+			std::cerr << "Error: Missing required field 'listen' in server configuration" << std::endl;
+			exit(1);
+		}
+		if (config.host.empty())
+		{
+			std::cerr << "Error: Missing required field 'host' in server configuration" << std::endl;
+			exit(1);
+		}
+		if (config.root.empty())
+		{
+			std::cerr << "Error: Missing required field 'root' in server configuration" << std::endl;
+			exit(1);
+		}
+		if (config.max_body_size == 0)
+		{
+			std::cerr << "Error: Missing required field 'max_body_size' in server configuration" << std::endl;
+			exit(1);
+		}
+		if (config.index.empty())
+		{
+			std::cerr << "Error: Missing required field 'index' in server configuration" << std::endl;
 			exit(1);
 		}
 		if (config.upload_dir.empty())
-			config.upload_dir = "upload_dir"; // Valore di default per upload_dir
-		if (config.host.empty())
-			config.host = "localhost"; // Valore di default per host
-		if (config.server_names.empty())
-			config.server_names = "localhost"; // Valore di default per server_names
-		if (config.max_body_size == 0)
-			config.max_body_size = 1000000000; // Valore di default per max_body_size
-		// if (config.index.empty())
-		// config.index = "index.html"; // Valore di default per index
-		// if (config.root.empty())
-		// config.root = "/var/www"; // Valore di default per root
+		{
+			std::cerr << "Error: Missing required field 'upload_dir' in server configuration" << std::endl;
+			exit(1);
+		}
 		if (config.accepted_methods.empty())
 		{
-			config.accepted_methods.push_back("GET");
-			config.accepted_methods.push_back("POST");
-			config.accepted_methods.push_back("DELETE");
+			std::cerr << "Error: Missing required field 'methods' in server configuration" << std::endl;
+			exit(1);
 		}
+
+		if (config.max_body_size == 0)
+			config.max_body_size = max_clients;
+		if (config.error_pages.empty())
+			config.error_pages = g_error_pages;
 		if (config.cgi.empty())
-			config.cgi = "off"; // Valore di default per cgi
+			config.cgi = "off";
+
 		for (std::map<std::string, t_location>::iterator locIt = config.location.begin(); locIt != config.location.end(); ++locIt)
 		{
 			t_location &location = locIt->second;
+
+			// Controllo campo obbligatorio root per le location
+			if (location.root.empty())
+			{
+				std::cerr << "Error: Missing required field 'root' in location " << locIt->first << std::endl;
+				exit(1);
+			}
+
+			// Ereditarietà dei valori dal server
 			if (location.upload_dir.empty())
 				location.upload_dir = config.upload_dir;
 			if (location.cgi.empty())
-				location.cgi = "off";
+				location.cgi = config.cgi;
 			if (location.accepted_methods.empty())
 				location.accepted_methods = config.accepted_methods;
+			if (location.index.empty())
+				location.index = config.index;
+			location.autoindex = location.autoindex || config.autoindex; // Priorità al valore della location
+		}
+
+		// Aggiunge location "/" se non esiste
+		if (config.location.find("/") == config.location.end())
+		{
+			t_location default_location;
+			default_location.accepted_methods = config.accepted_methods;
+			default_location.upload_dir = config.upload_dir;
+			default_location.root = config.root;
+			default_location.index = config.index;
+			default_location.autoindex = config.autoindex;
+			default_location.cgi = config.cgi;
+			config.location["/"] = default_location;
 		}
 	}
 }
@@ -325,7 +373,7 @@ bool ServerConfigs::loadConfig(const std::string &filename)
 			// Verifica che il percorso sia valido
 			if (start != std::string::npos && end != std::string::npos && end > start)
 			{
-				currentLocationPath = line.substr(start, end - start);							 // Estrai il percorso della location
+				currentLocationPath = line.substr(start, end - start); // Estrai il percorso della location
 				currentLocationPath = trim(currentLocationPath);
 			}
 		}

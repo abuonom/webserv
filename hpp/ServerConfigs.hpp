@@ -53,8 +53,6 @@ public:
 private:
 	bool isValidKey(const std::string &key, const std::string &type) const;
 	std::string trim1(std::string s, char c);
-
-
 };
 
 #endif
