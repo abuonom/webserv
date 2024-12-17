@@ -206,8 +206,6 @@ void ServerConfigs::validateAndFillDefaults()
 			config.max_body_size = 1000000; // Default 1MB
 		if (config.error_pages.empty())
 			config.error_pages = g_error_pages;
-		if(config.index.empty())
-			config.index = "off";
 		if (config.cgi.empty())
 			config.cgi = "off";
 
@@ -248,8 +246,6 @@ void ServerConfigs::validateAndFillDefaults()
 				continue; // Skip perché già processata
 			if(location.cgi.empty())
 				location.cgi = "off";
-			if(location.index.empty())
-				location.index = "off";
 		}
 	}
 }
