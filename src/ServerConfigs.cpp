@@ -180,7 +180,6 @@ std::string ServerConfigs::trim1(std::string s, char c)
 
 void ServerConfigs::validateAndFillDefaults()
 {
-	
 	if (configs.empty())
 	{
 		std::cerr << "Error: No server configurations found" << std::endl;
@@ -191,6 +190,7 @@ void ServerConfigs::validateAndFillDefaults()
 	{
 		t_config &config = it->second;
 
+		// Controllo campi obbligatori del server
 		if (config.port == 0)
 		{
 			std::cerr << "Error: Missing required field 'listen' in server configuration" << std::endl;
@@ -228,34 +228,11 @@ void ServerConfigs::validateAndFillDefaults()
 		}
 
 		if (config.max_body_size == 0)
-			config.max_body_size = max_clients;
+			config.max_body_size = 1000000; // Default 1MB
 		if (config.error_pages.empty())
 			config.error_pages = g_error_pages;
 		if (config.cgi.empty())
 			config.cgi = "off";
-
-		for (std::map<std::string, t_location>::iterator locIt = config.location.begin(); locIt != config.location.end(); ++locIt)
-		{
-			t_location &location = locIt->second;
-
-			// Controllo campo obbligatorio root per le location
-			if (location.root.empty())
-			{
-				std::cerr << "Error: Missing required field 'root' in location " << locIt->first << std::endl;
-				exit(1);
-			}
-
-			// Ereditarietà dei valori dal server
-			if (location.upload_dir.empty())
-				location.upload_dir = config.upload_dir;
-			if (location.cgi.empty())
-				location.cgi = config.cgi;
-			if (location.accepted_methods.empty())
-				location.accepted_methods = config.accepted_methods;
-			if (location.index.empty())
-				location.index = config.index;
-			location.autoindex = location.autoindex || config.autoindex; // Priorità al valore della location
-		}
 
 		// Aggiunge location "/" se non esiste
 		if (config.location.find("/") == config.location.end())
@@ -268,6 +245,36 @@ void ServerConfigs::validateAndFillDefaults()
 			default_location.autoindex = config.autoindex;
 			default_location.cgi = config.cgi;
 			config.location["/"] = default_location;
+		}
+		else
+		{
+			t_location &default_location = config.location["/"];
+			if (default_location.upload_dir.empty())
+				default_location.upload_dir = config.upload_dir;
+			if (default_location.cgi.empty())
+				default_location.cgi = config.cgi;
+			if (default_location.accepted_methods.empty())
+				default_location.accepted_methods = config.accepted_methods;
+			if (default_location.index.empty())
+				default_location.index = config.index;
+			if (default_location.root.empty())
+				default_location.root = config.root;
+			default_location.autoindex = default_location.autoindex || config.autoindex;
+		}
+
+		for (std::map<std::string, t_location>::iterator locIt = config.location.begin(); locIt != config.location.end(); ++locIt)
+		{
+			const std::string &locName = locIt->first;
+			t_location &location = locIt->second;
+
+			if (locName == "/")
+				continue; // Skip perché già processata
+
+			if (location.root.empty())
+			{
+				std::cerr << "Error: Missing required field 'root' in location " << locName << std::endl;
+				exit(1);
+			}
 		}
 	}
 }
