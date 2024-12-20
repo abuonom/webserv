@@ -2,6 +2,7 @@
 
 
 Server *g_server = NULL;
+ServerConfigs *g_serverConfigs = NULL;
 
 void handle_sigint(int sig)
 {
@@ -11,6 +12,11 @@ void handle_sigint(int sig)
 		std::cout << "\nCaught CTRL + C\nClosing the server and freeing resources..." << std::endl;
 		delete g_server; // Questo chiamerà il distruttore del server e chiuderà tutti i socket
 		g_server = NULL;
+	}
+	if (g_serverConfigs != NULL)
+	{
+		delete g_serverConfigs;
+		g_serverConfigs = NULL;
 	}
 	exit(0); // Uscita sicura
 }
@@ -40,29 +46,29 @@ void VerifyExtension(const std::string &filename, const std::string &extension)
 
 int main(int argc, char **argv)
 {
-	// Cattura il segnale SIGINT (CTRL + C) e assegna il gestore del segnale
-	signal(SIGINT, handle_sigint);
 
 	//Comportamento uguale al precedente
-	ServerConfigs serverConfigs;
+	g_serverConfigs = new ServerConfigs();
 	if (argc < 2)
 	{
 		VerifyExtension("default.config", ".config");
 		std::cout << "\033[1;31mWebServer started with default config file\033[0m" << std::endl;
-		serverConfigs.loadConfig("config/default.config");
-		serverConfigs.validateAndFillDefaults();
-		serverConfigs.printConfigs();
+		g_serverConfigs->loadConfig("config/default.config");
+		g_serverConfigs->validateAndFillDefaults();
+		g_serverConfigs->printConfigs();
 	}
 	else
 	{
 		VerifyExtension(argv[1], ".config");
 		std::cout << "\033[1;31mWebServer started with "<< argv[1] << " file\033[0m" << std::endl;
-		serverConfigs.loadConfig(argv[1]);
-		serverConfigs.validateAndFillDefaults();
+		g_serverConfigs->loadConfig(argv[1]);
+		g_serverConfigs->validateAndFillDefaults();
 	}
-	serverConfigs.printConfigs();
-	g_server = new Server(serverConfigs); // Assegna il server al puntatore globale
-	g_server->run(serverConfigs);
+	// Cattura il segnale SIGINT (CTRL + C) e assegna il gestore del segnale
+	signal(SIGINT, handle_sigint);
+	g_serverConfigs->printConfigs();
+	g_server = new Server(*g_serverConfigs); // Assegna il server al puntatore globale
+	g_server->run(*g_serverConfigs);
 
 	// Termina il server
 	delete g_server;
