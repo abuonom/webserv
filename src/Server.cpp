@@ -34,6 +34,14 @@ bool validateRequestLine(const std::string &line)
 	return line[versionPos - 1] == ' ';
 }
 
+// static bool checkservername(std::string rec, ServerConfigs serv)
+// {
+// 	std::string name;
+// 	name = rec.substr(rec.find("Host:") + 5, rec.find("\r\n"));
+// 	std::cout << "name = " << name << std::endl;
+// 	if (name != serv.)
+// }
+
 bool validateHeaderLine(const std::string &line)
 {
 	// Controlla che la linea contenga il carattere ':' seguito da uno spazio
@@ -362,14 +370,23 @@ void Server::handleClient(int client_fd, const ServerConfigs &serverConfigs)
 			  << std::endl;
 	std::string result;
 	GetMethod get;
+	Request request(rec, serverConfigs);
+	size_t start = rec.find("Host: ") + 6;
+	std::string name = rec.substr(start);
+	name = name.substr(0, name.find(":"));
+	std::map<int, s_config>::const_iterator it = serverConfigs.configs.find(request.host);
 	if (validateHttpRequest(rec) == false)
+	{
+		flag = true;
+		result = get.err400("HTTP/1.1");
+	}
+	else if (it != serverConfigs.configs.end() && name != it->second.server_names)
 	{
 		flag = true;
 		result = get.err400("HTTP/1.1");
 	}
 	else
 	{
-		Request request(rec, serverConfigs);
 		request.chunk = chunktot;
 		if (flag == false)
 			flag = (request._connection == "close");
